@@ -48,3 +48,4 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | T25 | `static/js/sistema.js`: tarjeta Servidor; eventos `contenedor_caido`/`contenedor_ok` (tras 2 lecturas, se avisan); socket montado en compose. | Gemini + Claude |
 | Nota | Avisos de movimiento: ya estaban apagados (solo los resúmenes del detector). Consumo (Sercomm FG6122TM): sin API ni SNMP; pendiente revisar su web con usuario. | Claude |
 | T26 | Tarjeta de consumo renombrada a "Calidad por dispositivo" mientras no haya `CONSUMO_CMD` (el módem Telmex no da bytes por equipo). | Claude |
+| Nota | Módem Telmex: la página "Estado WAN" tiene bytes Rx/Tx totales (consumo de la casa), pero el login es HMAC, los datos vienen cifrados con SJCL/AES y solo admite una sesión. Se deja sin integrar por ahora. | Claude |
