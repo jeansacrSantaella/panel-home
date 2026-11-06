@@ -60,10 +60,18 @@ a `CAMARAS_URL` (`/api/fotos/...`). Requiere la versión de gestorCamaras que ex
 - **Cámaras:** video en vivo de go2rtc, estado (en vivo / sin video / sin red), latencia, cortes y el último movimiento.
 - **Mapa de la red:** el router al centro y cada equipo alrededor; color = calidad, tamaño = consumo. Clic para ver detalle.
 - **Caídas:** disponibilidad de 24 h de internet, red local y DNS, caídas por hora del día y latencia de la última hora.
-- **Consumo por dispositivo:** datos usados por cada equipo en 24 h (requiere `CONSUMO_CMD`, ver abajo).
+- **Calidad por dispositivo:** latencia y pérdida de cada equipo conectado. Si configuras `CONSUMO_CMD` (ver abajo) pasa a
+  **Consumo por dispositivo** con los datos de 24 h. El módem de Telmex (Sercomm FG6122TM) no da bytes por equipo:
+  haría falta un router propio con OpenWrt.
+- **Almacenamiento de grabaciones:** disco libre y cuánto ocupan fotos y clips (de `GET /api/espacio` de gestorCamaras).
+- **Movimiento por día y hora:** mapa de calor de las detecciones de las últimas 4 semanas.
+- **Servidor:** CPU, memoria y tiempo encendido del equipo que corre Docker, y el estado de cada contenedor.
+  En Windows con Docker Desktop son los datos de la máquina virtual de Docker (WSL 2), no de todo Windows, y la
+  temperatura no está disponible. Los contenedores se leen del socket de Docker montado en solo lectura
+  (`docker-compose.yml`); si un contenedor se detiene más de ~30 s llega un aviso por Telegram.
 - **Línea de tiempo:** movimiento, cámaras caídas, internet caído, cambios de IP, equipos nuevos… con filtros y fotos.
 
-Los gráficos usan `static/js/hchart.js`, una librería propia que dibuja solo con HTML y CSS (sin canvas ni SVG).
+Los gráficos usan `static/js/hchart.js` (y `hchart-calor.js` para el mapa de calor), una librería propia que dibuja solo con HTML y CSS (sin canvas ni SVG).
 
 ## Avisos
 

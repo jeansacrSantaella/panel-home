@@ -47,7 +47,7 @@
     </section>
 
     <section id="sec-consumo" class="tarjeta">
-      <h2>Consumo por dispositivo · 24 h</h2>
+      <h2 id="consumo-titulo">Calidad por dispositivo</h2>
       <p id="consumo-aviso" class="aviso" hidden></p>
       <div id="consumo-dona"></div>
       <div id="consumo-barras"></div>
@@ -59,6 +59,18 @@
       <div id="espacio-kpis" class="kpis"></div>
       <div id="espacio-dona"></div>
       <div id="espacio-uso"></div>
+    </section>
+
+    <section id="sec-calor" class="tarjeta">
+      <h2>Movimiento por día y hora <span id="calor-sub" class="tenue"></span></h2>
+      <div id="calor-mapa"></div>
+    </section>
+
+    <section id="sec-sistema" class="tarjeta">
+      <h2>Servidor <span id="sistema-sub" class="tenue"></span></h2>
+      <p id="sistema-aviso" class="aviso" hidden></p>
+      <div id="sistema-barras"></div>
+      <ul id="sistema-contenedores" class="contenedores"></ul>
     </section>
 
     <section id="sec-eventos" class="tarjeta">
@@ -112,9 +124,12 @@
   </dialog>
 
   <script src="/static/js/hchart.js"></script>
+  <script src="/static/js/hchart-calor.js"></script>
   <script src="/static/js/visor.js"></script>
   <script src="/static/js/app.js"></script>
   <script src="/static/js/espacio.js"></script>
+  <script src="/static/js/calor.js"></script>
+  <script src="/static/js/sistema.js"></script>
   <script src="/static/js/linea.js"></script>
   <script src="/static/js/capturas.js"></script>
   <script src="/static/js/pestanas.js"></script>

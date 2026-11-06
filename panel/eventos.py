@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 import time
 
-from panel import fuentes
+from panel import fuentes, sistema
 
 log = logging.getLogger("panel.eventos")
 
@@ -35,15 +35,16 @@ class Recolector:
     def __init__(self, cfg, db):
         self.cfg = cfg
         self.db = db
-        self.ultimo = {"ts": 0, "netwatch": None, "camaras": None, "salud": None, "espacio": None}
+        self.ultimo = {"ts": 0, "netwatch": None, "camaras": None, "salud": None, "espacio": None, "sistema": None}
         self._espacio_ts = 0
+        self._malos = {}  # lecturas seguidas con el contenedor caído
 
     def ciclo(self, ahora=None) -> int:
         ahora = int(time.time()) if ahora is None else int(ahora)
         # primer arranque: el historial entra ya marcado como avisado para no inundar de avisos
         silencio = self.db.get("iniciado") is None
         total = 0
-        for paso in (self._red, self._camaras, self._movimiento, self._consumo, self._podar):
+        for paso in (self._red, self._camaras, self._movimiento, self._consumo, self._sistema, self._podar):
             try:
                 total += paso(ahora, silencio)
             except Exception:
@@ -76,6 +77,35 @@ class Recolector:
                                else ("fuente_caida", "medio", f"{nombre} no responde"))
         return int(self._guardar({"ts": ahora, "fuente": "panel", "tipo": tipo, "nivel": nivel, "titulo": titulo,
                                   "clave": f"fuente:{nombre}:{ahora}"}, silencio))
+
+    def _sistema(self, ahora: int, silencio: bool) -> int:
+        """CPU, RAM y contenedores del servidor; avisa si un contenedor se detiene o vuelve."""
+        s = sistema.leer_sistema(self.cfg.docker_sock)
+        self.ultimo["sistema"] = s
+        if s.get("contenedores") is None:
+            return 0
+        previos = self.db.get("contenedores", {})
+        actuales = {}
+        for c in s["contenedores"]:
+            nombre = c["nombre"]
+            ok = c["estado"] == "running" and c.get("salud") != "unhealthy"
+            # una caída cuenta tras 2 lecturas seguidas (~30 s): un `docker compose up --build` no avisa
+            self._malos[nombre] = 0 if ok else self._malos.get(nombre, 0) + 1
+            if nombre not in previos:  # primera vez que lo vemos: es la línea base (un contenedor viejo ya detenido no avisa)
+                actuales[nombre] = ok
+            else:
+                actuales[nombre] = ok or (previos[nombre] is not False and self._malos[nombre] < 2)
+        n = 0
+        for nombre, ok in actuales.items():
+            if previos.get(nombre) is None or previos[nombre] == ok:
+                continue
+            det = next(c["detalle"] for c in s["contenedores"] if c["nombre"] == nombre)
+            tipo, nivel, titulo = (("contenedor_ok", "info", f"Contenedor {nombre} funciona de nuevo") if ok
+                                   else ("contenedor_caido", "alto", f"Contenedor {nombre} detenido o con fallas"))
+            n += self._guardar({"ts": ahora, "fuente": "sistema", "tipo": tipo, "nivel": nivel, "titulo": titulo,
+                                "detalle": det, "clave": f"ctr:{nombre}:{ahora}"}, silencio)
+        self.db.set("contenedores", {**previos, **actuales})
+        return n
 
     def _red(self, ahora: int, silencio: bool) -> int:
         r = fuentes.netwatch_resumen(self.cfg)

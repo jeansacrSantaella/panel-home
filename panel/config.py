@@ -20,7 +20,8 @@ YA_AVISADOS: FrozenSet[str] = frozenset({
 
 # Solo lo que nadie más avisa: cuando NetWatch o gestorCamaras dejan de responder.
 # El movimiento NO se avisa al instante (solo va a la línea de tiempo): el detector ya manda un resumen cada 2 h.
-TIPOS_AVISO: FrozenSet[str] = frozenset({"fuente_caida", "fuente_ok"})
+# Contenedores caídos tampoco los avisa nadie más (p. ej. si se detiene el detector).
+TIPOS_AVISO: FrozenSet[str] = frozenset({"fuente_caida", "fuente_ok", "contenedor_caido", "contenedor_ok"})
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,7 @@ class Config:
     telegram_token: str = ""
     telegram_chat_id: str = ""
     ntfy_url: str = ""
+    docker_sock: str = "/var/run/docker.sock"  # para ver los contenedores; vacío = no consultar
     avisar: FrozenSet[str] = TIPOS_AVISO
 
     @property
@@ -84,6 +86,9 @@ def cargar(env: Mapping[str, str] = os.environ) -> Config:
     val = _obtener("CAMARAS_DATA")
     if val:
         kwargs["camaras_data"] = Path(val).expanduser()
+
+    if "DOCKER_SOCK" in env:
+        kwargs["docker_sock"] = _obtener("DOCKER_SOCK")
 
     val = _obtener("FOTOS_REMOTAS")
     if val:

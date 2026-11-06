@@ -10,6 +10,8 @@ services:
       - "8770:8770"   # panel web
     volumes:
       - ./data:/data   # aquí vive panel.db (eventos y consumo)
+      # Solo para leer el estado de los contenedores (tarjeta Servidor y avisos si alguno se detiene)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     env_file:
       - path: .env
         required: false   # TELEGRAM_TOKEN, TELEGRAM_CHAT_ID y las URLs de NetWatch/cámaras; ver .env.example

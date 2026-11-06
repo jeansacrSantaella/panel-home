@@ -74,6 +74,18 @@ class Db:
         return {r["tipo"]: r["n"] for r in
                 self._q("SELECT tipo, COUNT(*) AS n FROM eventos WHERE ts >= ? GROUP BY tipo", (int(desde),))}
 
+    def calor_movimiento(self, dias: int = 28, ahora: Optional[int] = None) -> dict:
+        """Detecciones por día de la semana (0=lunes) y hora local de los últimos `dias` días."""
+        ahora = int(time.time()) if ahora is None else int(ahora)
+        matriz = [[0] * 24 for _ in range(7)]
+        filas = self._q("SELECT (CAST(strftime('%w', ts, 'unixepoch', 'localtime') AS INTEGER) + 6) % 7 AS d, "
+                        "CAST(strftime('%H', ts, 'unixepoch', 'localtime') AS INTEGER) AS h, COUNT(*) AS n "
+                        "FROM eventos WHERE tipo = 'movimiento' AND ts >= ? GROUP BY d, h", (ahora - dias * 86400,))
+        for r in filas:
+            matriz[r["d"]][r["h"]] = r["n"]
+        total = sum(map(sum, matriz))
+        return {"dias": dias, "total": total, "max": max(map(max, matriz)), "matriz": matriz}
+
     # --- consumo ---
     def guardar_consumo(self, ts, muestras: dict) -> None:
         filas = [(int(ts), str(eq), int(rx), int(tx)) for eq, (rx, tx) in muestras.items()]

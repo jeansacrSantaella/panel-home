@@ -42,3 +42,9 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | T19 | gestorCamaras: `GET /api/espacio` (disco libre, bytes y archivos de fotos y clips; caché 60 s). Falta desplegar en la Lenovo. | Gemini, revisado por Claude |
 | T20 | `static/js/espacio.js`: tarjeta "Almacenamiento de grabaciones" (KPIs, dona, barra; ámbar < 20 % libre, rojo < 10 %). | Gemini, revisado por Claude |
 | T21 | `fuentes.camaras_espacio` (remoto o local), recolector cada 5 min, `espacio` en `/api/panel`, evento `panel` en app.js. | Claude |
+| T22 | `static/js/hchart-calor.js`: `HChart.calor`, mapa de calor en HTML/CSS. | Gemini, revisado por Claude |
+| T23 | `static/js/calor.js` + `Db.calor_movimiento`: movimiento por día y hora, 4 semanas. | Gemini + Claude |
+| T24 | `panel/sistema.py`: CPU, RAM, carga, encendido, temperatura y contenedores por el socket de Docker. Corregido: "Restarting" contaba como "starting". | Gemini, revisado por Claude |
+| T25 | `static/js/sistema.js`: tarjeta Servidor; eventos `contenedor_caido`/`contenedor_ok` (tras 2 lecturas, se avisan); socket montado en compose. | Gemini + Claude |
+| Nota | Avisos de movimiento: ya estaban apagados (solo los resúmenes del detector). Consumo (Sercomm FG6122TM): sin API ni SNMP; pendiente revisar su web con usuario. | Claude |
+| T26 | Tarjeta de consumo renombrada a "Calidad por dispositivo" mientras no haya `CONSUMO_CMD` (el módem Telmex no da bytes por equipo). | Claude |

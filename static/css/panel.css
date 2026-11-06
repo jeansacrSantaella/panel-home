@@ -124,6 +124,15 @@ h3 { font-size: 12px; font-weight: 600; color: var(--tenue); margin: 16px 0 6px;
 .visor-pie { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
 .visor-pie p { flex: 1; margin: 0; }
 
+/* servidor: contenedores */
+.contenedores { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
+.contenedores li { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+.contenedores .punto { width: 9px; height: 9px; border-radius: 50%; background: var(--tenue); flex: none; }
+.contenedores .punto.ok { background: var(--ok); }
+.contenedores .punto.alerta { background: var(--alerta); }
+.contenedores .punto.mal { background: var(--mal); }
+.contenedores .tenue { margin-left: auto; }
+
 @media (prefers-reduced-motion: reduce) { .ev.nuevo { animation: none; } }
 .ev-foto-btn { border: 0; padding: 0; margin-top: 4px; background: none; cursor: pointer; }
 

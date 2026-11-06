@@ -423,11 +423,14 @@
     const aviso = document.getElementById("consumo-aviso");
     const contDona = document.getElementById("consumo-dona");
     const contBarras = document.getElementById("consumo-barras");
+    const titulo = document.getElementById("consumo-titulo");
+    // Sin CONSUMO_CMD (el módem de Telmex no da bytes por equipo) la tarjeta muestra la calidad de conexión
+    if (titulo) titulo.textContent = d.consumo_activo ? "Consumo por dispositivo · 24 h" : "Calidad por dispositivo · última hora";
 
     if (!d.consumo_activo) {
       if (aviso) {
         aviso.removeAttribute("hidden");
-        aviso.textContent = "Configura CONSUMO_CMD para ver cuántos datos usa cada equipo (ver README). Mientras tanto se muestra la calidad de conexión.";
+        aviso.textContent = "Latencia promedio y pérdida de paquetes de cada equipo conectado (de NetWatch). Rojo: pierde 20 % o más; ámbar: pierde algo.";
       }
       if (contDona) contDona.textContent = "";
 
