@@ -1,0 +1,1 @@
+"""Panel unificado del hogar."""

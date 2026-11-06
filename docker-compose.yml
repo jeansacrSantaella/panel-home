@@ -1,0 +1,24 @@
+# Las URLs del .env deben usar la IP de la red (ej. 192.168.1.94), no localhost,
+# porque dentro del contenedor localhost es el propio contenedor y el navegador del celular tampoco lo resolvería.
+
+services:
+  panel-home:
+    build: .
+    container_name: panel-home
+    restart: unless-stopped
+    ports:
+      - "8770:8770"   # panel web
+    volumes:
+      - ./data:/data   # aquí vive panel.db (eventos y consumo)
+    env_file:
+      - path: .env
+        required: false   # TELEGRAM_TOKEN, TELEGRAM_CHAT_ID y las URLs de NetWatch/cámaras; ver .env.example
+    environment:
+      # Estas ganan sobre el .env
+      TZ: America/Mexico_City
+      PANEL_HOST: "0.0.0.0"
+      PANEL_DB: /data/panel.db
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

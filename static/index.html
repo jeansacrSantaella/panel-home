@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel del hogar</title>
+  <link rel="stylesheet" href="/static/css/panel.css">
+</head>
+<body>
+  <header class="barra">
+    <h1>Casa</h1>
+    <div id="chips" class="chips" aria-live="polite"></div>
+    <div class="barra-der">
+      <span id="ip-publica" class="tenue"></span>
+      <span id="actualizado" class="tenue"></span>
+      <button id="btn-notif" class="boton" type="button">Activar notificaciones</button>
+    </div>
+  </header>
+
+  <nav class="pestanas" aria-label="Secciones">
+    <a href="#resumen" class="pestana" data-pestana="resumen">Resumen</a>
+    <a href="#capturas" class="pestana" data-pestana="capturas">Capturas</a>
+    <a href="#camaras" class="pestana" data-pestana="camaras">Cámaras</a>
+    <a href="#red" class="pestana" data-pestana="red">Red</a>
+  </nav>
+
+  <main id="pestana-resumen" class="rejilla">
+    <section id="sec-camaras" class="tarjeta ancha">
+      <h2>Cámaras</h2>
+      <div id="camaras" class="camaras"></div>
+    </section>
+
+    <section id="sec-red" class="tarjeta">
+      <h2>Mapa de la red <span id="red-cuenta" class="tenue"></span></h2>
+      <div id="mapa" class="mapa"></div>
+      <div id="detalle-equipo" class="detalle" hidden></div>
+    </section>
+
+    <section id="sec-caidas" class="tarjeta">
+      <h2>Caídas · últimas 24 h</h2>
+      <div id="uptime" class="kpis"></div>
+      <div id="cintas" class="cintas"></div>
+      <h3>Caídas por hora del día</h3>
+      <div id="caidas-hora"></div>
+      <h3>Latencia a internet · última hora</h3>
+      <div id="latencia"></div>
+    </section>
+
+    <section id="sec-consumo" class="tarjeta">
+      <h2>Consumo por dispositivo · 24 h</h2>
+      <p id="consumo-aviso" class="aviso" hidden></p>
+      <div id="consumo-dona"></div>
+      <div id="consumo-barras"></div>
+    </section>
+
+    <section id="sec-eventos" class="tarjeta">
+      <h2>Línea de tiempo</h2>
+      <div id="filtros" class="filtros" role="group" aria-label="Filtrar eventos">
+        <button type="button" class="filtro activo" data-grupo="todos">Todo</button>
+        <button type="button" class="filtro" data-grupo="camaras">Cámaras</button>
+        <button type="button" class="filtro" data-grupo="internet">Internet</button>
+        <button type="button" class="filtro" data-grupo="equipos">Equipos</button>
+        <button type="button" class="filtro" data-grupo="sistema">Sistema</button>
+      </div>
+      <ol id="linea-tiempo" class="linea-tiempo"></ol>
+      <button id="mas-eventos" class="boton" type="button">Ver más</button>
+    </section>
+  </main>
+
+  <main id="pestana-capturas" class="capturas" hidden>
+    <section class="tarjeta">
+      <div class="capturas-barra">
+        <h2>Capturas del detector</h2>
+        <label>Día <input type="date" id="capturas-fecha"></label>
+        <label>Cámara <select id="capturas-camara"><option value="">Todas</option></select></label>
+        <span id="capturas-cuenta" class="tenue"></span>
+        <button id="capturas-recargar" class="boton" type="button">Recargar</button>
+      </div>
+      <div id="capturas-grid" class="capturas-grid"></div>
+    </section>
+  </main>
+
+  <!-- Los otros proyectos, desde su propia dirección (con todas sus funciones: mover, zoom, escáner...) -->
+  <main id="pestana-camaras" class="externa" hidden>
+    <div class="externa-barra"><span>gestorCamaras</span><a class="externa-enlace" target="_blank" rel="noopener">Abrir en otra ventana ↗</a></div>
+    <iframe class="externa-marco" title="Panel de cámaras" data-url="camaras_url" allow="autoplay; fullscreen"></iframe>
+  </main>
+  <main id="pestana-red" class="externa" hidden>
+    <div class="externa-barra"><span>NetWatch</span><a class="externa-enlace" target="_blank" rel="noopener">Abrir en otra ventana ↗</a></div>
+    <iframe class="externa-marco" title="NetWatch" data-url="netwatch_url"></iframe>
+  </main>
+
+  <dialog id="visor-foto" class="visor">
+    <div class="visor-marco">
+      <button id="visor-ant" class="visor-flecha visor-ant" type="button" aria-label="Foto anterior">‹</button>
+      <img id="visor-img" alt="">
+      <button id="visor-sig" class="visor-flecha visor-sig" type="button" aria-label="Foto siguiente">›</button>
+    </div>
+    <div class="visor-pie">
+      <p id="visor-texto"></p>
+      <span id="visor-pos" class="tenue"></span>
+      <form method="dialog"><button class="boton">Cerrar</button></form>
+    </div>
+  </dialog>
+
+  <script src="/static/js/hchart.js"></script>
+  <script src="/static/js/visor.js"></script>
+  <script src="/static/js/app.js"></script>
+  <script src="/static/js/linea.js"></script>
+  <script src="/static/js/capturas.js"></script>
+  <script src="/static/js/pestanas.js"></script>
+</body>
+</html>
