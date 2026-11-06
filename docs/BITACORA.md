@@ -49,3 +49,5 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | Nota | Avisos de movimiento: ya estaban apagados (solo los resúmenes del detector). Consumo (Sercomm FG6122TM): sin API ni SNMP; pendiente revisar su web con usuario. | Claude |
 | T26 | Tarjeta de consumo renombrada a "Calidad por dispositivo" mientras no haya `CONSUMO_CMD` (el módem Telmex no da bytes por equipo). | Claude |
 | Nota | Módem Telmex: la página "Estado WAN" tiene bytes Rx/Tx totales (consumo de la casa), pero el login es HMAC, los datos vienen cifrados con SJCL/AES y solo admite una sesión. Se deja sin integrar por ahora. | Claude |
+| T27 | Rediseño UI/UX de `panel.css`: tokens claro/oscuro, cabecera translúcida, rejilla 1/2/3 columnas (línea de tiempo lateral en escritorio), barra de pestañas inferior en móvil, visor a pantalla completa en móvil, foco visible y objetivos táctiles. Arreglo: sin backdrop-filter en móvil (atrapaba la barra fija). | Gemini, revisado por Claude |
+| T28 | `static/js/tema.js` + script en `<head>`: tema automático / claro / oscuro guardado en el navegador, sin parpadeo; mide cabecera y barra para los iframes. HTML con íconos SVG en pestañas. | Gemini + Claude |
