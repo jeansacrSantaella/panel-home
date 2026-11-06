@@ -4,8 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#ffffff">
-  <title>Panel del hogar</title>
+  <meta name="theme-color" content="#0B0F17">
+  <title>OrionHome · Casa</title>
+  <link rel="icon" type="image/svg+xml" href="/static/img/orionhome.svg">
+  <link rel="apple-touch-icon" href="/static/img/orionhome.svg">
   <script>
     // Tema guardado (claro/oscuro) antes de pintar, para que no parpadee
     try {
@@ -15,13 +17,69 @@
     } catch (e) { document.documentElement.dataset.temaPref = "auto"; }
   </script>
   <link rel="stylesheet" href="/static/css/panel.css">
+  <link rel="stylesheet" href="/static/css/orion.css">
 </head>
 <body>
+  <!-- Pantalla de inicio: Orión se dibuja mientras llegan los datos (estilos en orion.css, lógica en carga.js) -->
+  <div id="splash" class="splash" aria-hidden="true">
+    <svg class="splash-arte" viewBox="100 100 824 824" width="230" height="230">
+      <defs>
+        <radialGradient id="sp-halo-sirius" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".12" stop-color="#9ff6ff" stop-opacity=".95"/><stop offset=".35" stop-color="#00E5FF" stop-opacity=".45"/><stop offset=".7" stop-color="#8B5CF6" stop-opacity=".18"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></radialGradient>
+        <radialGradient id="sp-halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".3" stop-color="#7cf0ff" stop-opacity=".55"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></radialGradient>
+        <linearGradient id="sp-rama" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#8B5CF6"/><stop offset=".55" stop-color="#5aa8ff"/><stop offset="1" stop-color="#00E5FF"/></linearGradient>
+      </defs>
+      <g class="splash-ramas" fill="none" stroke="url(#sp-rama)" stroke-width="7" stroke-linecap="round">
+        <path class="splash-linea" pathLength="1" d="M318 292 Q 371 426, 397 568" style="--i:0"/>
+        <path class="splash-linea" pathLength="1" d="M566 310 Q 514 398, 483 496" style="--i:1"/>
+        <path class="splash-linea" pathLength="1" d="M397 568 L 440 532 L 483 496" style="--i:2"/>
+        <path class="splash-linea" pathLength="1" d="M397 568 Q 344 664, 316 770" style="--i:3"/>
+        <path class="splash-linea" pathLength="1" d="M483 496 Q 538 620, 570 752" style="--i:4"/>
+        <path class="splash-linea" pathLength="1" d="M318 292 Q 443 291, 566 310" style="--i:5"/>
+        <path class="splash-linea" pathLength="1" d="M316 770 Q 444 771, 570 752" style="--i:6"/>
+      </g>
+      <g fill="#fff">
+        <circle class="splash-polvo" cx="210" cy="250" r="2.2" style="--i:0;--o:0.7"/>
+        <circle class="splash-polvo" cx="270" cy="420" r="1.6" style="--i:1;--o:0.5"/>
+        <circle class="splash-polvo" cx="180" cy="560" r="2" style="--i:2;--o:0.55"/>
+        <circle class="splash-polvo" cx="250" cy="820" r="1.8" style="--i:3;--o:0.45"/>
+        <circle class="splash-polvo" cx="330" cy="200" r="1.5" style="--i:4;--o:0.5"/>
+        <circle class="splash-polvo" cx="470" cy="180" r="2" style="--i:5;--o:0.6"/>
+        <circle class="splash-polvo" cx="540" cy="260" r="1.4" style="--i:6;--o:0.4"/>
+        <circle class="splash-polvo" cx="860" cy="470" r="2.2" style="--i:7;--o:0.6"/>
+        <circle class="splash-polvo" cx="820" cy="640" r="1.6" style="--i:8;--o:0.45"/>
+        <circle class="splash-polvo" cx="760" cy="820" r="2" style="--i:9;--o:0.55"/>
+      </g>
+      <g>
+        <g class="splash-estrella" style="--i:0"><circle cx="318" cy="292" r="43" fill="url(#sp-halo)"/><circle cx="318" cy="292" r="12" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
+        <g class="splash-estrella" style="--i:1"><circle cx="566" cy="310" r="43" fill="url(#sp-halo)"/><circle cx="566" cy="310" r="12" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
+        <g class="splash-estrella" style="--i:2"><circle cx="316" cy="770" r="43" fill="url(#sp-halo)"/><circle cx="316" cy="770" r="12" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
+        <g class="splash-estrella" style="--i:3"><circle cx="570" cy="752" r="43" fill="url(#sp-halo)"/><circle cx="570" cy="752" r="12" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
+      </g>
+      <g>
+        <g class="splash-cinturon" style="--i:0"><circle cx="397" cy="568" r="58" fill="url(#sp-halo)"/><circle cx="397" cy="568" r="15" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
+        <g class="splash-cinturon" style="--i:1"><circle cx="440" cy="532" r="58" fill="url(#sp-halo)"/><circle cx="440" cy="532" r="15" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
+        <g class="splash-cinturon" style="--i:2"><circle cx="483" cy="496" r="58" fill="url(#sp-halo)"/><circle cx="483" cy="496" r="15" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
+      </g>
+      <path d="M506 477 L 714 303" fill="none" stroke="#7cf0ff" stroke-opacity=".55" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="1 13"/>
+      <g transform="translate(768 258)">
+        <g class="splash-sirius">
+          <circle r="150" fill="url(#sp-halo-sirius)"/>
+          <path d="M0 -118 C 9 -30, 30 -9, 118 0 C 30 9, 9 30, 0 118 C -9 30, -30 9, -118 0 C -30 -9, -9 -30, 0 -118 Z" fill="#eaffff"/>
+          <path d="M0 -58 C 5 -16, 16 -5, 58 0 C 16 5, 5 16, 0 58 C -5 16, -16 5, -58 0 C -16 -5, -5 -16, 0 -58 Z" fill="#fff" transform="rotate(45)" opacity=".55"/>
+          <circle r="13" fill="#fff"/>
+        </g>
+      </g>
+    </svg>
+    <div class="splash-nombre">Orion<b>Home</b></div>
+    <div class="splash-firma">Santaella</div>
+    <div class="splash-estado" id="splash-estado">Conectando con la casa…</div>
+  </div>
+
   <div class="cabecera">
     <header class="barra">
       <div class="marca">
-        <svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg>
-        <h1>Casa</h1>
+        <img class="marca-logo" src="/static/img/orion-marca.svg" alt="">
+        <div class="marca-texto"><h1>Orion<b>Home</b></h1><span class="marca-firma">Santaella</span></div>
       </div>
       <div id="chips" class="chips" aria-live="polite"></div>
       <div class="barra-der">
@@ -44,7 +102,7 @@
     </nav>
   </div>
 
-  <main id="pestana-resumen" class="rejilla">
+  <main id="pestana-resumen" class="rejilla esperando">
     <section id="sec-camaras" class="tarjeta">
       <h2>Cámaras</h2>
       <div id="camaras" class="camaras"></div>
@@ -130,6 +188,8 @@
     <iframe class="externa-marco" title="NetWatch" data-url="netwatch_url"></iframe>
   </main>
 
+  <footer class="pie-orion"><img src="/static/img/orion-marca.svg" alt=""><span>Orion<b>Home</b> · familia OrionGit · Santaella</span></footer>
+
   <dialog id="visor-foto" class="visor">
     <div class="visor-marco">
       <button id="visor-ant" class="visor-flecha visor-ant" type="button" aria-label="Foto anterior">‹</button>
@@ -144,6 +204,7 @@
   </dialog>
 
   <script src="/static/js/tema.js"></script>
+  <script src="/static/js/carga.js"></script>
   <script src="/static/js/hchart.js"></script>
   <script src="/static/js/hchart-calor.js"></script>
   <script src="/static/js/visor.js"></script>

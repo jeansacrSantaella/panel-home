@@ -129,6 +129,11 @@
             }
         }
 
+        // constelación de carga mientras llegan (solo si la galería está vacía, para no parpadear en la recarga de cada minuto)
+        if (divGrid && window.OrionCarga && !divGrid.querySelector(".captura")) {
+            window.OrionCarga.en(divGrid, "Buscando capturas…");
+        }
+
         fetch("/api/capturas?fecha=" + encodeURIComponent(fecha))
             .then(res => res.json())
             .then(data => {

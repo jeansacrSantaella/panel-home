@@ -1,4 +1,10 @@
-# panel-home
+# panel-home · OrionHome
+
+<img src="static/img/orionhome.svg" width="96" alt="OrionHome">
+
+**OrionHome** es el panel de la casa, de la familia de [OrionGit](../client-git) (Santaella): misma constelación de Orión
+en reloj de arena, aquí con Sirius como la casa. Al abrirlo, Orión se dibuja mientras llegan los datos; con tema
+automático, claro u oscuro (botón ◐), y pensado para usarse también desde el celular.
 
 Una sola web para la casa: cámaras en vivo, mapa de la red, consumo por dispositivo, caídas de internet
 y una línea de tiempo de eventos con avisos por Telegram o push. Python 3.9+, sin dependencias.

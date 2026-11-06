@@ -14,6 +14,12 @@
         return;
     }
 
+    // Marco de la foto: muestra la carga mientras llega la imagen
+    var marco = img.parentElement;
+    function listo() { marco.classList.remove("cargando"); }
+    img.addEventListener("load", listo);
+    img.addEventListener("error", listo);
+
     // Estado interno del visor
     var fotos = [];
     var indiceActual = 0;
@@ -27,6 +33,7 @@
         var actual = fotos[i];
         var total = fotos.length;
 
+        marco.classList.add("cargando");  // anillo de carga hasta que llegue la foto
         img.src = "/api/foto?ref=" + encodeURIComponent(actual.ref);
         img.alt = actual.texto || "";
         txt.textContent = actual.texto || "";
