@@ -35,7 +35,8 @@ class Recolector:
     def __init__(self, cfg, db):
         self.cfg = cfg
         self.db = db
-        self.ultimo = {"ts": 0, "netwatch": None, "camaras": None, "salud": None}
+        self.ultimo = {"ts": 0, "netwatch": None, "camaras": None, "salud": None, "espacio": None}
+        self._espacio_ts = 0
 
     def ciclo(self, ahora=None) -> int:
         ahora = int(time.time()) if ahora is None else int(ahora)
@@ -49,6 +50,12 @@ class Recolector:
                 log.exception("falló %s", paso.__name__)
         if silencio:
             self.db.set("iniciado", ahora)
+        if ahora - self._espacio_ts >= 300:  # el disco cambia despacio: cada 5 min basta
+            self._espacio_ts = ahora
+            try:
+                self.ultimo["espacio"] = fuentes.camaras_espacio(self.cfg)
+            except Exception:
+                log.exception("falló espacio")
         self.ultimo["ts"] = ahora
         return total
 

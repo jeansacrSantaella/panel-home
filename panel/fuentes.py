@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import json
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import time
 import urllib.error
@@ -218,6 +219,38 @@ def leer_foto(cfg: Config, ref: str) -> bytes | None:
             return p.read_bytes()
         except Exception:
             return None
+
+
+def _medir(base: Path) -> dict:
+    """Bytes, archivos y días de una carpeta fotos/ o clips/ (subcarpetas AAAA-MM-DD)."""
+    total = archivos = dias = 0
+    if base.is_dir():
+        for dia in base.iterdir():
+            if not (dia.is_dir() and re.fullmatch(r"\d{4}-\d\d-\d\d", dia.name)):
+                continue
+            dias += 1
+            for f in dia.iterdir():
+                try:
+                    if f.is_file():
+                        total += f.stat().st_size
+                        archivos += 1
+                except OSError:
+                    pass
+    return {"bytes": total, "archivos": archivos, "dias": dias}
+
+
+def camaras_espacio(cfg: Config) -> dict | None:
+    """Espacio del disco de las grabaciones: por HTTP (/api/espacio) o midiendo la carpeta local."""
+    if getattr(cfg, "fotos_remotas", False):
+        data = _seguro(lambda: get_json(f"{cfg.camaras_url.rstrip('/')}/api/espacio"))
+        return data if isinstance(data, dict) and "total" in data else None
+    try:
+        uso = shutil.disk_usage(cfg.camaras_data)
+    except OSError:
+        return None
+    return {"total": uso.total, "usado": uso.used, "libre": uso.free,
+            "fotos": _medir(cfg.camaras_data / "fotos"), "clips": _medir(cfg.camaras_data / "clips"),
+            "ts": int(time.time())}
 
 
 def leer_consumo(cfg: Config) -> dict[str, tuple[int, int]] | None:

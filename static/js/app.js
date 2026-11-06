@@ -40,6 +40,7 @@
       pintarMapa(d);
       pintarCaidas(d);
       pintarConsumo(d);
+      document.dispatchEvent(new CustomEvent("panel", { detail: d }));  // otras tarjetas (espacio.js)
     } catch (err) {
       if (elActualizado) {
         elActualizado.textContent = "Sin conexión con el panel";

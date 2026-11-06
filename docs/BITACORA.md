@@ -39,3 +39,6 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | T16 | `tests/test_capturas.py`: 7 pruebas nuevas. Total 13/13 OK. | Gemini, revisado por Claude |
 | T17 | Visor tipo carrusel (`static/js/visor.js`): flechas ‹ ›, teclado ← →, deslizar con el dedo, contador "2 / 5". En Capturas recorre las fotos del día/cámara filtrada; en la línea de tiempo, las fotos visibles. | Gemini (visor.js), Claude (HTML/CSS y llamadas) |
 | T18 | Docker: `Dockerfile`, `docker-compose.yml` (puerto 8770, base en `data/`), `.dockerignore`; guía en README. Probado en contenedor contra la .94: healthy. | Gemini, revisado por Claude |
+| T19 | gestorCamaras: `GET /api/espacio` (disco libre, bytes y archivos de fotos y clips; caché 60 s). Falta desplegar en la Lenovo. | Gemini, revisado por Claude |
+| T20 | `static/js/espacio.js`: tarjeta "Almacenamiento de grabaciones" (KPIs, dona, barra; ámbar < 20 % libre, rojo < 10 %). | Gemini, revisado por Claude |
+| T21 | `fuentes.camaras_espacio` (remoto o local), recolector cada 5 min, `espacio` en `/api/panel`, evento `panel` en app.js. | Claude |

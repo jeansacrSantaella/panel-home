@@ -57,7 +57,7 @@ def estado_panel(cfg, db, recolector, ahora=None) -> dict:
         "red": {k: nw.get(k) for k in CLAVES_RED} if nw else None,
         "equipos": equipos, "consumo_activo": bool(cfg.consumo_cmd),
         "camaras": camaras, "go2rtc_ok": salud.get("go2rtc") if salud else None,
-        "ultimo_movimiento": movs, "conteo_24h": db.conteo_por_tipo(ahora - 86400),
+        "ultimo_movimiento": movs, "espacio": u.get("espacio"), "conteo_24h": db.conteo_por_tipo(ahora - 86400),
     }
 
 

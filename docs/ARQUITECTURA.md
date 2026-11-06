@@ -142,3 +142,9 @@ class Avisador:
 - gestorCamaras: `GET /api/fotos/dias`, `GET /api/fotos?fecha=`, `GET /api/fotos/{fecha}/{archivo}`.
 - web: `GET /api/capturas?fecha=` y `/api/panel` incluye `camaras_url` y `netwatch_url` para las pestañas.
 - static: `pestanas.js` (hash #resumen #capturas #camaras #red) y `capturas.js` (galería).
+
+## Agregado: almacenamiento
+
+- gestorCamaras `GET /api/espacio` → `{total, usado, libre, fotos:{bytes,archivos,dias}, clips:{bytes,archivos,dias}, ts}` (caché 60 s).
+- `fuentes.camaras_espacio(cfg)`: por HTTP si `FOTOS_REMOTAS=1`, si no mide `CAMARAS_DATA`. El recolector lo lee cada 5 min en `ultimo["espacio"]`; `/api/panel` lo devuelve como `espacio`.
+- `app.js` emite el evento `panel` con los datos; `espacio.js` pinta la tarjeta.
