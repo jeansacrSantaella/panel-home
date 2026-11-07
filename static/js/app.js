@@ -135,7 +135,9 @@
         iframe.src = `${base}/stream.html?src=${encodeURIComponent(cam.id)}&mode=mse`;
         iframe.title = `Video de ${cam.nombre || cam.id}`;
         iframe.loading = "lazy";
-        iframe.setAttribute("allow", "autoplay");
+        // Sin permiso "autoplay" el navegador solo deja arrancar el video en silencio;
+        // el reproductor de go2rtc conserva el botón de volumen para activarlo a mano.
+        iframe.setAttribute("allow", "fullscreen");
 
         const pie = document.createElement("div");
         pie.className = "camara-pie";

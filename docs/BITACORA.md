@@ -57,3 +57,4 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | T32 | `static/login.html` + `static/js/login.js`: entrada con identidad Orión y paso para cambiar la contraseña de fábrica (o "Más tarde"). | Claude (HTML), Gemini (JS) |
 | T33 | `static/js/cuenta.js`: menú de cuenta, recordatorio fijo hasta cambiar la contraseña, diálogo de cambio, salida a /login si la sesión vence. Arreglo: el logout no mandaba JSON. | Gemini, revisado por Claude |
 | T34 | `static/css/cuenta.css`; servidor: rutas protegidas, POST solo JSON del mismo origen, cabeceras de seguridad, sin versión de Python. `tests/test_auth.py` (7 pruebas). Total 20/20 OK. | Gemini + Claude |
+| T35 | Cámaras en silencio: los iframes de go2rtc (Resumen) y de gestorCamaras (pestaña Cámaras) ya no delegan `autoplay`; el navegador solo permite arrancar mudo y go2rtc cae a `muted` solo (se puede subir el volumen a mano). | Claude |
