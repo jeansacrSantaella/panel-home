@@ -22,6 +22,13 @@ from panel.eventos import Recolector
 from panel.web import crear_servidor, estado_panel
 
 
+
+class SesionAbierta:
+    """Auth falsa con sesión siempre válida: estas pruebas revisan las rutas; la seguridad va en test_auth.py."""
+
+    def sesion(self, token):
+        return {"usuario": "admin", "debe_cambiar": False}
+
 class TestPanel(unittest.TestCase):
     """Casos de prueba para config, db, fuentes, eventos, avisos y web."""
 
@@ -295,7 +302,7 @@ class TestPanel(unittest.TestCase):
         self.assertEqual(len(st["camaras"]), 1)
         self.assertEqual(st["camaras"][0]["estado"], "ok")
 
-        self.server = crear_servidor(cfg, db, recolector)
+        self.server = crear_servidor(cfg, db, recolector, SesionAbierta())
         port = self.server.server_address[1]
         self.server_thread = threading.Thread(target=self.server.serve_forever)
         self.server_thread.daemon = True

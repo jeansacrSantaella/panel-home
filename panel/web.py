@@ -5,6 +5,7 @@ import json
 import logging
 import mimetypes
 import time
+from http.cookies import CookieError, SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -73,21 +74,37 @@ def capturas(cfg, recolector, fecha: str) -> dict:
             "No pude leer las capturas de gestorCamaras: ¿ya está desplegada la versión con /api/fotos?"}
 
 
-def crear_servidor(cfg, db, recolector) -> ThreadingHTTPServer:
+MAX_CUERPO = 4096
+PUBLICAS = ("/login", "/login.html")  # además de /static/: todo lo demás pide sesión
+
+
+def crear_servidor(cfg, db, recolector, auth) -> ThreadingHTTPServer:
+    from panel.auth import COOKIE, DURACION_SESION, Bloqueado
+
     class Manejador(BaseHTTPRequestHandler):
+        server_version = "OrionHome"  # no anunciar versión de Python
+        sys_version = ""
+
         def log_message(self, fmt, *args):
             log.debug(fmt, *args)
 
-        def _enviar(self, codigo: int, cuerpo: bytes, tipo: str, cache: str = "no-store"):
+        def _enviar(self, codigo: int, cuerpo: bytes, tipo: str, cache: str = "no-store", extra=()):
             self.send_response(codigo)
             self.send_header("Content-Type", tipo)
             self.send_header("Content-Length", str(len(cuerpo)))
             self.send_header("Cache-Control", cache)
+            # cabeceras de seguridad: nadie puede incrustar el panel ni adivinar tipos
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("X-Frame-Options", "DENY")
+            self.send_header("Referrer-Policy", "same-origin")
+            for k, v in extra:
+                self.send_header(k, v)
             self.end_headers()
             self.wfile.write(cuerpo)
 
-        def _json(self, datos, codigo: int = 200):
-            self._enviar(codigo, json.dumps(datos, ensure_ascii=False).encode(), "application/json; charset=utf-8")
+        def _json(self, datos, codigo: int = 200, extra=()):
+            self._enviar(codigo, json.dumps(datos, ensure_ascii=False).encode(), "application/json; charset=utf-8",
+                         extra=extra)
 
         def _archivo(self, ruta: Path, cache: str = "no-cache"):
             tipo = mimetypes.guess_type(ruta.name)[0] or "application/octet-stream"
@@ -95,17 +112,49 @@ def crear_servidor(cfg, db, recolector) -> ThreadingHTTPServer:
                 tipo += "; charset=utf-8"
             self._enviar(200, ruta.read_bytes(), tipo, cache)
 
+        def _redirigir(self, destino: str):
+            self.send_response(302)
+            self.send_header("Location", destino)
+            self.send_header("Content-Length", "0")
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+
+        # --- sesión ---
+        def _token(self) -> str:
+            galleta = SimpleCookie()
+            try:
+                galleta.load(self.headers.get("Cookie", ""))
+            except CookieError:
+                return ""
+            m = galleta.get(COOKIE)
+            return m.value if m else ""
+
+        def _cookie(self, token: str, edad: int) -> tuple:
+            return ("Set-Cookie", f"{COOKIE}={token}; Path=/; HttpOnly; SameSite=Strict; Max-Age={edad}")
+
+        def _ip(self) -> str:
+            return self.client_address[0]
+
         def do_GET(self):
             url = urlparse(self.path)
             q = {k: v[0] for k, v in parse_qs(url.query).items()}
             try:
-                if url.path in ("/", "/index.html"):
-                    return self._archivo(STATIC / "index.html")
                 if url.path.startswith("/static/"):
                     ruta = (STATIC / url.path[len("/static/"):]).resolve()
                     if STATIC.resolve() in ruta.parents and ruta.is_file():
                         return self._archivo(ruta)
                     return self._json({"error": "no existe"}, 404)
+                if url.path in PUBLICAS:
+                    return self._archivo(STATIC / "login.html", "no-store")
+                sesion = auth.sesion(self._token())
+                if sesion is None:
+                    if url.path.startswith("/api/"):
+                        return self._json({"error": "sin sesión"}, 401)
+                    return self._redirigir("/login")
+                if url.path in ("/", "/index.html"):
+                    return self._archivo(STATIC / "index.html", "no-store")
+                if url.path == "/api/sesion":
+                    return self._json(sesion)
                 if url.path == "/api/panel":
                     return self._json(estado_panel(cfg, db, recolector))
                 if url.path == "/api/eventos":
@@ -118,10 +167,56 @@ def crear_servidor(cfg, db, recolector) -> ThreadingHTTPServer:
                     # local o pedida a gestorCamaras según FOTOS_REMOTAS
                     foto = fuentes.leer_foto(cfg, q.get("ref", ""))
                     if foto:
-                        return self._enviar(200, foto, "image/jpeg", "max-age=86400")
+                        return self._enviar(200, foto, "image/jpeg", "private, max-age=86400")
                     return self._json({"error": "foto no encontrada"}, 404)
                 return self._json({"error": "no existe"}, 404)
             except ValueError as e:
                 return self._json({"error": str(e)}, 400)
+
+        def do_POST(self):
+            url = urlparse(self.path)
+            # Solo JSON del mismo origen: junto con SameSite=Strict evita peticiones forjadas desde otras páginas
+            origen = self.headers.get("Origin")
+            if origen and urlparse(origen).netloc != self.headers.get("Host", ""):
+                return self._json({"error": "origen no permitido"}, 403)
+            if not (self.headers.get("Content-Type") or "").startswith("application/json"):
+                return self._json({"error": "se espera JSON"}, 415)
+            try:
+                largo = int(self.headers.get("Content-Length") or 0)
+            except ValueError:
+                largo = -1
+            if largo < 0 or largo > MAX_CUERPO:
+                return self._json({"error": "cuerpo inválido"}, 413)
+            try:
+                datos = json.loads(self.rfile.read(largo) or b"{}")
+                if not isinstance(datos, dict):
+                    raise ValueError
+            except ValueError:
+                return self._json({"error": "JSON inválido"}, 400)
+            texto = lambda k: datos.get(k) if isinstance(datos.get(k), str) else ""  # noqa: E731
+
+            if url.path == "/api/login":
+                try:
+                    r = auth.entrar(texto("usuario"), texto("contrasena"), self._ip())
+                except Bloqueado as b:
+                    return self._json({"error": "Demasiados intentos", "segundos": b.segundos}, 429,
+                                      extra=[("Retry-After", str(b.segundos))])
+                if r is None:
+                    return self._json({"error": "Usuario o contraseña incorrectos"}, 401)
+                return self._json({"usuario": r["usuario"], "debe_cambiar": r["debe_cambiar"]},
+                                  extra=[self._cookie(r["token"], DURACION_SESION)])
+            if url.path == "/api/logout":
+                auth.salir(self._token())
+                return self._json({"ok": True}, extra=[self._cookie("", 0)])
+            sesion = auth.sesion(self._token())
+            if sesion is None:
+                return self._json({"error": "sin sesión"}, 401)
+            if url.path == "/api/contrasena":
+                try:
+                    auth.cambiar(sesion["usuario"], texto("actual"), texto("nueva"), self._token())
+                except ValueError as e:
+                    return self._json({"error": str(e)}, 400)
+                return self._json({"ok": True})
+            return self._json({"error": "no existe"}, 404)
 
     return ThreadingHTTPServer((cfg.host, cfg.port), Manejador)

@@ -21,7 +21,7 @@
       "ip_publica"
     ],
     equipos: ["equipo_nuevo", "equipo_conectado", "equipo_desconectado"],
-    sistema: ["fuente_caida", "fuente_ok", "pausa_monitor", "contenedor_caido", "contenedor_ok"]
+    sistema: ["fuente_caida", "fuente_ok", "pausa_monitor", "contenedor_caido", "contenedor_ok", "acceso_bloqueado"]
   };
 
   let maxId = 0;

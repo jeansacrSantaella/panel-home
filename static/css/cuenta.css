@@ -1,0 +1,471 @@
+/* static/css/cuenta.css - Estilos para pantalla de acceso y gestión de cuenta (Orión) */
+
+/* Configuración de box-sizing acotada a la pantalla de acceso y diálogos */
+.acceso *,
+.dlg-clave * {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ==========================================================================
+   A. Pantalla de entrada (body.acceso, siempre oscura)
+   ========================================================================== */
+
+body.acceso {
+  margin: 0;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  color: #e6edf7;
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background:
+    radial-gradient(1px 1px at 15% 15%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 25% 65%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 35% 25%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 45% 80%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 60% 15%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 70% 50%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 80% 85%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 85% 20%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 92% 60%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 10% 90%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.25), transparent 40%),
+    radial-gradient(circle at 90% 90%, rgba(0, 229, 255, 0.2), transparent 40%),
+    radial-gradient(circle at 50% 40%, #121a2b 0%, #0b0f17 55%, #06080d 100%);
+}
+
+.acceso-caja {
+  width: min(400px, 100%);
+  background: rgba(17, 24, 39, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(90, 168, 255, 0.18);
+  border-radius: 20px;
+  padding: 32px 28px 22px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}
+
+@media (max-width: 420px) {
+  .acceso-caja {
+    padding: 26px 20px 18px;
+  }
+}
+
+.acceso-marca {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 22px;
+}
+
+.acceso-marca img {
+  width: 64px;
+  height: 64px;
+  filter: drop-shadow(0 0 14px rgba(0, 229, 255, 0.45));
+  animation: acceso-flota 6s ease-in-out infinite;
+}
+
+.acceso-marca h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin: 6px 0 0;
+}
+
+.acceso-marca b {
+  background: linear-gradient(90deg, #8B5CF6, #5aa8ff 55%, #00E5FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.acceso-marca span {
+  font-size: 10.5px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #93a1b8;
+}
+
+.acceso-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.acceso-form h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.acceso-form label {
+  font-size: 12.5px;
+  color: #93a1b8;
+  margin-top: 8px;
+}
+
+.acceso-form input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid #26324a;
+  background: #0d1320;
+  color: #e6edf7;
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+}
+
+.acceso-form input:focus {
+  border-color: #5aa8ff;
+  box-shadow: 0 0 0 3px rgba(90, 168, 255, 0.25);
+}
+
+.campo-clave {
+  position: relative;
+}
+
+.campo-clave input {
+  padding-right: 46px;
+}
+
+.ver-clave {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: transparent;
+  color: #93a1b8;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ver-clave:hover {
+  color: #e6edf7;
+}
+
+.ver-clave[aria-pressed="true"] {
+  color: #00E5FF;
+}
+
+.ver-clave svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.fuerza {
+  height: 4px;
+  background: #1b2436;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 6px 0 0;
+}
+
+.fuerza i {
+  display: block;
+  height: 100%;
+  width: 0;
+  transition: width 0.25s ease;
+}
+
+.fuerza i[data-nivel="debil"] {
+  background: #f87171;
+}
+
+.fuerza i[data-nivel="media"] {
+  background: #fbbf24;
+}
+
+.fuerza i[data-nivel="buena"] {
+  background: linear-gradient(90deg, #8B5CF6, #5aa8ff 55%, #00E5FF);
+}
+
+.acceso-nota {
+  font-size: 12.5px;
+  color: #93a1b8;
+  margin: 2px 0;
+}
+
+.acceso-nota b {
+  color: #e6edf7;
+}
+
+.acceso-error {
+  font-size: 13px;
+  color: #fecaca;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin: 8px 0 0;
+}
+
+.acceso-boton {
+  margin-top: 14px;
+  min-height: 46px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, #8B5CF6, #5aa8ff 55%, #00E5FF);
+  color: #06080d;
+  font-size: 15px;
+  font-weight: 650;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 229, 255, 0.18);
+}
+
+.acceso-boton:hover {
+  filter: brightness(1.08);
+}
+
+.acceso-boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+  filter: none;
+}
+
+.acceso-boton:focus-visible {
+  box-shadow: 0 0 0 3px rgba(90, 168, 255, 0.45);
+  outline: none;
+}
+
+.acceso-despues {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: #93a1b8;
+  margin: 12px 0 0;
+  text-decoration: none;
+}
+
+.acceso-despues:hover {
+  text-decoration: underline;
+  color: #00E5FF;
+}
+
+.acceso-pie {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(147, 161, 184, 0.6);
+  margin: 22px 0 0;
+}
+
+@keyframes acceso-flota {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acceso-marca img {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   B. Componentes dentro del panel (utilizan tokens CSS del panel)
+   ========================================================================== */
+
+.cuenta {
+  position: relative;
+}
+
+.menu-cuenta {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 40;
+  min-width: 220px;
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  box-shadow: var(--sombra, 0 12px 32px rgba(0, 0, 0, 0.25));
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-cuenta-usuario {
+  font-size: 12px;
+  color: var(--tenue);
+  padding: 8px 10px 6px;
+  margin: 0 0 4px 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.menu-cuenta-usuario b {
+  color: var(--texto);
+}
+
+.menu-cuenta button {
+  text-align: left;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--texto);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.menu-cuenta button:hover,
+.menu-cuenta button:focus-visible {
+  background: var(--tarjeta-2);
+  outline: none;
+}
+
+.menu-cuenta button:last-child {
+  color: var(--mal);
+}
+
+.aviso-clave {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  max-width: 1440px;
+  margin: 12px 12px 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--alerta) 14%, var(--tarjeta));
+  border: 1px solid color-mix(in srgb, var(--alerta) 45%, var(--borde));
+  font-size: 13.5px;
+}
+
+@media (min-width: 760px) {
+  .aviso-clave {
+    margin: 12px 20px 0;
+  }
+}
+
+@media (min-width: 1480px) {
+  .aviso-clave {
+    margin: 12px auto 0;
+  }
+}
+
+.aviso-clave span {
+  flex: 1 1 260px;
+}
+
+.aviso-clave::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  background: var(--alerta);
+  flex-shrink: 0;
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+}
+
+.dlg-clave {
+  width: min(420px, 94vw);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio, 14px);
+  background: var(--tarjeta);
+  color: var(--texto);
+  padding: 22px;
+}
+
+.dlg-clave::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.dlg-clave form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dlg-clave h2 {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+
+.dlg-clave label {
+  font-size: 12.5px;
+  color: var(--tenue);
+  margin-top: 8px;
+}
+
+.dlg-clave input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--borde);
+  background: var(--tarjeta-2);
+  color: var(--texto);
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+}
+
+.dlg-clave input:focus {
+  border-color: var(--acento);
+}
+
+.dlg-clave .acceso-error {
+  color: var(--mal);
+  background: color-mix(in srgb, var(--mal) 10%, transparent);
+  border-color: color-mix(in srgb, var(--mal) 30%, transparent);
+}
+
+.dlg-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.boton-primario {
+  background: var(--marca-degradado);
+  border-color: transparent;
+  color: #06080d;
+  font-weight: 600;
+}
+
+.aviso-flotante {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 60;
+  background: #0B0F17;
+  color: #e6f9ff;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 759.98px) {
+  .aviso-flotante {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+}

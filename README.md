@@ -45,6 +45,19 @@ docker compose up -d --build
 - Actualizar: `git pull` y `docker compose up -d --build`. Ver la bitácora: `docker logs -f panel-home`.
 - Corre una sola copia del panel con Telegram configurado; si hay dos, cada aviso llega dos veces.
 
+## Acceso y seguridad
+
+- La primera vez se crea la cuenta **admin / 1234**. Al entrar te pide cambiarla (mínimo 8 caracteres);
+  si eliges "Más tarde", un aviso queda fijo en el panel hasta que la cambies (menú 👤 → Cambiar contraseña).
+- Contraseñas con PBKDF2-SHA256 (200 000 iteraciones y sal); la sesión es una cookie `HttpOnly` y
+  `SameSite=Strict` de 30 días y en la base solo se guarda el hash del token.
+- Todo pide sesión (página, API y fotos) salvo `/login` y `/static/`. Tras 5 intentos fallidos desde una IP
+  se bloquea 1 min (se duplica hasta 15 min) y queda en la línea de tiempo.
+- ¿Olvidaste la contraseña? `docker exec panel-home python main.py --restablecer-admin` la regresa a 1234.
+- Importante: protege **panel-home**, no a los otros servicios. gestorCamaras (`:8080`, tiene `ADMIN_PIN`),
+  go2rtc (`:1984`) y NetWatch (`:8765`) siguen abiertos en la red local. Y es HTTP sin cifrar: para entrar
+  desde fuera de casa usa una VPN como Tailscale, no abras puertos en el módem.
+
 ## Pestañas
 
 | Pestaña | Qué hay |

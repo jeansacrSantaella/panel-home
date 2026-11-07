@@ -21,6 +21,13 @@ from panel import fuentes, web
 from panel.web import capturas, crear_servidor, estado_panel
 
 
+
+class SesionAbierta:
+    """Auth falsa con sesión siempre válida: estas pruebas revisan las rutas; la seguridad va en test_auth.py."""
+
+    def sesion(self, token):
+        return {"usuario": "admin", "debe_cambiar": False}
+
 class TestCapturas(unittest.TestCase):
     """Casos de prueba para capturas remotas, locales, API de pestañas y avisos."""
 
@@ -161,7 +168,7 @@ class TestCapturas(unittest.TestCase):
         cfg = Config(host="127.0.0.1", port=0)
         recolector = RecolectorFalso()
 
-        self.server = crear_servidor(cfg, db, recolector)
+        self.server = crear_servidor(cfg, db, recolector, SesionAbierta())
         port = self.server.server_address[1]
         self.server_thread = threading.Thread(target=self.server.serve_forever)
         self.server_thread.daemon = True

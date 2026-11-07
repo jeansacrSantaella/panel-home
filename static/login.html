@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0B0F17">
+  <meta name="robots" content="noindex">
+  <title>Entrar · OrionHome</title>
+  <link rel="icon" type="image/svg+xml" href="/static/img/orionhome.svg">
+  <link rel="stylesheet" href="/static/css/cuenta.css">
+</head>
+<body class="acceso">
+  <main class="acceso-caja">
+    <div class="acceso-marca">
+      <img src="/static/img/orion-marca.svg" alt="">
+      <h1>Orion<b>Home</b></h1>
+      <span>Santaella</span>
+    </div>
+
+    <!-- Paso 1: entrar -->
+    <form id="form-entrar" class="acceso-form" novalidate>
+      <h2>Entrar al panel</h2>
+      <label for="usuario">Usuario</label>
+      <input id="usuario" name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      <label for="contrasena">Contraseña</label>
+      <div class="campo-clave">
+        <input id="contrasena" name="contrasena" type="password" autocomplete="current-password" required>
+        <button type="button" class="ver-clave" data-para="contrasena" aria-label="Mostrar contraseña" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <p id="error-entrar" class="acceso-error" role="alert" hidden></p>
+      <button id="btn-entrar" class="acceso-boton" type="submit">Entrar</button>
+    </form>
+
+    <!-- Paso 2: cambiar la contraseña de fábrica -->
+    <form id="form-cambiar" class="acceso-form" novalidate hidden>
+      <h2>Cambia la contraseña de fábrica</h2>
+      <p class="acceso-nota">Entraste con la contraseña inicial <b>1234</b>. Elige una nueva de al menos 8 caracteres
+        para proteger tus cámaras y tu red.</p>
+      <div id="campo-actual">
+        <label for="actual">Contraseña actual</label>
+        <input id="actual" type="password" autocomplete="current-password">
+      </div>
+      <label for="nueva">Nueva contraseña</label>
+      <div class="campo-clave">
+        <input id="nueva" type="password" autocomplete="new-password" minlength="8" required aria-describedby="fuerza-texto">
+        <button type="button" class="ver-clave" data-para="nueva" aria-label="Mostrar contraseña" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <div class="fuerza" aria-hidden="true"><i id="fuerza-barra"></i></div>
+      <p id="fuerza-texto" class="acceso-nota"></p>
+      <label for="confirmar">Confirmar la nueva contraseña</label>
+      <input id="confirmar" type="password" autocomplete="new-password" required>
+      <p id="error-cambiar" class="acceso-error" role="alert" hidden></p>
+      <button class="acceso-boton" type="submit">Guardar y entrar</button>
+      <a href="/" id="btn-despues" class="acceso-despues">Más tarde (te lo seguiré recordando)</a>
+    </form>
+
+    <p class="acceso-pie">familia OrionGit · Santaella</p>
+  </main>
+  <script src="/static/js/login.js"></script>
+</body>
+</html>
