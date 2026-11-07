@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="190 230 680 560">
+  <!-- Marca PleyadesHome (sin fondo): las Pléyades con Alcyone como la casa. Familia Astreo · Santaella -->
+  <defs>
+    <linearGradient id="r" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#8B5CF6"/><stop offset=".55" stop-color="#5aa8ff"/><stop offset="1" stop-color="#00E5FF"/></linearGradient>
+    <radialGradient id="h" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".15" stop-color="#9ff6ff" stop-opacity=".95"/><stop offset=".4" stop-color="#00E5FF" stop-opacity=".4"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></radialGradient>
+  </defs>
+  <g fill="none" stroke="url(#r)" stroke-width="26" stroke-linecap="round">
+    <path d="M251 545 L 246 586"/>
+    <path d="M246 586 L 438 607"/>
+    <path d="M438 607 L 542 737"/>
+    <path d="M542 737 L 724 565"/>
+    <path d="M724 565 L 656 451"/>
+    <path d="M656 451 L 438 607"/>
+    <path d="M656 451 L 724 373"/>
+    <path d="M724 373 L 698 285"/>
+    <path d="M724 565 L 802 503"/>
+  </g>
+  <g fill="#f4fdff" stroke="#00E5FF" stroke-width="8">
+    <circle cx="246" cy="586" r="33"/>
+    <circle cx="251" cy="545" r="20"/>
+    <circle cx="542" cy="737" r="26"/>
+    <circle cx="724" cy="565" r="31"/>
+    <circle cx="656" cy="451" r="29"/>
+    <circle cx="724" cy="373" r="24"/>
+    <circle cx="802" cy="503" r="18"/>
+    <circle cx="698" cy="285" r="18"/>
+  </g>
+  <g transform="translate(438 607)">
+    <circle r="125" fill="url(#h)"/>
+    <path d="M0 -112 C 9 -29, 29 -9, 112 0 C 29 9, 9 29, 0 112 C -9 29, -29 9, -112 0 C -29 -9, -9 -29, 0 -112 Z" fill="#eaffff"/>
+    <circle r="15" fill="#fff"/>
+  </g>
+</svg>

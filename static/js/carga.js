@@ -26,7 +26,7 @@
   };
 
   // Control de pantalla de inicio (splash)
-  // Tarjetas del Resumen: muestran el cinturón de Orión hasta que llegan los primeros datos
+  // Tarjetas del Resumen: muestran tres estrellas de las Pléyades hasta que llegan los primeros datos
   document.addEventListener("panel", function () {
     var resumen = document.getElementById("pestana-resumen");
     if (resumen) resumen.classList.remove("esperando");

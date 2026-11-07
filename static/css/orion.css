@@ -514,7 +514,7 @@ body.iniciando {
   }
 }
 
-/* Tarjetas en espera: solo el título y el cinturón de Orión pulsando (carga.js quita .esperando al llegar los datos) */
+/* Tarjetas en espera: solo el título y tres estrellas de las Pléyades pulsando (carga.js quita .esperando al llegar los datos) */
 .rejilla.esperando .tarjeta > :not(h2) { display: none !important; }
 .rejilla.esperando .tarjeta::after {
   content: ""; display: block; width: 8px; height: 8px; margin: 26px auto 22px; border-radius: 50%;

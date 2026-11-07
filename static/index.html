@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#0B0F17">
-  <title>OrionHome · Casa</title>
-  <link rel="icon" type="image/svg+xml" href="/static/img/orionhome.svg">
-  <link rel="apple-touch-icon" href="/static/img/orionhome.svg">
+  <title>PleyadesHome · Casa</title>
+  <link rel="icon" type="image/svg+xml" href="/static/img/pleyades.svg">
+  <link rel="apple-touch-icon" href="/static/img/pleyades.svg">
   <script>
     // Tema guardado (claro/oscuro) antes de pintar, para que no parpadee
     try {
@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/static/css/cuenta.css">
 </head>
 <body>
-  <!-- Pantalla de inicio: Orión se dibuja mientras llegan los datos (estilos en orion.css, lógica en carga.js) -->
+  <!-- Pantalla de inicio: las Pléyades se dibujan mientras llegan los datos (estilos en orion.css, lógica en carga.js) -->
   <div id="splash" class="splash" aria-hidden="true">
     <svg class="splash-arte" viewBox="100 100 824 824" width="230" height="230">
       <defs>
@@ -29,14 +29,19 @@
         <radialGradient id="sp-halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".3" stop-color="#7cf0ff" stop-opacity=".55"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></radialGradient>
         <linearGradient id="sp-rama" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#8B5CF6"/><stop offset=".55" stop-color="#5aa8ff"/><stop offset="1" stop-color="#00E5FF"/></linearGradient>
       </defs>
-      <g class="splash-ramas" fill="none" stroke="url(#sp-rama)" stroke-width="7" stroke-linecap="round">
-        <path class="splash-linea" pathLength="1" d="M318 292 Q 371 426, 397 568" style="--i:0"/>
-        <path class="splash-linea" pathLength="1" d="M566 310 Q 514 398, 483 496" style="--i:1"/>
-        <path class="splash-linea" pathLength="1" d="M397 568 L 440 532 L 483 496" style="--i:2"/>
-        <path class="splash-linea" pathLength="1" d="M397 568 Q 344 664, 316 770" style="--i:3"/>
-        <path class="splash-linea" pathLength="1" d="M483 496 Q 538 620, 570 752" style="--i:4"/>
-        <path class="splash-linea" pathLength="1" d="M318 292 Q 443 291, 566 310" style="--i:5"/>
-        <path class="splash-linea" pathLength="1" d="M316 770 Q 444 771, 570 752" style="--i:6"/>
+      <!-- nebulosa de reflexión azul, típica de las Pléyades -->
+      <radialGradient id="sp-nebulosa" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#5aa8ff" stop-opacity=".22"/><stop offset=".55" stop-color="#00E5FF" stop-opacity=".07"/><stop offset="1" stop-color="#00E5FF" stop-opacity="0"/></radialGradient>
+      <ellipse cx="520" cy="530" rx="380" ry="300" fill="url(#sp-nebulosa)"/>
+      <g class="splash-ramas" fill="none" stroke="url(#sp-rama)" stroke-width="6" stroke-linecap="round">
+        <path class="splash-linea" pathLength="1" d="M251 545 L 246 586" style="--i:0"/>
+        <path class="splash-linea" pathLength="1" d="M246 586 L 438 607" style="--i:1"/>
+        <path class="splash-linea" pathLength="1" d="M438 607 L 542 737" style="--i:2"/>
+        <path class="splash-linea" pathLength="1" d="M542 737 L 724 565" style="--i:3"/>
+        <path class="splash-linea" pathLength="1" d="M724 565 L 656 451" style="--i:4"/>
+        <path class="splash-linea" pathLength="1" d="M656 451 L 438 607" style="--i:5"/>
+        <path class="splash-linea" pathLength="1" d="M656 451 L 724 373" style="--i:6"/>
+        <path class="splash-linea" pathLength="1" d="M724 373 L 698 285" style="--i:7"/>
+        <path class="splash-linea" pathLength="1" d="M724 565 L 802 503" style="--i:8"/>
       </g>
       <g fill="#fff">
         <circle class="splash-polvo" cx="210" cy="250" r="2.2" style="--i:0;--o:0.7"/>
@@ -51,27 +56,28 @@
         <circle class="splash-polvo" cx="760" cy="820" r="2" style="--i:9;--o:0.55"/>
       </g>
       <g>
-        <g class="splash-estrella" style="--i:0"><circle cx="318" cy="292" r="43" fill="url(#sp-halo)"/><circle cx="318" cy="292" r="12" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
-        <g class="splash-estrella" style="--i:1"><circle cx="566" cy="310" r="43" fill="url(#sp-halo)"/><circle cx="566" cy="310" r="12" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
-        <g class="splash-estrella" style="--i:2"><circle cx="316" cy="770" r="43" fill="url(#sp-halo)"/><circle cx="316" cy="770" r="12" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
-        <g class="splash-estrella" style="--i:3"><circle cx="570" cy="752" r="43" fill="url(#sp-halo)"/><circle cx="570" cy="752" r="12" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
+        <g class="splash-estrella" style="--i:0"><circle cx="251" cy="545" r="31" fill="url(#sp-halo)"/><circle cx="251" cy="545" r="9" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>  <!-- Pleione -->
+        <g class="splash-estrella" style="--i:1"><circle cx="542" cy="737" r="41" fill="url(#sp-halo)"/><circle cx="542" cy="737" r="12" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>  <!-- Merope -->
+        <g class="splash-estrella" style="--i:2"><circle cx="724" cy="373" r="37" fill="url(#sp-halo)"/><circle cx="724" cy="373" r="11" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>  <!-- Taygeta -->
+        <g class="splash-estrella" style="--i:3"><circle cx="802" cy="503" r="27" fill="url(#sp-halo)"/><circle cx="802" cy="503" r="8" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>  <!-- Celaeno -->
+        <g class="splash-estrella" style="--i:4"><circle cx="698" cy="285" r="24" fill="url(#sp-halo)"/><circle cx="698" cy="285" r="7" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>  <!-- Asterope -->
       </g>
       <g>
-        <g class="splash-cinturon" style="--i:0"><circle cx="397" cy="568" r="58" fill="url(#sp-halo)"/><circle cx="397" cy="568" r="15" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
-        <g class="splash-cinturon" style="--i:1"><circle cx="440" cy="532" r="58" fill="url(#sp-halo)"/><circle cx="440" cy="532" r="15" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
-        <g class="splash-cinturon" style="--i:2"><circle cx="483" cy="496" r="58" fill="url(#sp-halo)"/><circle cx="483" cy="496" r="15" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>
+        <g class="splash-cinturon" style="--i:0"><circle cx="246" cy="586" r="54" fill="url(#sp-halo)"/><circle cx="246" cy="586" r="15" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>  <!-- Atlas -->
+        <g class="splash-cinturon" style="--i:1"><circle cx="724" cy="565" r="50" fill="url(#sp-halo)"/><circle cx="724" cy="565" r="14" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>  <!-- Electra -->
+        <g class="splash-cinturon" style="--i:2"><circle cx="656" cy="451" r="47" fill="url(#sp-halo)"/><circle cx="656" cy="451" r="13" fill="#f4fdff" stroke="#00E5FF" stroke-width="3"/></g>  <!-- Maia -->
       </g>
-      <path d="M506 477 L 714 303" fill="none" stroke="#7cf0ff" stroke-opacity=".55" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="1 13"/>
-      <g transform="translate(768 258)">
+      <!-- Alcyone, la más brillante: la casa -->
+      <g transform="translate(438 607)">
         <g class="splash-sirius">
-          <circle r="150" fill="url(#sp-halo-sirius)"/>
-          <path d="M0 -118 C 9 -30, 30 -9, 118 0 C 30 9, 9 30, 0 118 C -9 30, -30 9, -118 0 C -30 -9, -9 -30, 0 -118 Z" fill="#eaffff"/>
-          <path d="M0 -58 C 5 -16, 16 -5, 58 0 C 16 5, 5 16, 0 58 C -5 16, -16 5, -58 0 C -16 -5, -5 -16, 0 -58 Z" fill="#fff" transform="rotate(45)" opacity=".55"/>
-          <circle r="13" fill="#fff"/>
+          <circle r="140" fill="url(#sp-halo-sirius)"/>
+          <path d="M0 -105 C 8 -27, 27 -8, 105 0 C 27 8, 8 27, 0 105 C -8 27, -27 8, -105 0 C -27 -8, -8 -27, 0 -105 Z" fill="#eaffff"/>
+          <path d="M0 -52 C 4 -14, 14 -4, 52 0 C 14 4, 4 14, 0 52 C -4 14, -14 4, -52 0 C -14 -4, -4 -14, 0 -52 Z" fill="#fff" transform="rotate(45)" opacity=".55"/>
+          <circle r="12" fill="#fff"/>
         </g>
       </g>
     </svg>
-    <div class="splash-nombre">Orion<b>Home</b></div>
+    <div class="splash-nombre">Pleyades<b>Home</b></div>
     <div class="splash-firma">Santaella</div>
     <div class="splash-estado" id="splash-estado">Conectando con la casa…</div>
   </div>
@@ -79,8 +85,8 @@
   <div class="cabecera">
     <header class="barra">
       <div class="marca">
-        <img class="marca-logo" src="/static/img/orion-marca.svg" alt="">
-        <div class="marca-texto"><h1>Orion<b>Home</b></h1><span class="marca-firma">Santaella</span></div>
+        <img class="marca-logo" src="/static/img/pleyades-marca.svg" alt="">
+        <div class="marca-texto"><h1>Pleyades<b>Home</b></h1><span class="marca-firma">Santaella</span></div>
       </div>
       <div id="chips" class="chips" aria-live="polite"></div>
       <div class="barra-der">
@@ -205,7 +211,7 @@
     <iframe class="externa-marco" title="NetWatch" data-url="netwatch_url"></iframe>
   </main>
 
-  <footer class="pie-orion"><img src="/static/img/orion-marca.svg" alt=""><span>Orion<b>Home</b> · familia OrionGit · Santaella</span></footer>
+  <footer class="pie-orion"><img src="/static/img/pleyades-marca.svg" alt=""><span>Pleyades<b>Home</b> · familia Astreo · Santaella</span></footer>
 
   <dialog id="dlg-contrasena" class="dlg-clave" aria-labelledby="dlg-clave-titulo">
     <form id="form-clave" novalidate>

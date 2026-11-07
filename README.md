@@ -1,9 +1,10 @@
-# panel-home · OrionHome
+# panel-home · PleyadesHome
 
-<img src="static/img/orionhome.svg" width="96" alt="OrionHome">
+<img src="static/img/pleyades.svg" width="96" alt="PleyadesHome">
 
-**OrionHome** es el panel de la casa, de la familia de [OrionGit](../client-git) (Santaella): misma constelación de Orión
-en reloj de arena, aquí con Sirius como la casa. Al abrirlo, Orión se dibuja mientras llegan los datos; con tema
+**PleyadesHome** es el panel de la casa, de la familia **Astreo** (Santaella), la misma de [OrionGit](../client-git): mismo estilo y paleta,
+con las Pléyades (M45) como imagen y Alcyone, la más brillante, como la casa. Al abrirlo, las Pléyades se dibujan
+mientras llegan los datos; con tema
 automático, claro u oscuro (botón ◐), y pensado para usarse también desde el celular.
 
 Una sola web para la casa: cámaras en vivo, mapa de la red, consumo por dispositivo, caídas de internet

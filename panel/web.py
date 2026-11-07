@@ -82,7 +82,7 @@ def crear_servidor(cfg, db, recolector, auth) -> ThreadingHTTPServer:
     from panel.auth import COOKIE, DURACION_SESION, Bloqueado
 
     class Manejador(BaseHTTPRequestHandler):
-        server_version = "OrionHome"  # no anunciar versión de Python
+        server_version = "PleyadesHome"  # no anunciar versión de Python
         sys_version = ""
 
         def log_message(self, fmt, *args):
