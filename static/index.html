@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="/static/css/panel.css">
   <link rel="stylesheet" href="/static/css/orion.css">
   <link rel="stylesheet" href="/static/css/cuenta.css">
+  <link rel="stylesheet" href="/static/css/acerca.css">
 </head>
 <body>
   <!-- Pantalla de inicio: las Pléyades se dibujan mientras llegan los datos (estilos en orion.css, lógica en carga.js) -->
@@ -99,6 +100,7 @@
           <div id="menu-cuenta" class="menu-cuenta" role="menu" hidden>
             <p class="menu-cuenta-usuario">Sesión de <b id="cuenta-nombre"></b></p>
             <button type="button" role="menuitem" id="accion-cambiar">Cambiar contraseña</button>
+            <button type="button" role="menuitem" id="accion-acerca">Acerca de PleyadesHome</button>
             <button type="button" role="menuitem" id="accion-salir">Cerrar sesión</button>
           </div>
         </div>
@@ -211,7 +213,7 @@
     <iframe class="externa-marco" title="NetWatch" data-url="netwatch_url"></iframe>
   </main>
 
-  <footer class="pie-orion"><img src="/static/img/pleyades-marca.svg" alt=""><span>Pleyades<b>Home</b> · familia Astreo · Santaella</span></footer>
+  <footer class="pie-orion"><img src="/static/img/pleyades-marca.svg" alt=""><span>Pleyades<b>Home</b> · familia Astreo · Santaella</span><button type="button" id="pie-acerca" class="pie-acerca">Acerca de</button></footer>
 
   <dialog id="dlg-contrasena" class="dlg-clave" aria-labelledby="dlg-clave-titulo">
     <form id="form-clave" novalidate>
@@ -231,6 +233,114 @@
   </dialog>
   <div id="aviso-flotante" class="aviso-flotante" role="status" hidden></div>
 
+  <dialog id="dlg-acerca" class="dlg-acerca" aria-labelledby="acerca-titulo">
+    <div class="acerca-cabeza">
+      <div role="tablist" aria-label="Acerca de PleyadesHome" class="acerca-pestanas">
+        <button type="button" role="tab" id="tab-acerca-info" aria-controls="acerca-info" aria-selected="true">Información</button>
+        <button type="button" role="tab" id="tab-acerca-tec" aria-controls="acerca-tec" aria-selected="false" tabindex="-1">Tecnología</button>
+        <button type="button" role="tab" id="tab-acerca-lic" aria-controls="acerca-lic" aria-selected="false" tabindex="-1">Licencias</button>
+      </div>
+      <button type="button" id="acerca-cerrar" class="boton boton-icono" aria-label="Cerrar">✕</button>
+    </div>
+
+    <section id="acerca-info" role="tabpanel" aria-labelledby="tab-acerca-info" class="acerca-panel">
+      <div class="acerca-hero">
+        <img src="/static/img/pleyades.svg" alt="" width="88" height="88">
+        <div>
+          <h2 id="acerca-titulo">Pleyades<b>Home</b></h2>
+          <div class="acerca-familia">familia Astreo · Santaella</div>
+          <div class="acerca-version">v<span id="acerca-version">—</span> · Python <span id="acerca-python">—</span> · SQLite <span id="acerca-sqlite">—</span></div>
+          <p class="acerca-lema">Toda tu casa bajo un mismo cielo.</p>
+        </div>
+      </div>
+      <p>Panel unificado del hogar: cámaras en vivo, capturas del detector, mapa de la red, caídas de internet,
+        calidad por equipo, almacenamiento, estado del servidor y una línea de tiempo con avisos.
+        Su imagen son las <b>Pléyades</b> (M45); Alcyone, la más brillante, es la casa.</p>
+      <h3>Servicios conectados</h3>
+      <ul id="acerca-servicios" class="acerca-servicios"></ul>
+      <h3>Este panel</h3>
+      <dl class="acerca-datos">
+        <div><dt>Encendido</dt><dd id="acerca-encendido">—</dd></div>
+        <div><dt>Eventos guardados</dt><dd id="acerca-eventos">—</dd></div>
+        <div><dt>Base de datos</dt><dd id="acerca-db">—</dd></div>
+        <div><dt>Sistema</dt><dd id="acerca-sistema">—</dd></div>
+      </dl>
+      <p class="acerca-enlaces"><a href="https://github.com/jeansacrSantaella/panel-home" target="_blank" rel="noopener">Repositorio en GitHub ↗</a></p>
+    </section>
+
+    <section id="acerca-tec" role="tabpanel" aria-labelledby="tab-acerca-tec" class="acerca-panel" hidden>
+      <p class="tenue">Todo el servidor usa solo la librería estándar de Python y la interfaz no depende de ningún framework.</p>
+        <h3>Servidor · Python 3, solo librería estándar</h3>
+        <ul class="acerca-tec">
+          <li><b>http.server</b><span>servidor web y API JSON con hilos (ThreadingHTTPServer)</span></li>
+          <li><b>sqlite3</b><span>eventos, consumo, cuentas y sesiones en una base local (modo WAL)</span></li>
+          <li><b>urllib</b><span>consulta NetWatch, gestorCamaras, Telegram y ntfy</span></li>
+          <li><b>threading</b><span>recolector en segundo plano cada 15 s</span></li>
+          <li><b>hashlib · hmac · secrets</b><span>contraseñas PBKDF2-SHA256 y tokens de sesión</span></li>
+          <li><b>http.cookies</b><span>cookie de sesión HttpOnly y SameSite=Strict</span></li>
+          <li><b>socket · http.client</b><span>API de Docker por socket UNIX (solo lectura)</span></li>
+          <li><b>/proc · /sys</b><span>CPU, memoria, carga y temperatura del servidor</span></li>
+          <li><b>subprocess</b><span>lectura opcional de consumo (CONSUMO_CMD)</span></li>
+        </ul>
+        <h3>Interfaz · sin frameworks ni dependencias</h3>
+        <ul class="acerca-tec">
+          <li><b>HTML5</b><span>estructura semántica, &lt;dialog&gt;, pestañas con hash</span></li>
+          <li><b>CSS</b><span>variables, grid, color-mix, backdrop-filter, tema claro/oscuro, movimiento reducido</span></li>
+          <li><b>JavaScript</b><span>vanilla: fetch, async/await, CustomEvent, ResizeObserver, Notification API</span></li>
+          <li><b>SVG</b><span>logos, íconos y la animación de las Pléyades</span></li>
+        </ul>
+        <h3>Gráficas</h3>
+        <ul class="acerca-tec">
+          <li><b>hchart.js</b><span>librería propia solo con HTML y CSS: barras, columnas, cintas, dona, chispa y mapa radial</span></li>
+          <li><b>hchart-calor.js</b><span>mapa de calor de movimiento por día y hora</span></li>
+        </ul>
+        <h3>Servicios conectados</h3>
+        <ul class="acerca-tec">
+          <li><b>NetWatch</b><span>proyecto propio: red, disponibilidad, latencia y equipos</span></li>
+          <li><b>gestorCamaras</b><span>proyecto propio (FastAPI): cámaras, salud, capturas, clips y espacio</span></li>
+          <li><b>Detector</b><span>YOLO (Ultralytics) con PyTorch y OpenCV, dentro de gestorCamaras</span></li>
+          <li><b>go2rtc</b><span>video en vivo de las cámaras por MSE</span></li>
+          <li><b>Docker Engine API</b><span>estado de los contenedores</span></li>
+          <li><b>Telegram Bot API · ntfy</b><span>avisos al celular</span></li>
+        </ul>
+        <h3>Despliegue</h3>
+        <ul class="acerca-tec">
+          <li><b>Docker</b><span>imagen python:3.12-slim con tzdata</span></li>
+          <li><b>Docker Compose</b><span>reinicio automático, healthcheck, volumen data/ y socket de solo lectura</span></li>
+          <li><b>Windows + WSL 2</b><span>servidor Lenovo de la casa</span></li>
+        </ul>
+        <h3>Seguridad</h3>
+        <ul class="acerca-tec">
+          <li><b>PBKDF2-SHA256</b><span>200 000 iteraciones y sal aleatoria por contraseña</span></li>
+          <li><b>Sesiones</b><span>token aleatorio; en la base solo vive su hash</span></li>
+          <li><b>Protecciones</b><span>bloqueo por IP, POST solo JSON del mismo origen, cabeceras nosniff y DENY</span></li>
+        </ul>
+        <h3>Desarrollo</h3>
+        <ul class="acerca-tec">
+          <li><b>unittest</b><span>pruebas automáticas del servidor, eventos, capturas y seguridad</span></li>
+          <li><b>Claude + Gemini</b><span>Claude planea y revisa; Gemini/Gemma ejecutan micro tareas</span></li>
+          <li><b>Bitácora</b><span>cada paso documentado en docs/BITACORA.md</span></li>
+        </ul>
+    </section>
+
+    <section id="acerca-lic" role="tabpanel" aria-labelledby="tab-acerca-lic" class="acerca-panel" hidden>
+      <p class="tenue">PleyadesHome no incluye código de terceros; estas son las licencias de lo que usa a su alrededor.</p>
+      <ul class="acerca-tec">
+          <li><b>PleyadesHome</b><span class="acerca-lic">MIT</span><span>este proyecto · © 2026 Santaella</span></li>
+          <li><b>Python</b><span class="acerca-lic">PSF-2.0</span><span>intérprete y librería estándar</span></li>
+          <li><b>SQLite</b><span class="acerca-lic">Dominio público</span><span>base de datos</span></li>
+          <li><b>go2rtc</b><span class="acerca-lic">MIT</span><span>video en vivo</span></li>
+          <li><b>Docker Engine (Moby)</b><span class="acerca-lic">Apache-2.0</span><span>contenedores</span></li>
+          <li><b>python:3.12-slim</b><span class="acerca-lic">Varias (Debian)</span><span>imagen base</span></li>
+          <li><b>tzdata</b><span class="acerca-lic">Dominio público</span><span>zona horaria</span></li>
+          <li><b>ntfy</b><span class="acerca-lic">Apache-2.0 / GPL-2.0</span><span>avisos push (opcional)</span></li>
+          <li><b>FastAPI · Uvicorn</b><span class="acerca-lic">MIT · BSD-3</span><span>a través de gestorCamaras</span></li>
+          <li><b>Ultralytics YOLO</b><span class="acerca-lic">AGPL-3.0</span><span>a través del detector de gestorCamaras</span></li>
+          <li><b>PyTorch · OpenCV</b><span class="acerca-lic">BSD-3 · Apache-2.0</span><span>a través del detector de gestorCamaras</span></li>
+      </ul>
+    </section>
+  </dialog>
+
   <dialog id="visor-foto" class="visor">
     <div class="visor-marco">
       <button id="visor-ant" class="visor-flecha visor-ant" type="button" aria-label="Foto anterior">‹</button>
@@ -247,6 +357,7 @@
   <script src="/static/js/tema.js"></script>
   <script src="/static/js/carga.js"></script>
   <script src="/static/js/cuenta.js"></script>
+  <script src="/static/js/acerca.js"></script>
   <script src="/static/js/hchart.js"></script>
   <script src="/static/js/hchart-calor.js"></script>
   <script src="/static/js/visor.js"></script>

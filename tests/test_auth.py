@@ -7,6 +7,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from panel import VERSION
 from panel import auth as A
 from panel.config import cargar
 from panel.db import Db
@@ -142,7 +143,13 @@ class TestRutas(unittest.TestCase):
         self.assertEqual(self.pedir("/api/contrasena", {"actual": "1234", "nueva": "Orion-Casa-77"},
                                     galleta=galleta, origen="http://otro.sitio")[0], 403)
         self.assertEqual(self.pedir("/api/contrasena", {"actual": "1234"}, galleta=galleta, tipo="text/plain")[0], 415)
+        st, _, cuerpo = self.pedir("/api/acerca", galleta=galleta)
+        info = json.loads(cuerpo)
+        self.assertEqual(st, 200)
+        self.assertEqual(info["version"], VERSION)
+        self.assertEqual([s["nombre"] for s in info["servicios"]][:3], ["NetWatch", "gestorCamaras", "go2rtc"])
         self.assertEqual(self.pedir("/api/logout", {}, galleta=galleta)[0], 200)
+        self.assertEqual(self.pedir("/api/acerca")[0], 401)
         self.assertEqual(self.pedir("/api/sesion", galleta=galleta)[0], 401)
 
 

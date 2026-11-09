@@ -10,7 +10,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from panel import fuentes
+import platform
+import sqlite3
+
+from panel import VERSION, fuentes
 from panel.config import ROOT
 
 STATIC = ROOT / "static"
@@ -60,6 +63,36 @@ def estado_panel(cfg, db, recolector, ahora=None) -> dict:
         "camaras": camaras, "go2rtc_ok": salud.get("go2rtc") if salud else None,
         "ultimo_movimiento": movs, "espacio": u.get("espacio"),
         "sistema": u.get("sistema"), "calor": db.calor_movimiento(28, ahora), "conteo_24h": db.conteo_por_tipo(ahora - 86400),
+    }
+
+
+INICIO = int(time.time())
+
+
+def acerca(cfg, db, recolector, ahora=None) -> dict:
+    """Datos de la ventana "Acerca de": versión, entorno y estado de cada servicio conectado."""
+    ahora = int(time.time()) if ahora is None else int(ahora)
+    u = recolector.ultimo
+    salud = u.get("salud") or {}
+    sistema = u.get("sistema") or {}
+    try:
+        db_bytes = sum(f.stat().st_size for f in cfg.db_path.parent.glob(cfg.db_path.name + "*"))
+    except OSError:
+        db_bytes = None
+    total = db._q("SELECT COUNT(*) AS n, MIN(ts) AS desde FROM eventos")[0]
+    servicio = lambda nombre, url, ok, detalle="": {"nombre": nombre, "url": url, "ok": ok, "detalle": detalle}  # noqa: E731
+    return {
+        "version": VERSION, "python": platform.python_version(), "sqlite": sqlite3.sqlite_version,
+        "sistema": f"{platform.system()} {platform.machine()}", "inicio": INICIO, "ahora": ahora,
+        "db_bytes": db_bytes, "eventos": total["n"], "eventos_desde": total["desde"],
+        "servicios": [
+            servicio("NetWatch", cfg.netwatch_url, u.get("netwatch") is not None, "red, caídas y equipos"),
+            servicio("gestorCamaras", cfg.camaras_url, u.get("salud") is not None, "cámaras, capturas y clips"),
+            servicio("go2rtc", cfg.go2rtc_url or "(host):1984", salud.get("go2rtc") if salud else None, "video en vivo"),
+            servicio("Docker", cfg.docker_sock or "—", sistema.get("contenedores") is not None, "estado de contenedores"),
+            servicio("Telegram", "api.telegram.org", True if cfg.telegram_activo else None, "avisos"),
+            servicio("ntfy", cfg.ntfy_url or "—", True if cfg.ntfy_url else None, "avisos push"),
+        ],
     }
 
 
@@ -155,6 +188,8 @@ def crear_servidor(cfg, db, recolector, auth) -> ThreadingHTTPServer:
                     return self._archivo(STATIC / "index.html", "no-store")
                 if url.path == "/api/sesion":
                     return self._json(sesion)
+                if url.path == "/api/acerca":
+                    return self._json(acerca(cfg, db, recolector))
                 if url.path == "/api/panel":
                     return self._json(estado_panel(cfg, db, recolector))
                 if url.path == "/api/eventos":
