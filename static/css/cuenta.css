@@ -466,6 +466,6 @@ body.acceso {
 
 @media (max-width: 759.98px) {
   .aviso-flotante {
-    bottom: calc(84px + env(safe-area-inset-bottom));
+    bottom: calc(24px + env(safe-area-inset-bottom));
   }
 }

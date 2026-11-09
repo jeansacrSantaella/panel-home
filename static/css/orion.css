@@ -161,12 +161,15 @@ body {
   bottom: 2px;
 }
 
-@media (max-width: 759px) {
+@media (max-width: 759.98px) {
+  /* en el menú vertical, la marca de la sección activa es una barra a la izquierda */
   .pestana.activa::after {
-    top: 0;
-    bottom: auto;
-    left: 30%;
-    right: 30%;
+    top: 12px;
+    bottom: 12px;
+    left: 0;
+    right: auto;
+    width: 3px;
+    height: auto;
   }
 }
 
@@ -525,3 +528,13 @@ body.iniciando {
 }
 @keyframes orion-espera { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .rejilla.esperando .tarjeta::after { animation: none; opacity: .8; } }
+
+/* Nombre con degradado dentro del menú vertical */
+.menu-cabeza .degradado { background: var(--marca-degradado); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+@media (max-width: 759.98px) {
+  /* En el celular el botón de notificaciones es solo una campana (el texto sigue para lectores de pantalla) */
+  #btn-notif { width: 36px; padding: 0; font-size: 0; justify-content: center; }
+  #btn-notif::before { content: "🔔"; font-size: 16px; }
+  .marca h1 { font-size: 16px; }
+}

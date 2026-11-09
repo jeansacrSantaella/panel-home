@@ -319,38 +319,76 @@ h3 {
     padding: 0 16px;
   }
 
+  /* Celular: menú vertical que entra desde la izquierda (☰ en la cabecera) */
+  .barra {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "menu marca der" "chips chips chips";
+    gap: 8px 10px;
+  }
+  .btn-menu { display: inline-flex; grid-area: menu; }
+  .seccion-actual { display: block; }
+  .marca-firma { display: none; }
+
   .pestanas {
     position: fixed;
-    left: 0;
-    right: 0;
+    top: 0;
     bottom: 0;
-    z-index: 30;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
-    background: color-mix(in srgb, var(--superficie) 92%, transparent);
-    backdrop-filter: blur(12px);
-    border-top: 1px solid var(--borde);
+    left: 0;
+    z-index: 50;
+    width: min(290px, 84vw);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: calc(14px + env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom));
+    background: var(--superficie);
+    border-right: 1px solid var(--borde);
+    box-shadow: 18px 0 48px rgba(0, 0, 0, .35);
+    overflow-y: auto;
+    transform: translateX(-105%);
+    visibility: hidden;
+    transition: transform .25s ease, visibility 0s linear .25s;
   }
+  html.menu-abierto .pestanas {
+    transform: none;
+    visibility: visible;
+    transition: transform .25s ease;
+  }
+  .menu-cabeza { display: flex; }
 
   .pestana {
-    flex-direction: column;
-    gap: 2px;
-    padding: 6px 4px;
-    font-size: 11px;
-    justify-content: center;
-    text-align: center;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 12px 14px;
+    min-height: 48px;
+    font-size: 15px;
+    border-radius: 12px;
   }
+  .pestana .icono { width: 22px; height: 22px; }
 
-  .pestana .icono {
-    width: 22px;
-    height: 22px;
+  .menu-fondo {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    background: rgba(0, 0, 0, .5);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity .25s ease;
   }
-
-  body {
-    padding-bottom: calc(68px + env(safe-area-inset-bottom));
-  }
+  html.menu-abierto .menu-fondo { opacity: 1; }
+  html.menu-abierto, html.menu-abierto body { overflow: hidden; }
 }
+
+/* Botón ☰, título de la sección y cabecera del menú: solo en el celular */
+/* :where() = sin especificidad, así las reglas del celular (más arriba en el archivo) sí los muestran */
+:where(.btn-menu, .seccion-actual, .menu-cabeza) { display: none; }
+.menu-fondo[hidden] { display: none !important; }
+.seccion-actual { font-size: 12px; color: var(--tenue); line-height: 1.2; }
+.menu-cabeza { align-items: center; justify-content: space-between; gap: 10px; padding: 4px 4px 14px; margin-bottom: 6px; border-bottom: 1px solid var(--borde); }
+.menu-cabeza .marca-logo { width: 28px; height: 28px; }
+.menu-cabeza b { font-size: 16px; }
 
 /* 5. Rejilla del Resumen y Tarjetas */
 .rejilla {
@@ -879,7 +917,7 @@ h3 {
 @media (max-width: 759.98px) {
   .externa {
     padding: 8px;
-    height: calc(100dvh - var(--alto-cabecera, 100px) - var(--alto-nav, 68px));
+    height: calc(100dvh - var(--alto-cabecera, 100px));
   }
 }
 
@@ -995,3 +1033,14 @@ h3 {
   .filtros { flex-wrap: wrap; overflow: visible; }
 }
 .captura-pie { font-size: 12.5px; line-height: 1.35; }
+
+/* Tableta: los chips de estado bajan a su propia fila para no aplastarse */
+@media (min-width: 760px) and (max-width: 1199.98px) {
+  .barra { grid-template-columns: auto 1fr; grid-template-areas: "marca der" "chips chips"; }
+  .barra-der { justify-self: end; }
+}
+
+/* Escritorio y tableta: el menú es la barra horizontal; el botón ☰ no aplica (.boton-icono le daba display) */
+@media (min-width: 760px) {
+  .boton.btn-menu { display: none; }
+}
