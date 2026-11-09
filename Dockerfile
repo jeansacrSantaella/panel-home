@@ -11,6 +11,10 @@ ENV PYTHONUNBUFFERED=1 PANEL_HOST=0.0.0.0 PANEL_PORT=8770 PANEL_DB=/data/panel.d
 
 WORKDIR /app
 
+# tinytuya: control local de los focos Tuya
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Copia de código fuente
 COPY main.py .
 COPY panel/ ./panel/

@@ -155,3 +155,17 @@ class Avisador:
 - Públicas: `/login` y `/static/*`. Sin sesión: páginas → 302 a `/login`; `/api/*` → 401.
 - `GET /api/sesion`, `POST /api/login` (429 + `Retry-After` si está bloqueado), `POST /api/logout`, `POST /api/contrasena`.
 - POST: solo `application/json`, ≤ 4 KB y, si hay `Origin`, del mismo host.
+
+## Agregado: luces
+
+- `panel/luces.py` (`Luces`): lee `LUCES_ARCHIVO` (devices.json de `tinytuya wizard`), sondea cada 20 s en un hilo
+  (un hilo por foco) y aplica comandos con un candado por foco. IP: la del archivo o, si falta, por MAC desde NetWatch.
+- `GET /api/luces`, `POST /api/luces/<id>` (`encendida`, `brillo` 1-100, `temperatura` 0-100, `color` #rrggbb),
+  `POST /api/luces/todas` (`encendida`). Eventos `luz_encendida` / `luz_apagada` (no se avisan).
+
+## Agregado: rutinas
+
+- `panel/rutinas.py` (`Rutinas`): tabla `rutinas` (acciones JSON, horario `{hora, dias}` 0 = lunes, `activa`, `ultima`).
+  Hilo cada 20 s: ejecuta las que tocan (ventana de 2 min, `ultima` evita repetir). Ejecuta las acciones en paralelo
+  con `Luces.aplicar` y registra `rutina_ejecutada`.
+- `GET /api/rutinas`, `POST /api/rutinas` (crear/editar), `POST /api/rutinas/<id>/ejecutar|activa|borrar`.

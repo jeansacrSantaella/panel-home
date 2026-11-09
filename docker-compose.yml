@@ -20,6 +20,7 @@ services:
       TZ: America/Mexico_City
       PANEL_HOST: "0.0.0.0"
       PANEL_DB: /data/panel.db
+      LUCES_ARCHIVO: /data/devices.json   # llaves de los focos (docs/LUCES.md); data/ no se sube a git
     logging:
       options:
         max-size: "10m"

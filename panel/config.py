@@ -39,6 +39,7 @@ class Config:
     telegram_token: str = ""
     telegram_chat_id: str = ""
     ntfy_url: str = ""
+    luces_archivo: Path = ROOT / "data" / "devices.json"  # focos Tuya (tinytuya wizard); ver docs/LUCES.md
     docker_sock: str = "/var/run/docker.sock"  # para ver los contenedores; vacío = no consultar
     avisar: FrozenSet[str] = TIPOS_AVISO
 
@@ -86,6 +87,10 @@ def cargar(env: Mapping[str, str] = os.environ) -> Config:
     val = _obtener("CAMARAS_DATA")
     if val:
         kwargs["camaras_data"] = Path(val).expanduser()
+
+    val = _obtener("LUCES_ARCHIVO")
+    if val:
+        kwargs["luces_archivo"] = Path(val).expanduser()
 
     if "DOCKER_SOCK" in env:
         kwargs["docker_sock"] = _obtener("DOCKER_SOCK")

@@ -21,6 +21,7 @@
       "ip_publica"
     ],
     equipos: ["equipo_nuevo", "equipo_conectado", "equipo_desconectado"],
+    luces: ["luz_encendida", "luz_apagada", "rutina_ejecutada"],
     sistema: ["fuente_caida", "fuente_ok", "pausa_monitor", "contenedor_caido", "contenedor_ok", "acceso_bloqueado"]
   };
 

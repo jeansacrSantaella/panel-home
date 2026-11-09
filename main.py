@@ -12,6 +12,8 @@ from panel.avisos import Avisador
 from panel.config import cargar, leer_env
 from panel.db import Db
 from panel.eventos import Recolector
+from panel.luces import Luces
+from panel.rutinas import Rutinas
 from panel.web import crear_servidor
 
 log = logging.getLogger("panel")
@@ -69,7 +71,38 @@ def main() -> None:
     hilo = threading.Thread(target=bucle, args=(recolector, avisador, cfg.recolectar_cada, parar), daemon=True)
     hilo.start()
 
-    servidor = crear_servidor(cfg, db, recolector, auth)
+    def ips_por_mac() -> dict:
+        nw = recolector.ultimo.get("netwatch") or {}
+        return {(d.get("mac") or "").lower(): d.get("ip") for d in nw.get("devices", []) if d.get("mac")}
+
+    def al_cambiar_luz(luz: dict, encendida: bool) -> None:
+        ahora = int(time.time())
+        db.agregar_evento({"ts": ahora, "fuente": "luces", "tipo": "luz_encendida" if encendida else "luz_apagada",
+                           "nivel": "info" if encendida else "bajo",
+                           "titulo": f"{luz['nombre']}: {'encendida' if encendida else 'apagada'}",
+                           "detalle": f"IP {luz.get('ip') or '—'}",
+                           "clave": f"luz:{luz['id']}:{ahora}:{int(encendida)}", "avisado": 1})
+
+    luces = Luces(cfg.luces_archivo, ips_por_mac=ips_por_mac, al_cambiar=al_cambiar_luz)
+    if luces.configurado:
+        luces.iniciar()
+        log.info("Luces: %d focos Tuya", len(luces.lista()))
+    else:
+        log.info("Luces: %s", luces.motivo)
+
+    def al_ejecutar_rutina(rutina: dict, r: dict, origen: str) -> None:
+        ahora = int(time.time())
+        detalle = f"{r['ok']} de {r['total']} focos" + (f" · no respondió: {', '.join(r['fallaron'])}" if r["fallaron"] else "")
+        db.agregar_evento({"ts": ahora, "fuente": "luces", "tipo": "rutina_ejecutada",
+                           "nivel": "info" if r["ok"] == r["total"] else "medio",
+                           "titulo": f"Rutina «{rutina['nombre']}»" + (" (programada)" if origen == "programada" else ""),
+                           "detalle": detalle, "clave": f"rutina:{rutina['id']}:{ahora}:{origen}", "avisado": 1})
+
+    rutinas = Rutinas(db, luces, al_ejecutar=al_ejecutar_rutina)
+    if luces.configurado:
+        rutinas.iniciar()
+
+    servidor = crear_servidor(cfg, db, recolector, auth, luces, rutinas)
     log.info("NetWatch: %s · Cámaras: %s · go2rtc: %s", cfg.netwatch_url, cfg.camaras_url, cfg.go2rtc_url or "(host de la página):1984")
     log.info("Panel en http://%s:%d", cfg.host, cfg.port)
     try:

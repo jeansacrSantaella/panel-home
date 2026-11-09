@@ -1,0 +1,103 @@
+/* Rutinas de luces: lista dentro de la tarjeta Luces y editor en un diálogo */
+
+.rutinas { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--borde); }
+.rutinas-cabeza { display: flex; justify-content: space-between; align-items: center; margin: 0 0 10px; }
+.rutinas-cabeza h3 { margin: 0; }
+
+.rutinas-lista { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+li.rutina { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--tarjeta-2); }
+li.rutina.ocupada { opacity: .6; pointer-events: none; }
+.rutina-info { flex: 1; min-width: 0; }
+.rutina-info b { display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rutina-info .tenue { font-size: 12px; }
+li.rutina.pausada .rutina-info { opacity: .55; }
+.rutinas-vacio { font-size: 13px; padding: 6px 2px; }
+
+/* ▶ ejecutar */
+.rutina-ejecutar {
+  flex: none; width: 36px; height: 36px; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--marca-degradado); color: #06080d; font-size: 14px;
+}
+.rutina-ejecutar:hover { filter: brightness(1.1); }
+.rutina-ejecutar:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--acento-suave); }
+
+/* interruptor de la programación */
+.rutina-activa {
+  flex: none; position: relative; width: 38px; height: 22px; border-radius: 999px; border: 0; cursor: pointer;
+  background: color-mix(in srgb, var(--tenue) 35%, transparent); transition: background .2s;
+}
+.rutina-activa::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .2s;
+}
+.rutina-activa[aria-checked="true"] { background: var(--marca-degradado); }
+.rutina-activa[aria-checked="true"]::after { transform: translateX(16px); }
+.rutina-activa:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--acento-suave); }
+
+.rutina-editar, .rutina-borrar {
+  flex: none; background: none; border: 0; color: var(--tenue); font: inherit; font-size: 12.5px; padding: 6px 4px; cursor: pointer;
+}
+.rutina-editar:hover { color: var(--texto); }
+.rutina-borrar:hover { color: var(--mal); }
+
+/* editor */
+dialog.dlg-rutina {
+  width: min(560px, 94vw); max-height: 90dvh; overflow: auto; padding: 22px;
+  border: 1px solid var(--borde); border-radius: var(--radio, 14px); background: var(--tarjeta); color: var(--texto);
+}
+dialog.dlg-rutina::backdrop { background: rgba(0, 0, 0, .6); backdrop-filter: blur(3px); }
+.dlg-rutina form { display: flex; flex-direction: column; gap: 6px; }
+.dlg-rutina h2 { display: block; font-size: 17px; margin: 0 0 8px; }
+.dlg-rutina label { font-size: 12.5px; color: var(--tenue); }
+.dlg-rutina #rutina-nombre, .dlg-rutina input[type="time"], .dlg-rutina select {
+  min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--borde);
+  background: var(--tarjeta-2); color: var(--texto); font: inherit; font-size: 14px;
+}
+.dlg-rutina #rutina-nombre:focus, .dlg-rutina input[type="time"]:focus, .dlg-rutina select:focus { outline: none; border-color: var(--acento); }
+
+.rutina-focos-cabeza { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 12px 0 4px; font-size: 12.5px; color: var(--tenue); }
+.rutina-focos { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+li.rutina-foco {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 10px; align-items: center;
+  padding: 10px 12px; border-radius: 10px; background: var(--tarjeta-2);
+}
+.dlg-rutina .rutina-incluir { display: flex; gap: 8px; align-items: center; color: var(--texto); font-size: 14px; }
+.rutina-incluir input { width: 18px; height: 18px; accent-color: var(--acento); }
+.dlg-rutina .rf-accion { min-height: 34px; }
+.rf-ajustes { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.rf-ajustes[hidden] { display: none; }
+.rf-brillo, .rf-temp { flex: 1 1 140px; accent-color: var(--acento); }
+.rf-temp {
+  -webkit-appearance: none; appearance: none; height: 6px; border-radius: 6px;
+  background: linear-gradient(90deg, #ffb46b, #fff4e5, #dff1ff);
+}
+.rf-temp::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2px solid var(--borde); cursor: pointer;
+}
+.rf-temp::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2px solid var(--borde); cursor: pointer; }
+.rf-color { width: 44px; height: 32px; padding: 0; border: 1px solid var(--borde); border-radius: 8px; background: none; cursor: pointer; }
+
+/* horario */
+fieldset.rutina-horario { border: 1px solid var(--borde); border-radius: 12px; padding: 10px 12px; margin: 12px 0 0; }
+.rutina-horario legend { padding: 0 6px; }
+.rutina-horario legend label { display: flex; gap: 8px; align-items: center; color: var(--texto); font-size: 14px; }
+#rutina-horario-campos { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 6px; }
+#rutina-horario-campos[hidden] { display: none; }
+.rutina-dias { display: flex; gap: 6px; flex-wrap: wrap; }
+label.rutina-dia { position: relative; }
+label.rutina-dia input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+label.rutina-dia span {
+  display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%;
+  font-size: 12.5px; font-weight: 600; border: 1px solid var(--borde); color: var(--tenue); background: var(--tarjeta-2);
+}
+label.rutina-dia input:checked + span { background: var(--marca-degradado); color: #06080d; border-color: transparent; }
+label.rutina-dia input:focus-visible + span { box-shadow: 0 0 0 3px var(--acento-suave); }
+
+@media (max-width: 759.98px) {
+  dialog.dlg-rutina { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; border: 0; border-radius: 0; }
+  label.rutina-dia span { width: 38px; height: 38px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rutina-activa, .rutina-activa::after { transition: none; }
+}

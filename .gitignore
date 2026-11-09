@@ -27,3 +27,8 @@ panel.db
 panel.db-*
 __pycache__/
 data/
+# Llaves de los focos Tuya y credenciales del asistente de tinytuya
+devices.json
+tinytuya.json
+snapshot.json
+tuya-raw.json

@@ -20,6 +20,8 @@
   <link rel="stylesheet" href="/static/css/orion.css">
   <link rel="stylesheet" href="/static/css/cuenta.css">
   <link rel="stylesheet" href="/static/css/acerca.css">
+  <link rel="stylesheet" href="/static/css/luces.css">
+  <link rel="stylesheet" href="/static/css/rutinas.css">
 </head>
 <body>
   <!-- Pantalla de inicio: las Pléyades se dibujan mientras llegan los datos (estilos en orion.css, lógica en carga.js) -->
@@ -133,6 +135,23 @@
       <div id="camaras" class="camaras"></div>
     </section>
 
+    <section id="sec-luces" class="tarjeta">
+      <h2>Luces <span id="luces-sub" class="tenue"></span></h2>
+      <p id="luces-aviso" class="aviso" hidden></p>
+      <div class="luces-todas" id="luces-todas" hidden>
+        <button type="button" class="boton" data-todas="1">Encender todo</button>
+        <button type="button" class="boton" data-todas="0">Apagar todo</button>
+      </div>
+      <ul id="luces-lista" class="luces-lista"></ul>
+      <div id="rutinas" class="rutinas" hidden>
+        <div class="rutinas-cabeza">
+          <h3>Rutinas</h3>
+          <button type="button" id="rutina-nueva" class="boton">+ Nueva rutina</button>
+        </div>
+        <ul id="rutinas-lista" class="rutinas-lista"></ul>
+      </div>
+    </section>
+
     <section id="sec-red" class="tarjeta">
       <h2>Mapa de la red <span id="red-cuenta" class="tenue"></span></h2>
       <div id="mapa" class="mapa"></div>
@@ -183,6 +202,7 @@
         <button type="button" class="filtro" data-grupo="camaras">Cámaras</button>
         <button type="button" class="filtro" data-grupo="internet">Internet</button>
         <button type="button" class="filtro" data-grupo="equipos">Equipos</button>
+        <button type="button" class="filtro" data-grupo="luces">Luces</button>
         <button type="button" class="filtro" data-grupo="sistema">Sistema</button>
       </div>
       <ol id="linea-tiempo" class="linea-tiempo"></ol>
@@ -232,6 +252,33 @@
     </form>
   </dialog>
   <div id="aviso-flotante" class="aviso-flotante" role="status" hidden></div>
+
+  <dialog id="dlg-rutina" class="dlg-rutina" aria-labelledby="rutina-titulo">
+    <form id="form-rutina" novalidate>
+      <h2 id="rutina-titulo">Nueva rutina</h2>
+      <input type="hidden" id="rutina-id">
+      <label for="rutina-nombre">Nombre</label>
+      <input id="rutina-nombre" maxlength="40" placeholder="Noche, Trabajar, Cine…" required>
+      <div class="rutina-focos-cabeza">
+        <span>Qué hace cada foco</span>
+        <button type="button" id="rutina-capturar" class="boton">Usar cómo están ahora</button>
+      </div>
+      <ul id="rutina-focos" class="rutina-focos"></ul>
+      <fieldset class="rutina-horario">
+        <legend><label><input type="checkbox" id="rutina-programar"> Programar a una hora</label></legend>
+        <div id="rutina-horario-campos" hidden>
+          <label for="rutina-hora">Hora</label>
+          <input type="time" id="rutina-hora" value="19:00">
+          <div class="rutina-dias" role="group" aria-label="Días de la semana"><label class="rutina-dia"><input type="checkbox" value="0"><span>L</span></label><label class="rutina-dia"><input type="checkbox" value="1"><span>M</span></label><label class="rutina-dia"><input type="checkbox" value="2"><span>M</span></label><label class="rutina-dia"><input type="checkbox" value="3"><span>J</span></label><label class="rutina-dia"><input type="checkbox" value="4"><span>V</span></label><label class="rutina-dia"><input type="checkbox" value="5"><span>S</span></label><label class="rutina-dia"><input type="checkbox" value="6"><span>D</span></label></div>
+        </div>
+      </fieldset>
+      <p id="rutina-error" class="acceso-error" role="alert" hidden></p>
+      <div class="dlg-acciones">
+        <button type="button" id="rutina-cancelar" class="boton">Cancelar</button>
+        <button type="submit" class="boton boton-primario">Guardar</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="dlg-acerca" class="dlg-acerca" aria-labelledby="acerca-titulo">
     <div class="acerca-cabeza">
@@ -358,6 +405,8 @@
   <script src="/static/js/carga.js"></script>
   <script src="/static/js/cuenta.js"></script>
   <script src="/static/js/acerca.js"></script>
+  <script src="/static/js/luces.js"></script>
+  <script src="/static/js/rutinas.js"></script>
   <script src="/static/js/hchart.js"></script>
   <script src="/static/js/hchart-calor.js"></script>
   <script src="/static/js/visor.js"></script>

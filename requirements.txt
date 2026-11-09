@@ -1,0 +1,2 @@
+# Única dependencia externa: control local de los focos Tuya (cifrado del protocolo). Ver docs/LUCES.md
+tinytuya==1.20.0

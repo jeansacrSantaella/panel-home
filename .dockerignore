@@ -10,3 +10,8 @@ docs/
 .DS_Store
 .vscode/
 .idea/
+# Llaves de los focos Tuya y credenciales del asistente de tinytuya
+devices.json
+tinytuya.json
+snapshot.json
+tuya-raw.json

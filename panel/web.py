@@ -11,6 +11,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 import platform
+import re
 import sqlite3
 
 from panel import VERSION, fuentes
@@ -28,18 +29,19 @@ def _entero(valor, defecto=None):
         raise ValueError("parámetro numérico inválido")
 
 
-def estado_panel(cfg, db, recolector, ahora=None) -> dict:
+def estado_panel(cfg, db, recolector, ahora=None, luces=None) -> dict:
     """Une lo último que leyó el recolector con el consumo y los conteos guardados."""
     ahora = int(time.time()) if ahora is None else int(ahora)
     u = recolector.ultimo
     nw = u.get("netwatch")
     consumo = db.consumo(24, ahora)
     equipos = []
+    focos = luces.nombre_por_ip() if luces is not None and luces.configurado else {}
     for d in (nw or {}).get("devices", []):
         mac, ip = (d.get("mac") or "").lower(), d.get("ip") or ""
         equipos.append({
             "mac": mac, "ip": ip, "vendor": d.get("vendor") or "",
-            "nombre": d.get("alias") or d.get("hostname") or d.get("vendor") or ip,
+            "nombre": d.get("alias") or focos.get(ip) or d.get("hostname") or d.get("vendor") or ip,
             "online": bool(d.get("online")), "q": d.get("q"), "drops": d.get("drops", 0),
             "consumo": consumo.get(mac) or consumo.get(ip),
         })
@@ -111,7 +113,7 @@ MAX_CUERPO = 4096
 PUBLICAS = ("/login", "/login.html")  # además de /static/: todo lo demás pide sesión
 
 
-def crear_servidor(cfg, db, recolector, auth) -> ThreadingHTTPServer:
+def crear_servidor(cfg, db, recolector, auth, luces=None, rutinas=None) -> ThreadingHTTPServer:
     from panel.auth import COOKIE, DURACION_SESION, Bloqueado
 
     class Manejador(BaseHTTPRequestHandler):
@@ -191,7 +193,14 @@ def crear_servidor(cfg, db, recolector, auth) -> ThreadingHTTPServer:
                 if url.path == "/api/acerca":
                     return self._json(acerca(cfg, db, recolector))
                 if url.path == "/api/panel":
-                    return self._json(estado_panel(cfg, db, recolector))
+                    return self._json(estado_panel(cfg, db, recolector, luces=luces))
+                if url.path == "/api/luces":
+                    if luces is None or not luces.configurado:
+                        motivo = luces.motivo if luces is not None else "Control de luces desactivado"
+                        return self._json({"configurado": False, "motivo": motivo, "luces": []})
+                    return self._json({"configurado": True, "motivo": None, "luces": luces.lista()})
+                if url.path == "/api/rutinas":
+                    return self._json({"rutinas": rutinas.lista() if rutinas is not None else []})
                 if url.path == "/api/eventos":
                     tipos = [t for t in q.get("tipos", "").split(",") if t]
                     return self._json({"eventos": db.eventos(_entero(q.get("desde")), _entero(q.get("hasta")),
@@ -207,6 +216,52 @@ def crear_servidor(cfg, db, recolector, auth) -> ThreadingHTTPServer:
                 return self._json({"error": "no existe"}, 404)
             except ValueError as e:
                 return self._json({"error": str(e)}, 400)
+
+        def _rutinas_post(self, resto: str, datos: dict):
+            """Crear o editar (/api/rutinas), y /<id>/ejecutar, /<id>/activa, /<id>/borrar."""
+            if rutinas is None or luces is None or not luces.configurado:
+                return self._json({"error": "Las luces no están configuradas"}, 409)
+            try:
+                if resto in ("", "/"):
+                    return self._json(rutinas.guardar(datos))
+                m = re.fullmatch(r"/(\d{1,9})/(ejecutar|activa|borrar)", resto)
+                if not m:
+                    return self._json({"error": "no existe"}, 404)
+                ident, accion = int(m.group(1)), m.group(2)
+                if accion == "ejecutar":
+                    return self._json(rutinas.ejecutar(ident))
+                if accion == "activa":
+                    if not isinstance(datos.get("activa"), bool):
+                        return self._json({"error": "falta 'activa'"}, 400)
+                    return self._json(rutinas.activar(ident, datos["activa"]))
+                rutinas.borrar(ident)
+                return self._json({"ok": True})
+            except KeyError:
+                return self._json({"error": "No existe esa rutina"}, 404)
+            except ValueError as e:
+                return self._json({"error": str(e)}, 400)
+
+        def _luces_post(self, cual: str, datos: dict):
+            """Enciende, apaga o ajusta un foco (o todos) por la red local."""
+            if luces is None or not luces.configurado:
+                return self._json({"error": "Las luces no están configuradas"}, 409)
+            if cual == "todas":
+                if not isinstance(datos.get("encendida"), bool):
+                    return self._json({"error": "falta 'encendida'"}, 400)
+                return self._json({"respondieron": luces.aplicar_todas(datos["encendida"])})
+            if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", cual):
+                return self._json({"error": "foco inválido"}, 400)
+            cambios = {k: datos[k] for k in ("encendida", "brillo", "temperatura", "color") if k in datos}
+            if not cambios:
+                return self._json({"error": "nada que cambiar"}, 400)
+            try:
+                return self._json(luces.aplicar(cual, cambios))
+            except KeyError:
+                return self._json({"error": "No conozco ese foco"}, 404)
+            except ValueError as e:
+                return self._json({"error": str(e)}, 400)
+            except RuntimeError as e:
+                return self._json({"error": str(e)}, 504)
 
         def do_POST(self):
             url = urlparse(self.path)
@@ -246,6 +301,10 @@ def crear_servidor(cfg, db, recolector, auth) -> ThreadingHTTPServer:
             sesion = auth.sesion(self._token())
             if sesion is None:
                 return self._json({"error": "sin sesión"}, 401)
+            if url.path == "/api/rutinas" or url.path.startswith("/api/rutinas/"):
+                return self._rutinas_post(url.path[len("/api/rutinas"):], datos)
+            if url.path.startswith("/api/luces/"):
+                return self._luces_post(url.path[len("/api/luces/"):], datos)
             if url.path == "/api/contrasena":
                 try:
                     auth.cambiar(sesion["usuario"], texto("actual"), texto("nueva"), self._token())

@@ -362,6 +362,7 @@ h3 {
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
     "camaras"
+    "luces"
     "caidas"
     "eventos"
     "espacio"
@@ -379,6 +380,7 @@ h3 {
 #sec-calor   { grid-area: calor; }
 #sec-sistema { grid-area: sistema; }
 #sec-eventos { grid-area: eventos; }
+#sec-luces   { grid-area: luces; }
 
 @media (min-width: 760px) {
   .rejilla {
@@ -387,10 +389,11 @@ h3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-areas:
       "camaras camaras"
-      "caidas red"
+      "luces caidas"
       "eventos eventos"
-      "espacio sistema"
-      "calor consumo";
+      "red sistema"
+      "espacio consumo"
+      "calor calor";
   }
 }
 
@@ -399,9 +402,9 @@ h3 {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(340px, .9fr);
     grid-template-areas:
       "camaras camaras eventos"
-      "caidas red eventos"
-      "espacio sistema eventos"
-      "calor calor consumo";
+      "luces caidas eventos"
+      "red sistema eventos"
+      "espacio calor consumo";
   }
 
   #sec-eventos {

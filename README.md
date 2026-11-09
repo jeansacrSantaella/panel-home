@@ -46,6 +46,23 @@ docker compose up -d --build
 - Actualizar: `git pull` y `docker compose up -d --build`. Ver la bitácora: `docker logs -f panel-home`.
 - Corre una sola copia del panel con Telegram configurado; si hay dos, cada aviso llega dos veces.
 
+## Luces (focos Tuya)
+
+Tarjeta **Luces** en el Resumen: encender/apagar, brillo, blanco cálido-frío y color de cada foco, y "Apagar todo".
+El control es **local** (puerto 6668, sin la nube de Tuya) con [tinytuya](https://github.com/jasonacox/tinytuya),
+la única dependencia externa (`requirements.txt`; la imagen de Docker ya la instala). Las llaves de los focos se
+sacan una sola vez: sigue [docs/LUCES.md](docs/LUCES.md). Los cambios quedan en la línea de tiempo (filtro Luces)
+y los focos aparecen con su nombre en el mapa de la red.
+
+### Rutinas
+
+En la tarjeta Luces: **+ Nueva rutina** guarda qué hace cada foco (encender/apagar, brillo, blanco o color;
+"Usar cómo están ahora" copia el estado actual). Se ejecuta con ▶ o sola a una hora y días de la semana; se puede
+pausar. El panel la dispara aunque nadie tenga la página abierta (revisa cada 20 s, con 2 min de tolerancia y sin
+repetir) y queda en la línea de tiempo. Si un foco no responde, la rutina sigue con los demás y lo indica.
+
+Llaves de los focos sin cuenta de desarrollador: `python3 scripts/llaves_smartlife.py` (ver docs/LUCES.md).
+
 ## Acceso y seguridad
 
 - La primera vez se crea la cuenta **admin / 1234**. Al entrar te pide cambiarla (mínimo 8 caracteres);
