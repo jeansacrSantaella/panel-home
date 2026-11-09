@@ -117,6 +117,7 @@
 
     <nav class="pestanas" aria-label="Secciones">
       <a href="#resumen" class="pestana" data-pestana="resumen"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Resumen</span></a>
+      <a href="#luces" class="pestana" data-pestana="luces"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z"/></svg><span>Luces</span></a>
       <a href="#capturas" class="pestana" data-pestana="capturas"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg><span>Capturas</span></a>
       <a href="#camaras" class="pestana" data-pestana="camaras"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg><span>Cámaras</span></a>
       <a href="#red" class="pestana" data-pestana="red"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 9a15 15 0 0 1 20 0"/><path d="M5.5 12.5a10 10 0 0 1 13 0"/><path d="M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg><span>Red</span></a>
@@ -136,20 +137,9 @@
     </section>
 
     <section id="sec-luces" class="tarjeta">
-      <h2>Luces <span id="luces-sub" class="tenue"></span></h2>
-      <p id="luces-aviso" class="aviso" hidden></p>
-      <div class="luces-todas" id="luces-todas" hidden>
-        <button type="button" class="boton" data-todas="1">Encender todo</button>
-        <button type="button" class="boton" data-todas="0">Apagar todo</button>
-      </div>
-      <ul id="luces-lista" class="luces-lista"></ul>
-      <div id="rutinas" class="rutinas" hidden>
-        <div class="rutinas-cabeza">
-          <h3>Rutinas</h3>
-          <button type="button" id="rutina-nueva" class="boton">+ Nueva rutina</button>
-        </div>
-        <ul id="rutinas-lista" class="rutinas-lista"></ul>
-      </div>
+      <h2>Luces <span id="luces-sub" class="tenue"></span><a href="#luces" class="tarjeta-enlace">Ver todo →</a></h2>
+      <p id="luces-aviso-resumen" class="aviso" hidden></p>
+      <ul id="luces-resumen" class="luces-resumen"></ul>
     </section>
 
     <section id="sec-red" class="tarjeta">
@@ -207,6 +197,29 @@
       </div>
       <ol id="linea-tiempo" class="linea-tiempo"></ol>
       <button id="mas-eventos" class="boton" type="button">Ver más</button>
+    </section>
+  </main>
+
+  <main id="pestana-luces" class="luces-vista" hidden>
+    <section class="tarjeta">
+      <div class="luces-vista-cabeza">
+        <h2>Focos <span id="luces-sub-vista" class="tenue"></span></h2>
+        <div class="luces-todas" id="luces-todas" hidden>
+          <button type="button" class="boton" data-todas="1">Encender todo</button>
+          <button type="button" class="boton" data-todas="0">Apagar todo</button>
+        </div>
+      </div>
+      <p id="luces-aviso" class="aviso" hidden></p>
+      <ul id="luces-lista" class="luces-lista"></ul>
+    </section>
+    <section class="tarjeta">
+      <div id="rutinas" class="rutinas rutinas-vista" hidden>
+        <div class="rutinas-cabeza">
+          <h3>Rutinas</h3>
+          <button type="button" id="rutina-nueva" class="boton">+ Nueva rutina</button>
+        </div>
+        <ul id="rutinas-lista" class="rutinas-lista"></ul>
+      </div>
     </section>
   </main>
 

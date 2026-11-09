@@ -1,7 +1,7 @@
 /* Pestañas: Resumen, Capturas y los otros proyectos incrustados desde su dirección. */
 (function () {
   "use strict";
-  const NOMBRES = ["resumen", "capturas", "camaras", "red"];
+  const NOMBRES = ["resumen", "luces", "capturas", "camaras", "red"];
   let urls = null;  // camaras_url y netwatch_url, vienen de /api/panel
 
   // Los iframes se cargan solo al abrir su pestaña (el panel de cámaras limita las sesiones abiertas)

@@ -288,3 +288,41 @@ input[type="color"].luz-color {
     transition: none;
   }
 }
+
+/* ---- Resumen compacto: punto de color, nombre e interruptor ---- */
+.tarjeta-enlace { margin-left: auto; font-size: 12.5px; font-weight: 500; color: var(--acento); text-decoration: none; }
+.tarjeta-enlace:hover { text-decoration: underline; }
+.luces-resumen { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.luz-mini { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 10px; }
+.luz-mini:nth-child(odd) { background: var(--tarjeta-2); }
+.luz-mini b { flex: 1; min-width: 0; font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.luz-mini.sin-red { opacity: .55; }
+.luz-mini.ocupada { opacity: .6; pointer-events: none; }
+.luz-punto {
+  flex: none; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--luz, color-mix(in srgb, var(--tenue) 35%, transparent));
+}
+.luz-mini:not(.apagada) .luz-punto { box-shadow: 0 0 10px 1px var(--luz, transparent); }
+
+/* ---- Vista Luces: estado de conexión de cada foco ---- */
+li.luz { grid-template-areas: "icono info switch" "conexion conexion conexion" "brillo brillo brillo" "mas mas mas"; }
+.luz-conexion { grid-area: conexion; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12px; }
+.luz-conexion .tenue { overflow-wrap: anywhere; }
+.luz-estado { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.luz-estado::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.luz-estado.ok { color: var(--ok); }
+.luz-estado.mal { color: var(--mal); }
+li.luz.sin-red { opacity: 1; }                     /* en la vista detallada se ve completo para leer el motivo */
+li.luz.sin-red .luz-icono, li.luz.sin-red .luz-info, li.luz.sin-red .luz-brillo { opacity: .55; }
+
+.luces-vista { display: grid; gap: 16px; padding: 16px 20px; max-width: 1440px; margin: 0 auto; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.luces-vista-cabeza { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.luces-vista-cabeza h2 { margin: 0; }
+.luces-vista-cabeza .luces-todas { margin: 0; }
+.rutinas.rutinas-vista { margin-top: 0; padding-top: 0; border-top: 0; }
+@media (min-width: 1100px) {
+  .luces-vista { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+  .luces-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 759.98px) { .luces-vista { padding: 12px; gap: 12px; } }
+.luces-todas .boton { white-space: nowrap; }
