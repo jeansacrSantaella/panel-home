@@ -9,6 +9,10 @@
 .camaras-aviso p { margin: 0; }
 .camaras-aviso a { color: var(--acento); font-weight: 500; }
 .camaras-vacio { margin: 0; padding: 24px; text-align: center; color: var(--tenue); }
+.camaras-externa { display: flex; flex-direction: column; gap: 8px; height: calc(100dvh - var(--alto-cabecera, 110px) - 24px); min-height: 360px; }
+.camaras-externa-barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.camaras-externa .externa-marco { flex: 1; min-height: 0; }
+.camaras-externa .boton[aria-pressed="true"] { border-color: var(--acento); background: var(--acento-suave); }
 .camaras-vista [hidden] { display: none !important; }
 
 .camaras-rejilla { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
@@ -73,3 +77,11 @@ dialog.dlg-camara { width: min(520px, 94vw); max-height: 90dvh; overflow: auto; 
 /* tarjeta de cámaras del Resumen */
 .camara-video { position: relative; aspect-ratio: 16 / 9; background: #000; overflow: hidden; }
 .camara-video .reproductor-nodo { width: 100%; height: 100%; }
+
+/* botón de audio superpuesto al video */
+.reproductor-audio {
+  position: absolute; right: 8px; bottom: 8px; z-index: 2; min-width: 40px; min-height: 40px; border-radius: 999px;
+  border: 1px solid var(--borde); background: rgba(7, 10, 18, .7); color: #fff; font-size: 18px; cursor: pointer;
+}
+.reproductor-audio:hover, .reproductor-audio[aria-pressed="true"] { border-color: var(--acento); }
+.reproductor-audio:focus-visible { outline: none; box-shadow: var(--foco); }

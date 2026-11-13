@@ -318,8 +318,20 @@
       <div class="camaras-acciones">
         <button type="button" class="boton" data-camaras-modo="grande" aria-pressed="true">1 grande</button>
         <button type="button" class="boton" data-camaras-modo="dos" aria-pressed="false">2 columnas</button>
+        <button type="button" id="camaras-grabaciones" class="boton">📁 Grabaciones</button>
         <button type="button" id="camaras-agregar" class="boton">Agregar cámaras</button>
       </div>
+    </section>
+    <!-- Modo transición: gestorCamaras embebido -->
+    <section id="camaras-externa" class="camaras-externa" aria-label="gestorCamaras" hidden>
+      <div class="camaras-externa-barra">
+        <div class="camaras-acciones" role="group" aria-label="Vista de gestorCamaras">
+          <button type="button" class="boton" data-externa="vivo" aria-pressed="true">En vivo</button>
+          <button type="button" class="boton" data-externa="grabaciones" aria-pressed="false">Grabaciones</button>
+        </div>
+        <a id="camaras-externa-abrir" class="externa-enlace" target="_blank" rel="noopener">Abrir en otra ventana ↗</a>
+      </div>
+      <iframe id="camaras-marco" class="externa-marco" title="gestorCamaras" allow="fullscreen"></iframe>
     </section>
     <p id="camaras-error" class="camaras-error" role="alert" hidden></p>
     <section id="camaras-aviso" class="tarjeta camaras-aviso" hidden>

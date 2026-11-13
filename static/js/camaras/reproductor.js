@@ -103,6 +103,23 @@
   function crear(contenedor, camara, opciones) {
     opciones = opciones || {};
     const v = { destruido: false };
+    let conAudio = false, botonAudio = null;
+    // Alterna el audio; el play() va dentro del gesto del usuario
+    function aplicarAudio() {
+      if (botonAudio) {
+        botonAudio.textContent = conAudio ? "🔊" : "🔇";
+        botonAudio.setAttribute("aria-pressed", String(conAudio));
+        botonAudio.setAttribute("aria-label", conAudio ? "Silenciar" : "Activar audio");
+        botonAudio.title = conAudio ? "Silenciar" : "Activar audio";
+      }
+      const vid = contenedor.querySelector("video-stream");
+      if (vid && vid.video) {
+        vid.video.muted = !conAudio;
+        if (conAudio) { const r = vid.video.play(); if (r && r.catch) r.catch(() => {}); }
+      }
+    }
+    v.audio = function (si) { conAudio = !!si; aplicarAudio(); };
+    v.conAudio = () => conAudio;
     v.montar = async function () {
       if (v.destruido) return;
       contenedor.classList.add("reproductor");
@@ -120,9 +137,18 @@
         const proto = location.protocol === "https:" ? "wss:" : "ws:";
         p.src = `${proto}//${location.host}/api/camaras/video?src=${encodeURIComponent(camara.id)}&sesion=${encodeURIComponent(id)}`;
         contenedor.replaceChildren(p);
+        // Siempre arranca en silencio
+        conAudio = false;
+        if (opciones.audio) {
+          botonAudio = document.createElement("button");
+          botonAudio.type = "button";
+          botonAudio.className = "reproductor-audio";
+          botonAudio.addEventListener("click", () => v.audio(!conAudio));
+          contenedor.appendChild(botonAudio);
+        }
         requestAnimationFrame(() => {
-          if (!p.video) return;
-          p.video.muted = true; p.video.controls = false; p.video.playsInline = true;
+          if (p.video) { p.video.muted = true; p.video.controls = false; p.video.playsInline = true; }
+          aplicarAudio();
         });
         if (opciones.alListo) opciones.alListo(id);
       } catch (e) {

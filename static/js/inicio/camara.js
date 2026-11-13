@@ -113,7 +113,7 @@
     if (pestañaVisible) {
       if (!repro || reproId !== camaraActualId) {
         if (repro) repro.destruir();
-        repro = Reproductor.crear(iframeEl, camaraActiva);
+        repro = Reproductor.crear(iframeEl, camaraActiva, { audio: true });
         reproId = camaraActualId;
       }
     } else if (repro) {

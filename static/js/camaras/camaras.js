@@ -21,6 +21,18 @@
     return n;
   }
 
+  // Va a Capturas con la cámara y el día de hoy preseleccionados
+  function irAGrabaciones(cid) {
+    const d = new Date();
+    const hoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    try {
+      if (cid) sessionStorage.setItem("capturas-camara", cid);
+      sessionStorage.setItem("capturas-fecha", hoy);
+    } catch (_) {}
+    location.hash = "#capturas";
+  }
+  $("camaras-grabaciones").addEventListener("click", () => irAGrabaciones(""));
+
   function error(msg) { errorEl.textContent = msg || ""; errorEl.hidden = !msg; }
 
   async function api(ruta, metodo, cuerpo, cab) {
@@ -91,6 +103,7 @@
     };
     const etiquetaZoom = el("span", "cam-zoom-valor", "1×");
     barra.append(
+      boton("📁 Grabaciones", "Grabaciones de " + nombre, () => irAGrabaciones(cid)),
       boton("Foto", "Foto actual de " + nombre, () => window.open(`/api/camaras/${encodeURIComponent(cid)}/foto`, "_blank", "noopener")),
       boton("Pantalla completa", "Pantalla completa de " + nombre, () => {
         (vista.requestFullscreen || vista.webkitRequestFullscreen || (() => {})).call(vista);
@@ -148,7 +161,7 @@
     ["pointerup", "pointercancel"].forEach(ev => vista.addEventListener(ev, () => { arrastrando = false; }));
     vista.addEventListener("dblclick", () => { z = 1; dx = dy = 0; aplicar(); });
 
-    const rep = Reproductor.crear(vista, cam);
+    const rep = Reproductor.crear(vista, cam, { audio: true });
     return { nodo: t, punto, estado, lat, cortes, rep, vista };
   }
 
@@ -191,18 +204,42 @@
   }
 
   // ---------- carga ----------
+  // ---------- modo transición: gestorCamaras embebido ----------
+  const externa = $("camaras-externa"), marco = $("camaras-marco"), abrir = $("camaras-externa-abrir");
+  let vistaExterna = "vivo";
+  function urlExterna() {
+    const base = ((panel && panel.camaras_url) || "").replace(/\/+$/, "");
+    return vistaExterna === "vivo" ? base : base + "/grabaciones.html";
+  }
+  function pintarExterna() {
+    const url = urlExterna();
+    abrir.href = url || "#";
+    document.querySelectorAll("[data-externa]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.externa === vistaExterna)));
+    if (visible && url) { if (marco.getAttribute("src") !== url) marco.src = url; }
+    else marco.removeAttribute("src");  // libera la sesión de video de gestorCamaras
+  }
+  document.querySelectorAll("[data-externa]").forEach(b => b.addEventListener("click", () => { vistaExterna = b.dataset.externa; pintarExterna(); }));
+  function modoExterno(si) {
+    externa.hidden = !si;
+    const cab = raiz.querySelector(".camaras-cab");
+    if (cab) cab.hidden = si;  // en transición la barra de gestorCamaras ya trae todo
+    if (si) { destruirTiles(); camaras = []; avisoEl.hidden = true; $("camaras-vacio").hidden = true; rejilla.hidden = true; }
+    pintarExterna();
+  }
+
   async function cargar() {
     error("");
+    if (panel && panel.camaras_internas === false) { modoExterno(true); return; }
+    if (!externa.hidden) modoExterno(false);
     try {
       camaras = await api("/api/camaras");
       avisoEl.hidden = true;
     } catch (e) {
       destruirTiles(); camaras = [];
       if (e.estado === 409 || e.estado === 404) {
+        if (panel && panel.camaras_url) { modoExterno(true); return; }
         avisoEl.hidden = false;
-        const url = panel && panel.camaras_url;
-        enlaceResp.hidden = !url;
-        if (url) enlaceResp.href = url;
+        enlaceResp.hidden = true;
       } else { error("No se pudieron leer las cámaras: " + e.message); }
     }
     api("/api/camaras/config").then(c => { config = c; }).catch(() => {});
@@ -228,11 +265,12 @@
     const ahora = e.detail === "camaras";
     if (ahora === visible) return;
     visible = ahora;
-    if (visible) iniciar(); else detener();
+    if (visible) iniciar(); else { detener(); pintarExterna(); }
   });
   document.addEventListener("panel", e => {
     panel = e.detail;
-    if (panel && panel.camaras_url && !avisoEl.hidden) { enlaceResp.href = panel.camaras_url; enlaceResp.hidden = false; }
+    if (visible && panel && panel.camaras_url && panel.camaras_internas === false && externa.hidden) modoExterno(true);
+    else if (visible && !externa.hidden) pintarExterna();
   });
 
   // ---------- diseño ----------

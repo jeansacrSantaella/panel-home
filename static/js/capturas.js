@@ -47,6 +47,13 @@
 
     consumirFechaPedida();
 
+    // Cámara pedida desde la pestaña Cámaras; se consume una sola vez
+    let camaraPedida = "";
+    try {
+        camaraPedida = sessionStorage.getItem("capturas-camara") || "";
+        sessionStorage.removeItem("capturas-camara");
+    } catch (_) {}
+
     // Fecha de hoy en hora local (AAAA-MM-DD)
     function hoyLocal() {
         const d = new Date();
@@ -101,7 +108,7 @@
     // Actualiza las opciones del selector de cámaras conservando la selección previa
     function actualizarCamaras() {
         if (!selCamara) return;
-        const previa = selCamara.value;
+        const previa = camaraPedida || selCamara.value;
         const mapa = new Map();
         items.forEach(c => { if (c.camara && !mapa.has(c.camara)) mapa.set(c.camara, c.nombre_camara); });
         while (selCamara.options.length > 1) selCamara.remove(1);
@@ -111,6 +118,7 @@
             selCamara.appendChild(opt);
         });
         selCamara.value = mapa.has(previa) ? previa : "";
+        if (camaraPedida && items.length) camaraPedida = "";
     }
 
     function marcarDias(dias) {

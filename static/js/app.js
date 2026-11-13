@@ -141,7 +141,7 @@
         div.appendChild(vista);
         div.appendChild(pie);
         cont.appendChild(div);
-        div.reproductor = Reproductor.crear(vista, cam);  // solo se crea una vez por cámara
+        div.reproductor = Reproductor.crear(vista, cam, { audio: true });  // solo se crea una vez por cámara
       }
 
       // Actualizar pie

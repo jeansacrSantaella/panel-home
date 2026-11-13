@@ -164,3 +164,11 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | Navegador | `scripts/prueba_navegador.py` + `tests/test_navegador.py`: levanta el panel aislado con datos falsos, inyecta un capturador de errores y abre cada pestaña con Chrome headless; falla si hay errores de JS. 6/6 pestañas OK (verificado que sí detecta un error inyectado). | Agente Claude Sonnet |
 | Web | `tests/test_web_red_clima_hab.py`: 18 pruebas de `/salud`, sonda (404/401/200/413/409), resumen, eventos, CSV, alias, clima y habitaciones. Sin bugs. | Agente Claude Haiku |
 | Prueba | Suite completa 284/284. | Claude |
+
+## 2026-11-13 — Cámaras como antes (zoom, mover, grabaciones, audio)
+
+| Paso | Qué | Quién |
+|---|---|---|
+| Transición | Con `CAMARAS_INTERNAS=0` la pestaña Cámaras vuelve a mostrar gestorCamaras embebido ("En vivo" / "Grabaciones" / "Abrir en otra ventana"), sin autoplay (arranca en silencio, su botón 🔇 Audio activa el sonido); el iframe se quita al salir para liberar la sesión de video. Verificado con las cámaras reales: video, Audio, flechas y zoom. | Agente Sonnet (cortado por límite de uso) + Claude |
+| Interno | Reproductor con botón 🔇/🔊 (arranca en silencio, `play()` en el gesto); "📁 Grabaciones" por cámara → Capturas filtrada por esa cámara y hoy; Inicio y Resumen con audio. | Agente Sonnet |
+| Prueba real | Puente WebSocket contra el go2rtc de la .94: 101 + 825 KB en ~3 s, video H.264 y audio AAC. Suite 284/284; navegador sin errores. | Claude |
