@@ -1,0 +1,122 @@
+/* Pestaña Red: solo lo propio de esta pestaña. Lo genérico (.tarjeta, .tabla, .actividad, .paginas...) está en tablero.css. */
+
+/* Estado: cuerpo en rejilla para los indicadores */
+.red-estado-cuerpo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+/* Escáner: resumen del equipo en rejilla */
+.red-escaner-resultado {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.red-escaner-resultado > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--texto);
+}
+
+/* Alias editable dentro de .tabla: el lápiz aparece con el mouse o el foco */
+.red-alias {
+  white-space: nowrap;
+}
+.red-alias-lapiz {
+  opacity: 0;
+  margin-left: 4px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--tenue);
+  cursor: pointer;
+  transition: opacity .15s ease;
+}
+.red-alias:hover .red-alias-lapiz,
+.red-alias:focus-within .red-alias-lapiz,
+.red-alias-lapiz:focus-visible {
+  opacity: 1;
+}
+.red-alias-lapiz:hover {
+  color: var(--texto);
+}
+.red-alias-lapiz:focus-visible,
+.red-alias-input:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+.red-alias-input {
+  width: min(100%, 180px);
+  padding: 4px 8px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--tarjeta);
+  color: var(--texto);
+  font: inherit;
+}
+/* En pantallas táctiles no hay mouse: el lápiz se ve siempre */
+@media (hover: none) {
+  .red-alias-lapiz {
+    opacity: .7;
+  }
+}
+
+/* Gráfica de velocidad: alto mínimo para que las líneas se lean */
+#red-velocidad-grafica {
+  width: 100%;
+  min-height: 240px;
+}
+
+/* Celular: nada desborda horizontalmente; las tablas se desplazan dentro de su caja */
+@media (max-width: 759px) {
+  .red-vista .tarjeta {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .red-barra {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .red-barra > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .red-tabla-envoltura {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .red-escaner-resultado {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #red-velocidad-grafica svg,
+  #red-velocidad-grafica canvas,
+  #red-velocidad-grafica img {
+    max-width: 100%;
+  }
+}
+
+/* Estado: IP pública tras el texto de la sonda */
+.red-estado-ip { white-space: nowrap; }
+.red-estado-cuerpo { display: flex; flex-direction: column; gap: 16px; }
+.red-calidad-progreso { min-width: 0; width: 100%; }
+
+/* Cabeza de tarjeta: título arriba, controles debajo a todo lo ancho en celular */
+.red-cabeza > * { min-width: 0; }
+.red-vista, .red-vista > .tarjeta { min-width: 0; max-width: 100%; }
+@media (max-width: 759.98px) {
+  .red-cabeza { flex-direction: column; align-items: stretch; }
+  .red-cabeza .red-barra, .red-cabeza .boton { width: 100%; }
+  .red-cabeza .red-barra > * { flex: 1 1 140px; }
+  .red-cabeza .red-barra label { flex: 1 1 140px; }
+  .red-cabeza .red-barra label input { flex: 1; width: 100%; }
+  .red-estado-cuerpo, .red-escaner-resultado { min-width: 0; }
+  .red-estado-cuerpo .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Tabla de equipos: datos en una línea (se desplaza dentro de su caja); solo el nombre puede partirse */
+#red-equipos-tabla .tabla td { white-space: nowrap; }
+#red-equipos-tabla .tabla td:nth-child(2) { white-space: normal; min-width: 180px; }

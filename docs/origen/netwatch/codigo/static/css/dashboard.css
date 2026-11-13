@@ -1,0 +1,486 @@
+/* Define colores base y tema oscuro. */
+:root {
+  --bg: #edf0ee;
+  --panel: #f8faf9;
+  --ink: #17262b;
+  --muted: #5e6f73;
+  --line: #cbd5d2;
+  --up: #2f7d5b;
+  --warn: #c58a1b;
+  --down: #b3402f;
+  --none: #d9dfdc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #10191c;
+    --panel: #17242a;
+    --ink: #e3ebe9;
+    --muted: #8fa2a6;
+    --line: #2a3b41;
+    --up: #4aa57e;
+    --warn: #d9a232;
+    --down: #d9604d;
+    --none: #24343a;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #10191c;
+  --panel: #17242a;
+  --ink: #e3ebe9;
+  --muted: #8fa2a6;
+  --line: #2a3b41;
+  --up: #4aa57e;
+  --warn: #d9a232;
+  --down: #d9604d;
+  --none: #24343a;
+}
+
+/* Define la base visual y la estructura de las tarjetas. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.5 "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+
+main {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 28px 18px 60px;
+}
+
+h1 {
+  font-size: 28px;
+  margin: 0 0 2px;
+  letter-spacing: -.01em;
+}
+
+h2 {
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+
+.sub {
+  color: var(--muted);
+  margin: 0 0 22px;
+}
+
+section {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 16px 18px;
+  min-width: 0;
+}
+
+section.is-expanded {
+  position: fixed;
+  inset: 12px;
+  z-index: 1000;
+  overflow: auto;
+  margin: 0;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 35%);
+}
+
+body.widget-expanded {
+  overflow: hidden;
+}
+
+/* Ajusta las columnas al ancho disponible y conserva el orden del HTML. */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 430px), 1fr));
+  gap: 16px;
+}
+
+.dashboard-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.layout-hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.tool-button,
+.expand-widget,
+.drag-handle {
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 5px 9px;
+}
+
+.tool-button,
+.expand-widget {
+  cursor: pointer;
+}
+
+/* Ajusta los iconos de la barra superior. */
+.export,
+#theme-toggle,
+#reset-layout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+svg.icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Muestra la luna en tema claro y el sol en tema oscuro. */
+#theme-toggle .icon-sun,
+#theme-toggle[aria-pressed="true"] .icon-moon {
+  display: none;
+}
+
+#theme-toggle[aria-pressed="true"] .icon-sun {
+  display: block;
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.widget-header h2 {
+  margin: 0;
+}
+
+.widget-controls {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.drag-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.dragging {
+  opacity: .45;
+}
+
+/* Estiliza las acciones del encabezado y los valores técnicos. */
+.mono {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.export {
+  display: inline-block;
+  margin: 0;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.export:hover {
+  border-color: var(--muted);
+}
+
+.export:focus-visible,
+.net:focus-visible,
+.page-button:focus-visible,
+.page-size:focus-visible,
+.tool-button:focus-visible,
+.expand-widget:focus-visible,
+.drag-handle:focus-visible,
+.event-filters input:focus-visible,
+.event-filters select:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Divide la disponibilidad en celdas de diez minutos. */
+.ribbon-row {
+  display: grid;
+  grid-template-columns: 96px 1fr 70px;
+  gap: 12px;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.ribbon {
+  display: flex;
+  gap: 1px;
+  height: 26px;
+}
+
+.ribbon i {
+  flex: 1;
+  background: var(--none);
+  border-radius: 1px;
+}
+
+.ribbon i.u {
+  background: var(--up);
+}
+
+.ribbon i.w {
+  background: var(--warn);
+}
+
+.ribbon i.d {
+  background: var(--down);
+}
+
+.axis {
+  display: grid;
+  grid-template-columns: 96px 1fr 70px;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.axis div:nth-child(2) {
+  display: flex;
+  justify-content: space-between;
+}
+
+.pct {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Estiliza las gráficas y sus leyendas. */
+svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.legend b {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.empty {
+  color: var(--muted);
+}
+
+/* Estiliza las tablas de calidad y equipos. */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 4px 8px 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+td {
+  padding: 6px 8px 6px 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+.wrap {
+  overflow-x: auto;
+}
+
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 7px;
+  background: var(--none);
+}
+
+.dot.on {
+  background: var(--up);
+}
+
+.name {
+  cursor: pointer;
+  border-bottom: 1px dotted var(--muted);
+}
+
+.tag {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.net {
+  font: inherit;
+  font-size: 13px;
+  padding: 2px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.net.none {
+  color: var(--muted);
+  border-style: dashed;
+}
+
+/* Comparte estos controles entre las tablas de equipos y eventos. */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.page-size,
+.page-button,
+.event-filters input,
+.event-filters select {
+  font: inherit;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.page-button {
+  cursor: pointer;
+}
+
+.page-button:disabled {
+  cursor: default;
+  opacity: .5;
+}
+
+.page-info {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Acota el historial completo con estos filtros. */
+.event-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.event-filters input,
+.event-filters select {
+  min-width: 0;
+  color: var(--ink);
+}
+
+.event-kind {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Colorea las caídas en rojo y las recuperaciones en verde. */
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+li:last-child {
+  border-bottom: 0;
+}
+
+li time {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+li.bad span {
+  color: var(--down);
+}
+
+li.good span {
+  color: var(--up);
+}
+
+@media (max-width: 600px) {
+  section.is-expanded {
+    inset: 6px;
+    padding: 12px;
+  }
+}
+
+/* Estiliza el resultado del escáner. */
+#scan-result h3 {
+  font-size: 14px;
+  margin: 14px 0 6px;
+}
+
+#scan-result details {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+#scan-result th {
+  white-space: nowrap;
+}

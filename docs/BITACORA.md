@@ -115,3 +115,15 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | W1 | `sonda/medir.py` para Windows en español/inglés: ping solo con `TTL=` (TTL expirado = fallo), `tiempo<1m`, decodificación OEM/cp850, `arp -a` con varias interfaces (vEthernet), `route print` con la ruta de menor métrica, IP local evitando adaptadores virtuales. 18 pruebas con salidas de ejemplo; verificado que en macOS sigue midiendo bien. | Agente Claude Sonnet |
 | W2 | `sonda/__main__.py`: lee el `.env` del repo, panel por defecto `http://127.0.0.1:8770`, `--log` con rotación (con `pythonw` es la única salida). Arreglos: sin consola no truena, fecha en el log, `force=True`. Pruebas (8). | Gemini 3.5 flash-lite (código) + Claude (arreglos) + agente Haiku (pruebas, Gemini no las escribió) |
 | W3 | `scripts/windows/instalar-sonda.ps1` (tarea programada "PleyadesHome Sonda": SYSTEM, al iniciar +1 min, reinicio cada minuto), `desinstalar-sonda.ps1`, `sonda.bat`, guía `docs/SONDA_WINDOWS.md`. Sin probar en Windows real. | Agente Claude Haiku |
+
+## 2026-11-13 — Diseño de tablero (referencia del usuario, colores Astreo) y pestaña Red propia
+
+| Paso | Qué | Quién |
+|---|---|---|
+| Diseño | `docs/DISENO.md`: estructura (lateral, ruta, buscador), clases genéricas y contrato de gráficas `HChart.anillo/progreso/bloques/area/anillos`. Memoria `diseno-tablero`. | Claude |
+| D1 | `static/css/tablero.css` + cabecera de `index.html` + `menu.js`: lateral fija 232 px (íconos en 760–1023, ☰ la contrae), grupo SERVICIOS con puntos de estado, ruta "PANEL / SECCIÓN", buscador global → Red, campana y avatar. | Agente Claude Sonnet |
+| D2 | `static/js/hchart-tablero.js` + `static/demo-tablero.html`. | Gemini (en corrección: anillos desbordan, área rota) |
+| Red | `/api/red/resumen`; `static/js/red/nucleo.js` (Claude), `estado.js` + `velocidad.js` (Gemini flash-lite vía agente Haiku), `equipos.js` (Gemini flash-lite; arreglos de Claude: doble guardado del alias, datos en `detail.resumen`, clases), `escaner.js` (Gemini 3 flash preview), `eventos.js` + `red.css` (agente Haiku). Se quitó el iframe de NetWatch. | varios |
+| Revisión | Capturas con Chrome headless (panel + sonda real) en escritorio, tableta y celular para revisar el diseño. | Claude |
+| Arreglos | Gráficas: anillos dentro de su caja, área con relleno y línea continua (clip-path), bloques/progreso con degradado continuo (agente Sonnet, verificado con capturas). CSS: campos y selectores del tablero, rejilla de KPIs, nada desborda en celular, chips en la barra (agente Sonnet). Claude: equipos.js leía `detail` en vez de `detail.resumen` (tabla vacía), fabricante repetido, punto de estado invisible, tabla sin partir datos. | varios |
+| Prueba | Capturas finales escritorio/tableta: lateral, ruta, anillos segmentados, progreso, tabla de 15 equipos reales, velocidad, eventos. Suite 187/187. | Claude |

@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>netwatch · documentación</title>
+<link rel="icon" type="image/png" href="/static/img/neto.png">
+<link rel="stylesheet" href="/static/css/dashboard.css">
+<script src="/static/js/theme-boot.js"></script>
+<link rel="stylesheet" href="/static/css/docs.css">
+</head>
+<body>
+<main>
+  <h1>Documentación de netwatch</h1>
+  <p class="sub">Consulta los componentes, dependencias y reglas para detectar caídas.</p>
+  <div class="dashboard-tools">
+    <a class="export" href="/"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Volver al dashboard</a>
+  </div>
+
+  <div class="docs-layout">
+    <nav class="docs-nav" aria-label="Índice">
+      <a href="#resumen">Resumen</a>
+      <a href="#librerias">Librerías</a>
+      <a href="#arquitectura">Arquitectura</a>
+      <a href="#logica">Lógica de detección</a>
+      <a href="#config">Configuración</a>
+      <a href="#datos">Base de datos</a>
+      <a href="#api">API HTTP</a>
+      <a href="#backend">Módulos del backend</a>
+      <a href="#frontend">Módulos del dashboard</a>
+      <a href="#cli">Comandos y pruebas</a>
+    </nav>
+
+    <div class="docs-body">
+      <section id="resumen">
+        <h2>Resumen</h2>
+        <p>Monitoriza tu red local con netwatch. Encuentra el backend en <code>netwatch/</code>; ejecuta estas tareas en paralelo:</p>
+        <ol>
+          <li><strong>Inventario</strong>: encuentra equipos con un barrido de ping y la tabla ARP.</li>
+          <li><strong>Caídas</strong>: comprueba cada 5 segundos la red local, internet y DNS; registra cada caída y recuperación.</li>
+          <li><strong>Calidad</strong>: mide latencia, jitter y pérdida por destino y equipo; prueba la velocidad cada hora.</li>
+          <li><strong>Alertas</strong>: configura Telegram para recibir avisos de caídas, equipos nuevos y cambios de IP pública.</li>
+        </ol>
+        <p>Consulta los datos en SQLite (<code>netwatch.db</code>) y en el dashboard, servido desde el servidor web local.</p>
+      </section>
+
+      <section id="librerias">
+        <h2>Librerías</h2>
+        <p>No instales dependencias: usa la <strong>librería estándar de Python 3</strong> y comandos del sistema operativo. Construye el dashboard con HTML, CSS y JavaScript sin frameworks; dibuja las gráficas en SVG.</p>
+        <h3>Módulos de Python</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Módulo</th><th>Uso</th></tr></thead>
+          <tbody>
+            <tr><td><code>sqlite3</code></td><td>Base de datos local con equipos, mediciones, eventos y velocidades.</td></tr>
+            <tr><td><code>http.server</code></td><td><code>ThreadingHTTPServer</code> y <code>BaseHTTPRequestHandler</code>: el servidor web del dashboard y la API.</td></tr>
+            <tr><td><code>threading</code>, <code>queue</code></td><td>Un hilo por cada tarea periódica; una cola para las alertas pendientes de enviar.</td></tr>
+            <tr><td><code>concurrent.futures</code></td><td><code>ThreadPoolExecutor</code> para hacer muchos pings y consultas DNS a la vez.</td></tr>
+            <tr><td><code>subprocess</code></td><td>Ejecuta <code>ping</code>, <code>arp</code>, <code>ip</code> y <code>route</code>.</td></tr>
+            <tr><td><code>socket</code>, <code>struct</code>, <code>random</code></td><td>Construye y envía a mano paquetes DNS por UDP; obtiene la IP local; resolución inversa de nombres.</td></tr>
+            <tr><td><code>urllib.request</code>, <code>urllib.parse</code>, <code>urllib.error</code></td><td>IP pública (ipify), prueba de velocidad (Cloudflare), lista de fabricantes (IEEE), API de Telegram y parseo de URLs.</td></tr>
+            <tr><td><code>re</code></td><td>Interpreta la salida de comandos: tiempos de ping, tabla ARP y puerta de enlace.</td></tr>
+            <tr><td><code>csv</code>, <code>io</code>, <code>json</code></td><td>Exportación a CSV y respuestas de la API.</td></tr>
+            <tr><td><code>argparse</code></td><td>Opciones de línea de comandos.</td></tr>
+            <tr><td><code>datetime</code>, <code>time</code></td><td>Marcas de tiempo y filtros de fecha de los eventos.</td></tr>
+            <tr><td><code>os</code>, <code>platform</code>, <code>pathlib</code></td><td>Variables de entorno, detección de macOS frente a Linux y rutas de archivos.</td></tr>
+          </tbody>
+        </table></div>
+        <h3>Comandos del sistema y servicios externos</h3>
+        <ul>
+          <li><code>ping</code>: usa <code>-W</code> en milisegundos en macOS y en segundos en Linux. <code>ping()</code> ajusta el valor según el sistema.</li>
+          <li><code>arp -an</code> e <code>ip neigh</code>: lee ambas tablas de vecinos (IP a MAC) y combina sus resultados.</li>
+          <li><code>route -n get default</code> (macOS) o <code>ip route show default</code> (Linux): dirección del router.</li>
+          <li>Consulta <code>api.ipify.org</code> para la IP pública, <code>speed.cloudflare.com</code> para la velocidad y <code>api.telegram.org</code> para las alertas. Descarga una vez la lista de fabricantes desde <code>standards-oui.ieee.org</code> a <code>oui.txt</code>.</li>
+        </ul>
+      </section>
+
+      <section id="arquitectura">
+        <h2>Arquitectura</h2>
+        <p>Organiza el código por capas y limita cada dependencia a las capas inferiores. Crea y conecta los componentes concretos en <code>netwatch/app.py</code>.</p>
+<pre><code>main.py                    punto de entrada (python3 main.py)
+netwatch/
+  config.py                Settings: intervalos, rutas y variables de entorno
+  cli.py                   opciones de línea de comandos
+  app.py                   raíz de composición: crea y conecta todo
+  core/                    piezas genéricas, sin red ni base de datos
+    events.py              Event y EventBus (publicar / suscribirse)
+    scheduler.py           PeriodicTask y Scheduler (un hilo por tarea)
+    metrics.py             latencia, jitter, pérdida y duraciones
+  storage/
+    database.py            conexión SQLite con candado, esquema y migraciones
+    repositories.py        un repositorio por tabla: todo el SQL vive aquí
+  network/                 ping, DNS, ARP, router, HTTP y fabricantes (OUI)
+  monitors/                tareas periódicas que miden y publican eventos
+  alerts/telegram.py       cliente y notificador (suscriptor del EventBus)
+  services/                casos de uso: resumen, CSV, eventos, escáner, equipos
+  web/                     router, archivos estáticos, endpoints y servidor
+  static/                  index.html, docs.html, css/, js/, img/
+tests/                     pruebas unitarias (python3 -m unittest)</code></pre>
+        <h3>Principios SOLID aplicados</h3>
+        <ul>
+          <li><strong>Responsabilidad única</strong>: asigna una función a cada monitor, repositorio y widget.</li>
+          <li><strong>Abierto/cerrado</strong>: añade mediciones con <code>PeriodicTask</code>, registra alertas en <code>EventBus</code>, endpoints en <code>Router</code> y tarjetas en <code>main.js</code>, sin modificar componentes existentes.</li>
+          <li><strong>Sustitución de Liskov</strong>: implementa el contrato <code>run_once()</code>/<code>interval</code> en cada tarea y <code>update(summary)</code> en cada widget.</li>
+          <li><strong>Segregación de interfaces</strong>: inyecta en cada clase solo las dependencias que necesita. Por ejemplo, pasa <code>internet_up()</code> a <code>SpeedMonitor</code> en vez del monitor de conectividad completo.</li>
+          <li><strong>Inversión de dependencias</strong>: inyecta repositorios y funciones de red (<code>pinger</code>, <code>read_arp</code>…) en monitores y servicios. Así puedes probarlos con SQLite en memoria y redes simuladas.</li>
+        </ul>
+        <h3>Hilos</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Tarea</th><th>Cada cuánto</th><th>Qué hace</th></tr></thead>
+          <tbody>
+            <tr><td><code>ConnectivityMonitor</code></td><td>5 s</td><td>Ping y consulta DNS al router, a 1.1.1.1 y a 8.8.8.8; decide si hay caídas.</td></tr>
+            <tr><td><code>DeviceQualityMonitor</code></td><td>30 s</td><td>Ping a cada equipo conectado para medir su calidad.</td></tr>
+            <tr><td><code>InventoryScanner</code></td><td>120 s</td><td>Barrido de la subred /24 y actualización del inventario.</td></tr>
+            <tr><td><code>PublicIpMonitor</code></td><td>300 s</td><td>Consulta la IP pública y registra los cambios.</td></tr>
+            <tr><td><code>RetentionTask</code></td><td>1 día</td><td>Borra mediciones de más de 30 días.</td></tr>
+            <tr><td><code>SpeedMonitor</code></td><td>3600 s</td><td>Prueba de velocidad (empieza 30 s después de arrancar).</td></tr>
+            <tr><td><code>VendorLookup</code></td><td>una vez</td><td>Carga la tabla de fabricantes por prefijo de MAC.</td></tr>
+            <tr><td><code>TelegramNotifier</code></td><td>continuo</td><td>Solo si hay token de Telegram: envía las alertas de la cola.</td></tr>
+          </tbody>
+        </table></div>
+        <p>Comparte una conexión SQLite entre los hilos. <code>Database.query()</code> y <code>Database.execute()</code> usan un candado para serializar el acceso.</p>
+        <div class="flow"><span>monitores</span><b>→</b><span>repositorios / EventBus</span><b>→</b><span><code>SummaryService</code></span><b>→</b><span><code>/api/summary</code></span><b>→</b><span><code>main.js</code> cada 5 s</span><b>→</b><span>widgets</span></div>
+      </section>
+
+      <section id="logica">
+        <h2>Lógica de detección</h2>
+        <h3>Caídas de red local, internet y DNS</h3>
+        <p>En cada ciclo, <code>ConnectivityMonitor</code> consulta por ping y DNS el router y los destinos externos. Evalúa estos tres estados:</p>
+        <ul>
+          <li><strong>Red local</strong>: marca la conexión como correcta si responde el router; si no detectas el router, asume que la red local funciona.</li>
+          <li><strong>Internet</strong>: marca la conexión como correcta si responde <code>1.1.1.1</code> o <code>8.8.8.8</code>.</li>
+          <li><strong>DNS</strong>: marca el servicio como correcto si responde al menos un servidor DNS.</li>
+        </ul>
+        <p>Atribuye los fallos en cascada: si cae la red local, no marques internet como caído; si cae internet, no marques DNS como caído.</p>
+        <p><code>ServiceState.update()</code> evita falsas alarmas. Exige <strong>3 fallos seguidos</strong> (<code>fails_to_alert</code>) para registrar <code>*_down</code> y fecha la caída en el primer fallo. Registra <code>*_up</code> con la duración total cuando vuelve la conexión.</p>
+        <p>Registra <code>monitor_gap</code> si pasan más de 20 s (4 × <code>probe_every</code>) entre ciclos; normalmente indica que suspendiste el equipo.</p>
+
+        <h3>Consulta DNS hecha a mano</h3>
+        <p><code>dns_query()</code> arma un paquete DNS (cabecera con id aleatorio, recursión activada y pregunta tipo A para <code>example.com</code>), lo envía por UDP al puerto 53 y da la respuesta por buena si coincide el id, el código de respuesta es 0 y hay al menos una respuesta.</p>
+
+        <h3>Inventario de equipos</h3>
+        <ol>
+          <li>Obtén la IP local con <code>local_ip()</code> y calcula la subred <code>x.y.z.0/24</code>.</li>
+          <li>Haz ping a las 254 direcciones con 64 hilos para llenar la tabla ARP; no necesitas las respuestas.</li>
+          <li>Lee la tabla con <code>read_arp()</code> y descarta entradas incompletas, broadcast y multicast.</li>
+          <li>Guarda cada equipo nuevo con su nombre DNS inverso y publica <code>new_device</code>. Incluye el fabricante y marca si la MAC es privada (bit 0x02 del primer byte, común en teléfonos).</li>
+          <li>Marca un equipo como desconectado tras 3 escaneos seguidos sin detectarlo (<code>misses_to_offline</code>) y publica <code>device_offline</code>. Si vuelve, publica <code>device_online</code>.</li>
+        </ol>
+        <p>Omite las alertas de equipos nuevos durante el primer escaneo con la base vacía (<code>notify=False</code>) para no recibir un aviso por cada equipo de casa.</p>
+
+        <h3>Calidad: latencia, jitter y pérdida</h3>
+        <p>Pasa a <code>quality()</code> las mediciones ordenadas de la última hora:</p>
+        <ul>
+          <li><strong>Latencia</strong>: media de los tiempos de las respuestas correctas.</li>
+          <li><strong>Jitter</strong>: media de la diferencia absoluta entre cada respuesta y la siguiente.</li>
+          <li><strong>Pérdida</strong>: porcentaje de mediciones sin respuesta.</li>
+        </ul>
+
+        <h3>Disponibilidad de 24 horas</h3>
+        <p>Divide el día en 144 tramos de 10 minutos y calcula los aciertos por servicio en cada uno. Si pruebas varios destinos (por ejemplo, los dos de internet), cuenta el mejor. La cinta marca en verde ≥ 99 %, en ámbar ≥ 90 % y en rojo los valores inferiores. Calcula la disponibilidad como la media de los tramos con datos.</p>
+
+        <h3>Prueba de velocidad</h3>
+        <p><code>SpeedTester.measure()</code> descarga 10 MB y sube 3 MB de datos aleatorios a Cloudflare. Calcula los Mbps con bytes × 8 / segundos y omite la prueba si falla internet.</p>
+
+        <h3>Escáner de host</h3>
+        <p><code>HostScanner.scan()</code> resuelve el nombre, consulta DNS inverso, envía 4 pings para medir latencia, jitter, pérdida y TTL, busca la MAC en ARP y el inventario, prueba DNS y conecta por TCP a cada puerto (256 hilos, 0,5 s por puerto). En cada puerto abierto, lee el banner; si usa HTTP, envía <code>HEAD</code> y muestra la cabecera <code>Server</code>.</p>
+
+        <h3>Alertas por Telegram</h3>
+        <p>Suscribe <code>TelegramNotifier</code> al <code>EventBus</code> para encolar hasta 100 eventos de <code>alert_kinds</code> con <code>notify</code> activo. Un hilo los envía en orden y reintenta cada 30 s si falla la conexión. Marca los reintentos como "enviado con retraso" y descarta respuestas 400/401/403/404 (token o chat incorrectos).</p>
+      </section>
+
+      <section id="config">
+        <h2>Configuración</h2>
+        <p>Los valores están en la clase <code>Settings</code> de <code>netwatch/config.py</code>:</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Constante</th><th>Valor</th><th>Significado</th></tr></thead>
+          <tbody>
+            <tr><td><code>probe_every</code></td><td>5</td><td>Segundos entre mediciones de caídas.</td></tr>
+            <tr><td><code>scan_every</code></td><td>120</td><td>Segundos entre escaneos de la red.</td></tr>
+            <tr><td><code>ip_every</code></td><td>300</td><td>Segundos entre consultas de IP pública.</td></tr>
+            <tr><td><code>device_every</code></td><td>30</td><td>Segundos entre pings a cada equipo.</td></tr>
+            <tr><td><code>speed_every</code></td><td>3600</td><td>Segundos entre pruebas de velocidad.</td></tr>
+            <tr><td><code>speed_down_bytes</code> / <code>speed_up_bytes</code></td><td>10 MB / 3 MB</td><td>Datos que baja y sube cada prueba.</td></tr>
+            <tr><td><code>misses_to_offline</code></td><td>3</td><td>Escaneos sin ver un equipo antes de darlo por desconectado.</td></tr>
+            <tr><td><code>fails_to_alert</code></td><td>3</td><td>Fallos seguidos antes de registrar una caída.</td></tr>
+            <tr><td><code>keep_days</code></td><td>30</td><td>Conserva mediciones durante este número de días.</td></tr>
+            <tr><td><code>contracted_down</code> / <code>contracted_up</code></td><td>0 / 0</td><td>Mbps contratados de bajada y subida, para comparar en la gráfica (0 = sin dato).</td></tr>
+            <tr><td><code>external_hosts</code></td><td>1.1.1.1, 8.8.8.8</td><td>Destinos para comprobar internet y DNS.</td></tr>
+          </tbody>
+        </table></div>
+        <h3>Variables de entorno</h3>
+        <ul>
+          <li><code>NETWATCH_DB</code>: ruta de la base de datos (por defecto, <code>netwatch.db</code> en la raíz del proyecto).</li>
+          <li><code>TELEGRAM_TOKEN</code> y <code>TELEGRAM_CHAT_ID</code>: activan las alertas. El token nunca va en el código.</li>
+        </ul>
+      </section>
+
+      <section id="datos">
+        <h2>Base de datos</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Tabla</th><th>Columnas</th><th>Contenido</th></tr></thead>
+          <tbody>
+            <tr><td><code>devices</code></td><td>mac (clave), ip, hostname, alias, random_mac, first_seen, last_seen, online, misses, network</td><td>Inventario de equipos. Añade <code>network</code> con <code>ALTER TABLE</code> en bases antiguas.</td></tr>
+            <tr><td><code>probes</code></td><td>ts, kind, target, ok, ms</td><td>Guarda cada medición. <code>kind</code>: <code>ping</code>, <code>dns</code> o <code>dev</code> (equipo; usa la MAC como <code>target</code>). Borra los datos a los 30 días.</td></tr>
+            <tr><td><code>events</code></td><td>ts, kind, detail</td><td>Conserva el historial sin purgarlo.</td></tr>
+            <tr><td><code>speed</code></td><td>ts, down, up</td><td>Resultados de las pruebas de velocidad en Mbps.</td></tr>
+            <tr><td><code>meta</code></td><td>key, value</td><td>Valores sueltos; por ahora, <code>public_ip</code>.</td></tr>
+          </tbody>
+        </table></div>
+        <h3>Tipos de evento</h3>
+        <p><code>lan_down</code>/<code>lan_up</code>, <code>wan_down</code>/<code>wan_up</code>, <code>dns_down</code>/<code>dns_up</code>, <code>new_device</code>, <code>device_online</code>, <code>device_offline</code>, <code>ip_first</code>, <code>ip_change</code>, <code>monitor_gap</code>.</p>
+      </section>
+
+      <section id="api">
+        <h2>API HTTP</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Ruta</th><th>Método</th><th>Respuesta</th></tr></thead>
+          <tbody>
+            <tr><td><code>/</code>, <code>/index.html</code></td><td>GET</td><td>El dashboard.</td></tr>
+            <tr><td><code>/docs</code></td><td>GET</td><td>Esta página.</td></tr>
+            <tr><td><code>/static/…</code>, <code>/favicon.ico</code></td><td>GET</td><td>CSS, JavaScript e imágenes del dashboard.</td></tr>
+            <tr><td><code>/api/summary</code></td><td>GET</td><td>JSON con todo lo que pinta el dashboard (ver <code>summary()</code>).</td></tr>
+            <tr><td><code>/api/events</code></td><td>GET</td><td>Eventos paginados. Parámetros: <code>page</code>, <code>size</code> (10, 25 o 50), <code>from</code> y <code>to</code> (AAAA-MM-DD, ambos incluidos) y <code>kind</code>. Con parámetros inválidos devuelve 400.</td></tr>
+            <tr><td><code>/api/export.csv</code></td><td>GET</td><td>Resumen completo descargable en CSV.</td></tr>
+            <tr><td><code>/api/alias</code></td><td>POST</td><td><code>{"mac", "alias"}</code>: pone nombre a un equipo (máx. 60 caracteres; vacío lo quita).</td></tr>
+            <tr><td><code>/api/scan</code></td><td>POST</td><td><code>{"host", "ports"}</code>: analiza un host. <code>ports</code> es <code>common</code>, un rango (<code>1-1024</code>) o una lista (<code>22,80,8000-8100</code>), máx. 5000.</td></tr>
+            <tr><td><code>/api/network</code></td><td>POST</td><td><code>{"mac", "network"}</code>: tipo de conexión, <code>5 GHz</code>, <code>2.4 GHz</code> o <code>Cable</code> (otro valor lo quita).</td></tr>
+          </tbody>
+        </table></div>
+        <p>Campos de <code>/api/summary</code>:</p>
+<pre><code>now            hora del servidor (epoch)
+checks         {lan|wan|dns: {label, down_since}}
+ribbon_start   inicio de la cinta de 24 h
+ribbon         {lan|wan|dns: [144 valores 0–1 o null]}
+uptime         {lan|wan|dns: % disponibilidad 24 h}
+series         {destino: [[ts, ms, ok], …]} latencia por minuto, última hora
+hours          [24] caídas por hora del día (todo el historial)
+devices        equipos con vendor, q (calidad) y drops (desconexiones en 24 h)
+events         últimos 60 eventos
+quality        {destino: {avg, jitter, loss}}
+speed          últimas 48 pruebas
+contracted     velocidad contratada
+public_ip      IP pública actual</code></pre>
+      </section>
+
+      <section id="backend">
+        <h2>Módulos del backend</h2>
+        <h3>core</h3>
+        <div class="table-wrap"><table>
+          <tbody>
+            <tr><td><code>EventBus.publish(kind, detail, notify)</code></td><td>Guarda y distribuye el evento a consola y Telegram. Usa <code>notify=False</code> para guardarlo sin alertar.</td></tr>
+            <tr><td><code>Scheduler</code> / <code>PeriodicTask</code></td><td>Ejecuta <code>run_once()</code> en un hilo por tarea; registra los errores y continúa.</td></tr>
+            <tr><td><code>quality(rows)</code>, <code>format_duration(s)</code></td><td>Latencia media, jitter y pérdida; duración legible.</td></tr>
+          </tbody>
+        </table></div>
+        <h3>storage</h3>
+        <div class="table-wrap"><table>
+          <tbody>
+            <tr><td><code>Database</code></td><td>Conexión, <code>migrate()</code> (esquema y columnas nuevas) y <code>clear()</code> para <code>--reset</code>.</td></tr>
+            <tr><td><code>DeviceRepository</code>, <code>ProbeRepository</code>, <code>EventRepository</code>, <code>SpeedRepository</code>, <code>MetaRepository</code></td><td>Lecturas y escrituras de cada tabla. <code>Repositories.on(db)</code> los crea todos.</td></tr>
+          </tbody>
+        </table></div>
+        <h3>network</h3>
+        <div class="table-wrap"><table>
+          <tbody>
+            <tr><td><code>ping()</code>, <code>ping_series()</code></td><td>Un ping, o varios seguidos con su TTL.</td></tr>
+            <tr><td><code>dns_query()</code></td><td>Consulta DNS tipo A por UDP. Prueba por separado <code>build_query()</code> e <code>is_valid_answer()</code>.</td></tr>
+            <tr><td><code>local_ip()</code>, <code>gateway()</code>, <code>read_arp()</code>, <code>reverse_dns()</code></td><td>IP propia, router, tabla ARP (<code>parse_arp()</code> la interpreta) y nombre por DNS inverso.</td></tr>
+            <tr><td><code>VendorLookup</code>, <code>is_private_mac()</code></td><td>Fabricante por MAC y detección de MAC privada.</td></tr>
+          </tbody>
+        </table></div>
+        <h3>monitors, alerts y services</h3>
+        <div class="table-wrap"><table>
+          <tbody>
+            <tr><td><code>ServiceState</code></td><td>Máquina de estados de caída de un servicio (lan, wan, dns).</td></tr>
+            <tr><td><code>ConnectivityMonitor.evaluate()</code></td><td>Aplica la atribución en cascada a los resultados de un ciclo.</td></tr>
+            <tr><td><code>TelegramClient</code> / <code>TelegramNotifier</code></td><td>Envío a la API de Telegram, y la cola con reintentos.</td></tr>
+            <tr><td><code>SummaryService.build()</code></td><td>El JSON del dashboard.</td></tr>
+            <tr><td><code>CsvExporter.export()</code></td><td>CSV por bloques, con BOM para Excel.</td></tr>
+            <tr><td><code>EventQueryService.page()</code></td><td>Valida los filtros y pagina el historial.</td></tr>
+            <tr><td><code>HostScanner.scan()</code></td><td>Análisis de un host; usa <code>parse_ports()</code>, <code>os_hint()</code>, <code>scan_port()</code> y <code>grab_banner()</code>.</td></tr>
+            <tr><td><code>DeviceService</code></td><td>Alias (máx. 60 caracteres) y tipo de conexión de un equipo.</td></tr>
+          </tbody>
+        </table></div>
+        <h3>web</h3>
+        <div class="table-wrap"><table>
+          <tbody>
+            <tr><td><code>Router</code></td><td>Tabla de rutas <code>(método, ruta) → handler</code>, más un handler por defecto para los estáticos.</td></tr>
+            <tr><td><code>Request</code> / <code>Response</code></td><td>Independientes de <code>http.server</code>, para probar los endpoints sin red.</td></tr>
+            <tr><td><code>StaticFiles</code></td><td>Sirve <code>/static/…</code> con su tipo MIME y bloquea rutas fuera de la carpeta.</td></tr>
+            <tr><td><code>register_api()</code> / <code>register_pages()</code></td><td>Registra endpoints y páginas.</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="frontend">
+        <h2>Módulos del dashboard</h2>
+        <p>Módulos ES en <code>netwatch/static/js/</code>, sin frameworks ni paso de compilación.</p>
+        <div class="table-wrap"><table>
+          <tbody>
+            <tr><td><code>main.js</code></td><td>Crea los widgets y cada 5 s pide <code>/api/summary</code> y llama a <code>update(summary)</code> en cada uno.</td></tr>
+            <tr><td><code>lib/api.js</code></td><td>Cliente de la API: el único módulo que conoce las URLs.</td></tr>
+            <tr><td><code>lib/pager.js</code></td><td>Clase <code>Pager</code> reutilizable: paginación en el navegador (equipos) o en el servidor (eventos).</td></tr>
+            <tr><td><code>lib/dom.js</code>, <code>lib/targets.js</code>, <code>lib/storage.js</code></td><td>Escapado y formato; nombres y colores de los destinos; <code>localStorage</code> sin errores.</td></tr>
+            <tr><td><code>ui/layout.js</code></td><td>Arrastra tarjetas, restaura el orden y expándelas a pantalla completa; cierra con Escape.</td></tr>
+            <tr><td><code>ui/theme.js</code>, <code>theme-boot.js</code></td><td>Modo claro/oscuro; <code>theme-boot.js</code> aplica el tema guardado antes de pintar la página.</td></tr>
+            <tr><td><code>widgets/*.js</code></td><td>Una tarjeta por archivo: status, availability, latency, quality, speed, devices, hourly, events, scanner.</td></tr>
+          </tbody>
+        </table></div>
+        <p>Interacciones: clic en el nombre de un equipo para ponerle alias; clic en su red para alternar 5 GHz → 2.4 GHz → Cable → sin asignar; arrastrar <code>⠿</code> para mover tarjetas; <code>⛶</code> para expandir.</p>
+      </section>
+
+      <section id="cli">
+        <h2>Línea de comandos y pruebas</h2>
+<pre><code>python3 main.py                     # http://127.0.0.1:8765
+python3 main.py --host 0.0.0.0      # accesible desde otros equipos de la red
+python3 main.py --port 9000
+python3 main.py --reset             # borra los datos acumulados
+python3 main.py --find-chat-id      # muestra tu chat id de Telegram
+python3 main.py --test-telegram     # envía un mensaje de prueba
+python3 -m netwatch                 # equivalente a main.py
+python3 -m unittest                 # ejecuta las pruebas</code></pre>
+      </section>
+    </div>
+  </div>
+</main>
+</body>
+</html>

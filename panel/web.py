@@ -284,6 +284,9 @@ def crear_servidor(cfg, db, recolector, auth, luces=None, rutinas=None, red=None
                                     extra=[("Content-Disposition", f'attachment; filename="{nombre}"')])
             if que == "sonda":
                 return self._json({"sonda": red.sonda()})
+            if que == "resumen":  # todo lo de la pestaña Red en una sola petición
+                return self._json({"resumen": red.resumen(), "sonda": red.sonda(),
+                                   "vivo": red.resumen_vivo() is not None})
             return self._json({"error": "no existe"}, 404)
 
         def _red_post(self, que: str, datos: dict):

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>netwatch</title>
+<link rel="icon" type="image/png" href="/static/img/neto.png">
+<link rel="stylesheet" href="/static/css/dashboard.css">
+<script src="/static/js/theme-boot.js"></script>
+<script type="module" src="/static/js/main.js"></script>
+</head>
+<body>
+<main>
+  <h1 id="headline">Midiendo…</h1>
+  <p class="sub" id="sub"></p>
+  <div class="dashboard-tools">
+    <a class="export" href="/api/export.csv" download><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Exportar resumen en CSV</a>
+    <button id="theme-toggle" class="tool-button" type="button" aria-pressed="false"><svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span class="label">Activar modo nocturno</span></button>
+    <button id="reset-layout" class="tool-button" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>Restablecer posiciones</button>
+    <a class="export" href="/docs"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>Documentación</a>
+    <span class="layout-hint">Mueve las tarjetas arrastrando el control ⠿.</span>
+  </div>
+
+  <div id="dashboard-grid" class="dashboard-grid">
+    <section data-widget="availability">
+      <header class="widget-header">
+        <h2>Últimas 24 horas</h2>
+        <div class="widget-controls">
+          <button class="drag-handle" type="button" draggable="true" aria-label="Arrastrar sección Últimas 24 horas" title="Arrastrar para mover">⠿</button>
+          <button class="expand-widget" type="button" aria-label="Expandir sección Últimas 24 horas" aria-pressed="false" title="Expandir a pantalla completa">⛶</button>
+        </div>
+      </header>
+      <div id="ribbons"></div>
+      <div class="axis"><div></div><div><span>hace 24 h</span><span>hace 12 h</span><span>ahora</span></div><div></div></div>
+    </section>
+
+    <section data-widget="latency">
+      <header class="widget-header">
+        <h2>Latencia de la última hora</h2>
+        <div class="widget-controls">
+          <button class="drag-handle" type="button" draggable="true" aria-label="Arrastrar sección Latencia" title="Arrastrar para mover">⠿</button>
+          <button class="expand-widget" type="button" aria-label="Expandir sección Latencia" aria-pressed="false" title="Expandir a pantalla completa">⛶</button>
+        </div>
+      </header>
+      <div id="chart"></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section data-widget="quality">
+      <header class="widget-header">
+        <h2>Calidad de la conexión (última hora)</h2>
+        <div class="widget-controls">
+          <button class="drag-handle" type="button" draggable="true" aria-label="Arrastrar sección Calidad de la conexión" title="Arrastrar para mover">⠿</button>
+          <button class="expand-widget" type="button" aria-label="Expandir sección Calidad de la conexión" aria-pressed="false" title="Expandir a pantalla completa">⛶</button>
+        </div>
+      </header>
+      <div class="wrap"><table>
+        <thead><tr><th>Destino</th><th>Latencia media</th><th>Jitter</th><th>Pérdida</th></tr></thead>
+        <tbody id="quality"></tbody>
+      </table></div>
+      <p class="tag">El jitter es cuánto varía la latencia entre una medición y la siguiente: importa para videollamadas y juegos.</p>
+    </section>
+
+    <section data-widget="speed">
+      <header class="widget-header">
+        <h2>Velocidad medida</h2>
+        <div class="widget-controls">
+          <button class="drag-handle" type="button" draggable="true" aria-label="Arrastrar sección Velocidad medida" title="Arrastrar para mover">⠿</button>
+          <button class="expand-widget" type="button" aria-label="Expandir sección Velocidad medida" aria-pressed="false" title="Expandir a pantalla completa">⛶</button>
+        </div>
+      </header>
+      <div id="speed"></div>
+    </section>
+
+    <section data-widget="devices">
+      <header class="widget-header">
+        <h2>Equipos en la red</h2>
+        <div class="widget-controls">
+          <button class="drag-handle" type="button" draggable="true" aria-label="Arrastrar sección Equipos en la red" title="Arrastrar para mover">⠿</button>
+          <button class="expand-widget" type="button" aria-label="Expandir sección Equipos en la red" aria-pressed="false" title="Expandir a pantalla completa">⛶</button>
+        </div>
+      </header>
+      <div class="wrap"><table>
+        <thead><tr><th>Equipo</th><th>IP</th><th>Red</th><th>Latencia</th><th>Jitter</th><th>Pérdida</th><th>Caídas 24 h</th><th>Visto</th></tr></thead>
+        <tbody id="devices"></tbody>
+      </table></div>
+      <p class="tag">Toca el nombre de un equipo para ponerle un alias, y la etiqueta de red para indicar si usa 5 GHz, 2.4 GHz o cable. Los equipos con MAC aleatoria suelen ser teléfonos con dirección privada.</p>
+      <div class="pagination" aria-label="Paginación de equipos">
+        <label for="devices-page-size">Filas por página</label>
+        <select id="devices-page-size" class="page-size">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+        </select>
+        <span id="devices-page-info" class="page-info" aria-live="polite"></span>
+        <button id="devices-prev" class="page-button" data-page="devices" data-delta="-1" type="button">Anterior</button>
+        <button id="devices-next" class="page-button" data-page="devices" data-delta="1" type="button">Siguiente</button>
+      </div>
+    </section>
+
+    <section data-widget="hourly-drops">
+      <header class="widget-header">
+        <h2>Caídas por hora del día</h2>
+        <div class="widget-controls">
+          <button class="drag-handle" type="button" draggable="true" aria-label="Arrastrar sección Caídas por hora del día" title="Arrastrar para mover">⠿</button>
+          <button class="expand-widget" type="button" aria-label="Expandir sección Caídas por hora del día" aria-pressed="false" title="Expandir a pantalla completa">⛶</button>
+        </div>
+      </header>
+      <div id="hours"></div>
+    </section>
+
+    <section data-widget="events">
+      <header class="widget-header">
+        <h2>Eventos recientes</h2>
+        <div class="widget-controls">
+          <button class="drag-handle" type="button" draggable="true" aria-label="Arrastrar sección Eventos recientes" title="Arrastrar para mover">⠿</button>
+          <button class="expand-widget" type="button" aria-label="Expandir sección Eventos recientes" aria-pressed="false" title="Expandir a pantalla completa">⛶</button>
+        </div>
+      </header>
+      <div class="event-filters" aria-label="Filtros de eventos">
+        <label for="events-from">Desde</label>
+        <input id="events-from" type="date">
+        <label for="events-to">Hasta</label>
+        <input id="events-to" type="date">
+        <label for="events-kind">Tipo</label>
+        <select id="events-kind">
+          <option value="">Todos</option>
+        </select>
+        <button id="events-clear" class="tool-button" type="button">Limpiar filtros</button>
+      </div>
+      <ul id="events"></ul>
+      <div class="pagination" aria-label="Paginación de eventos">
+        <label for="events-page-size">Filas por página</label>
+        <select id="events-page-size" class="page-size">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+        </select>
+        <span id="events-page-info" class="page-info" aria-live="polite"></span>
+        <button id="events-prev" class="page-button" data-page="events" data-delta="-1" type="button">Anterior</button>
+        <button id="events-next" class="page-button" data-page="events" data-delta="1" type="button">Siguiente</button>
+      </div>
+    </section>
+
+    <section data-widget="scanner">
+      <header class="widget-header">
+        <h2>Escáner</h2>
+        <div class="widget-controls">
+          <button class="drag-handle" type="button" draggable="true" aria-label="Arrastrar sección Escáner" title="Arrastrar para mover">⠿</button>
+          <button class="expand-widget" type="button" aria-label="Expandir sección Escáner" aria-pressed="false" title="Expandir a pantalla completa">⛶</button>
+        </div>
+      </header>
+      <form id="scan-form" class="event-filters" aria-label="Opciones del escáner">
+        <label for="scan-host">Host</label>
+        <input id="scan-host" list="scan-hosts" placeholder="192.168.1.10 o nombre" required>
+        <datalist id="scan-hosts"></datalist>
+        <label for="scan-preset">Puertos</label>
+        <select id="scan-preset">
+          <option value="common">Comunes</option>
+          <option value="1-1024">1–1024</option>
+          <option value="custom">Personalizado</option>
+        </select>
+        <input id="scan-ports" aria-label="Puertos personalizados" placeholder="22,80,8000-8100" hidden>
+        <button id="scan-run" class="tool-button" type="submit">Escanear</button>
+      </form>
+      <div id="scan-result"><p class="empty">Elige un equipo de la red o escribe una IP o un nombre.</p></div>
+    </section>
+  </div>
+</main>
+</body>
+</html>

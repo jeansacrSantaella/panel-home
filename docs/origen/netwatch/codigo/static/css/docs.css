@@ -1,0 +1,76 @@
+/* Reutiliza los colores definidos en dashboard.css. */
+.docs-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.docs-nav {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+}
+.docs-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.docs-nav a:hover { color: var(--ink); background: var(--panel); }
+.docs-body { display: flex; flex-direction: column; gap: 16px; }
+.docs-body section { scroll-margin-top: 16px; }
+.docs-body h2 { font-size: 19px; margin-bottom: 8px; }
+.docs-body h3 { font-size: 15px; margin: 18px 0 6px; }
+.docs-body p, .docs-body li { max-width: 78ch; }
+.docs-body ul, .docs-body ol { padding-left: 20px; margin: 6px 0; }
+.docs-body code, .docs-body pre {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+.docs-body code {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0 4px;
+}
+.docs-body pre {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.docs-body pre code { background: none; border: 0; padding: 0; }
+.table-wrap { overflow-x: auto; }
+.docs-body table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 6px 0; }
+.docs-body th, .docs-body td {
+  text-align: left;
+  vertical-align: top;
+  padding: 6px 10px 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.docs-body th { color: var(--muted); font-weight: 600; }
+.docs-body td:first-child { white-space: nowrap; }
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 8px 0;
+  font-size: 14px;
+}
+.flow span {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 3px 8px;
+  background: var(--bg);
+}
+.flow b { color: var(--muted); font-weight: 400; }
+@media (max-width: 760px) {
+  .docs-layout { grid-template-columns: 1fr; }
+  .docs-nav { position: static; flex-direction: row; flex-wrap: wrap; }
+}

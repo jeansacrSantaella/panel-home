@@ -1,0 +1,481 @@
+/* Tablero: estructura (lateral + barra superior + contenido) y componentes genéricos.
+   Se carga después de panel.css/orion.css y sobrescribe lo que choca. Ver docs/DISENO.md. */
+
+/* ---------- Tokens locales (degradado de título legible en claro y oscuro) ---------- */
+:root {
+  --lateral-ancho: 72px;
+  --titulo-grad: linear-gradient(90deg, #6d3fe0, #2b7fe0 55%, #0a8fb0);
+  --brillo-interior: inset 0 1px 0 color-mix(in srgb, var(--texto) 4%, transparent);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --titulo-grad: var(--marca-degradado); }
+}
+:root[data-theme="dark"] { --titulo-grad: var(--marca-degradado); }
+
+/* ---------- Accesibilidad: foco visible en todo lo interactivo del tablero ---------- */
+.pestana:focus-visible, .lateral-servicios a:focus-visible, .buscar-global input:focus-visible,
+.barra .boton:focus-visible {
+  outline: 2px solid var(--marca-azul);
+  outline-offset: 2px;
+}
+
+/* ---------- Piezas de la barra superior (todos los anchos) ---------- */
+.ruta {
+  grid-area: ruta;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--tenue);
+  white-space: nowrap;
+}
+.ruta b { color: var(--texto); font-weight: 600; }
+.ruta-sep { opacity: .6; }
+
+.buscar-global {
+  grid-area: buscar;
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.buscar-global .icono {
+  position: absolute;
+  left: 13px;
+  width: 16px;
+  height: 16px;
+  color: var(--tenue);
+  pointer-events: none;
+}
+.buscar-global input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 14px 0 36px;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  background: var(--tarjeta-2);
+  color: var(--texto);
+  font: inherit;
+  font-size: 13px;
+}
+.buscar-global input::placeholder { color: var(--tenue); }
+.buscar-global input:focus { border-color: var(--marca-azul); }
+
+/* Avatar redondo con el degradado de marca */
+.barra #btn-cuenta {
+  border-radius: 50%;
+  border: 0;
+  background: var(--marca-degradado);
+  color: #fff;
+}
+/* Notificaciones: botón de ícono; linea.js reescribe el texto, así que se oculta y se pinta la campana */
+.barra #btn-notif { font-size: 0; padding: 0; width: 36px; justify-content: center; }
+.barra #btn-notif::before { content: "\1F514"; font-size: 16px; }
+.barra #btn-notif:disabled { opacity: .55; }
+
+.barra-der { min-width: 0; }
+
+/* Estado: punto de 8 px */
+.punto { display: inline-block; flex: none; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; }
+.punto[data-estado="ok"] { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 20%, transparent); }
+.punto[data-estado="alerta"] { background: var(--alerta); }
+.punto[data-estado="mal"] { background: var(--mal); }
+.punto[data-estado="nada"] { background: var(--tenue); opacity: .6; }
+
+/* Lista de servicios (grupo inferior de la lateral) */
+.lateral-servicios {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--borde);
+}
+.lateral-servicios h3 {
+  margin: 0 0 6px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--tenue);
+}
+.lateral-servicios ul { list-style: none; margin: 0; padding: 0; }
+.lateral-servicios .servicio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--tenue);
+  text-decoration: none;
+}
+.lateral-servicios a.servicio:hover { background: var(--tarjeta-2); color: var(--texto); }
+
+/* ---------- Celular (< 760 px): se conserva el menú deslizante de panel.css ---------- */
+@media (max-width: 759.98px) {
+  .ruta { display: none; }
+  /* buscador en su propia fila bajo la marca */
+  .barra { grid-template-areas: "menu marca der" "buscar buscar buscar" "chips chips chips"; }
+  .barra-der { gap: 6px; }
+  .barra #btn-notif:disabled { display: none; }
+}
+
+/* ---------- Tableta y escritorio (≥ 760 px): lateral fija a la izquierda ---------- */
+@media (min-width: 760px) {
+  body { padding-left: var(--lateral-ancho); }
+
+  /* .cabecera deja de ser caja: la barra se pega arriba contra el body y la lateral es fija */
+  .cabecera { display: contents; }
+
+  .barra {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    max-width: none;
+    margin: 0;
+    padding: 10px 20px;
+    grid-template-columns: auto auto minmax(140px, 300px) minmax(0, 1fr) auto;
+    grid-template-areas: "menu ruta buscar chips der";
+    background: color-mix(in srgb, var(--superficie) 88%, transparent);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--borde);
+  }
+  .barra > .marca { display: none; }   /* la marca vive en la lateral */
+  .barra .btn-menu { display: none; grid-area: menu; }
+  .seccion-actual { display: none; }
+  .chips { justify-content: flex-end; }
+
+  .pestanas {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    width: var(--lateral-ancho);
+    max-width: none;
+    margin: 0;
+    padding: 14px 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--superficie);
+    border-right: 1px solid var(--borde);
+  }
+  .menu-cabeza { display: flex; justify-content: center; padding: 4px 4px 14px; }
+  .menu-cabeza #btn-menu-cerrar { display: none; }
+  .menu-cabeza b span, .menu-cabeza b { white-space: nowrap; }
+
+  /* Secciones: ícono + nombre en mayúsculas pequeñas, flecha al pasar o estar activa */
+  .pestana {
+    position: relative;
+    gap: 12px;
+    padding: 11px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .pestana::before {
+    content: "\203A";
+    order: 3;
+    margin-left: auto;
+    font-size: 16px;
+    letter-spacing: 0;
+    opacity: 0;
+    transition: opacity .15s ease;
+  }
+  .pestana:hover::before, .pestana.activa::before { opacity: .8; }
+  .pestana.activa {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--marca-violeta) 18%, transparent), transparent);
+    color: var(--texto);
+  }
+  .pestana.activa .icono { color: var(--marca-azul); }
+  /* sobrescribe orion.css: la marca de la activa es una barra a la izquierda, no una línea inferior */
+  .pestanas .pestana.activa::after {
+    top: 8px; bottom: 8px; left: 0; right: auto; width: 3px; height: auto;
+  }
+
+  /* Solo íconos (tableta o lateral contraída): el nombre queda como title y para lectores de pantalla */
+  .pestana span, .servicio-nombre { white-space: nowrap; }
+}
+
+/* Solo íconos: 760–1023 px siempre; ≥ 1024 px con html.lateral-mini */
+@media (min-width: 760px) and (max-width: 1023.98px) {
+  :root { --solo-iconos: 1; }
+}
+@media (min-width: 760px) and (max-width: 1023.98px) {
+  .pestana span, .servicio-nombre, .menu-cabeza b, .lateral-servicios h3 {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .pestana { justify-content: center; padding: 11px 0; }
+  .pestana::before { display: none; }
+  .pestana .icono { width: 22px; height: 22px; }
+  .lateral-servicios .servicio { justify-content: center; padding: 9px 0; }
+}
+
+/* Escritorio ancho: lateral completa, o contraída con ☰ */
+@media (min-width: 1024px) {
+  :root { --lateral-ancho: 232px; }
+  :root.lateral-mini { --lateral-ancho: 72px; }
+  .barra .btn-menu { display: inline-flex; }
+
+  html.lateral-mini .pestana span, html.lateral-mini .servicio-nombre,
+  html.lateral-mini .menu-cabeza b, html.lateral-mini .lateral-servicios h3 {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  html.lateral-mini .pestana { justify-content: center; padding: 11px 0; }
+  html.lateral-mini .pestana::before { display: none; }
+  html.lateral-mini .pestana .icono { width: 22px; height: 22px; }
+  html.lateral-mini .lateral-servicios .servicio { justify-content: center; padding: 9px 0; }
+  .menu-cabeza { justify-content: flex-start; }
+  html.lateral-mini .menu-cabeza { justify-content: center; }
+}
+
+@media (min-width: 760px) and (prefers-reduced-motion: no-preference) {
+  .pestanas { transition: width .2s ease; }
+  body { transition: padding-left .2s ease; }
+}
+
+/* ---------- Componentes genéricos ---------- */
+.tarjeta {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  box-shadow: var(--brillo-interior);
+}
+
+.tarjeta h2 {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  background: var(--titulo-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.tarjeta h2 :is(small, .tenue, span) {
+  -webkit-text-fill-color: var(--tenue);
+  color: var(--tenue);
+  font-weight: 400;
+  letter-spacing: .04em;
+  text-transform: none;
+}
+.tarjeta h2 .tarjeta-enlace { -webkit-text-fill-color: var(--acento); color: var(--acento); }
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+.kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px 14px;
+  text-align: center;
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  box-shadow: var(--brillo-interior);
+}
+.kpi-titulo {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--acento);
+}
+.kpi-texto {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--tenue);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cifra {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.1;
+  background: var(--titulo-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Barras finas con degradado. Admite <li>/<div> hijos con .progreso-etiqueta y .progreso-pista > .progreso-relleno
+   (o un <progress>). */
+.progreso { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.progreso > * { display: grid; gap: 5px; min-width: 0; }
+.progreso-etiqueta { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; color: var(--tenue); }
+.progreso-pista, .progreso progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--borde);
+  appearance: none;
+}
+.progreso-relleno { display: block; height: 100%; border-radius: inherit; background: var(--marca-degradado); }
+.progreso progress::-webkit-progress-bar { background: var(--borde); }
+.progreso progress::-webkit-progress-value { background: var(--marca-degradado); border-radius: 999px; }
+.progreso progress::-moz-progress-bar { background: var(--marca-degradado); border-radius: 999px; }
+
+.tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tabla th {
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tenue);
+  border-bottom: 1px solid var(--borde);
+  white-space: nowrap;
+}
+.tabla td { padding: 9px 10px; border-bottom: 1px solid var(--borde); vertical-align: middle; }
+.tabla tbody tr:last-child td { border-bottom: 0; }
+.tabla tbody tr:hover { background: color-mix(in srgb, var(--acento) 6%, transparent); }
+
+.red-tabla-envoltura { width: 100%; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.red-tabla-envoltura .tabla { min-width: 560px; }
+
+.paginas { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 12px; font-size: 13px; color: var(--tenue); }
+.paginas .boton { min-height: 30px; padding: 0 10px; font-size: 12px; }
+
+.actividad { list-style: none; margin: 0; padding: 0; }
+.actividad > li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "punto titulo hora" ". detalle detalle";
+  column-gap: 10px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--borde);
+}
+.actividad > li:last-child { border-bottom: 0; }
+.actividad > li::before {
+  content: "";
+  grid-area: punto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--nivel, var(--tenue));
+  align-self: center;
+}
+.actividad > li[data-nivel="alto"] { --nivel: var(--mal); }
+.actividad > li[data-nivel="medio"] { --nivel: var(--alerta); }
+.actividad > li[data-nivel="bajo"] { --nivel: var(--ok); }
+.actividad > li[data-nivel="info"] { --nivel: var(--info); }
+.actividad > li > :first-child { grid-area: titulo; font-size: 13.5px; color: var(--texto); min-width: 0; overflow-wrap: anywhere; }
+.actividad > li > :nth-child(2) { grid-area: detalle; font-size: 12.5px; color: var(--tenue); }
+.actividad > li > :last-child:not(:first-child):not(:nth-child(2)) { grid-area: hora; font-size: 12px; color: var(--tenue); white-space: nowrap; }
+.actividad > li > :nth-child(2):last-child { grid-area: hora; font-size: 12px; white-space: nowrap; }
+
+.barra-herramientas, .red-barra { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.red-cabeza { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-bottom: 12px; }
+.red-cabeza h2 { margin: 0; }
+
+/* ---------- Pestaña Red: rejilla de tarjetas ---------- */
+.red-vista {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px 12px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.red-vista[hidden] { display: none; }
+.red-vista > .tarjeta { padding: 16px; min-width: 0; }
+@media (min-width: 760px) { .red-vista { padding: 16px 20px; } }
+@media (min-width: 1200px) {
+  .red-vista { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #red-no-interna, #red-estado, #red-equipos, #red-eventos { grid-column: 1 / -1; }
+}
+
+/* Movimiento reducido: sin transiciones nuevas */
+@media (prefers-reduced-motion: reduce) {
+  .pestana::before, .pestanas, body { transition: none !important; }
+}
+
+/* ---------- Campos de formulario dentro de las tarjetas ---------- */
+.red-barra, .barra-herramientas { color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .red-barra, :root:not([data-theme="light"]) .barra-herramientas { color-scheme: dark; } }
+:root[data-theme="dark"] .red-barra, :root[data-theme="dark"] .barra-herramientas { color-scheme: dark; }
+:root[data-theme="light"] .red-barra, :root[data-theme="light"] .barra-herramientas { color-scheme: light; }
+
+:is(.red-barra, .barra-herramientas) :is(input:not([type=checkbox]):not([type=radio]), select) {
+  height: 36px;
+  min-width: 0;
+  padding: 0 12px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+  font-size: 13px;
+  text-overflow: ellipsis;
+}
+:is(.red-barra, .barra-herramientas) select { padding-right: 8px; cursor: pointer; }
+:is(.red-barra, .barra-herramientas) input::placeholder { color: var(--tenue); opacity: 1; }
+:is(.red-barra, .barra-herramientas) :is(input, select):focus,
+:is(.red-barra, .barra-herramientas) :is(input, select):focus-visible {
+  outline: none;
+  border-color: var(--acento);
+  box-shadow: var(--foco);
+  border-radius: 10px;
+}
+:is(.red-barra, .barra-herramientas) label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--tenue);
+}
+:is(.red-barra, .barra-herramientas) .boton { height: 36px; }
+#red-escaner-form :is(input) { flex: 1 1 180px; }
+#red-equipos-buscar { flex: 1 1 220px; }
+
+/* ---------- KPIs y pulido ---------- */
+.kpis { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.kpi { align-items: center; justify-content: flex-start; text-align: center; }
+.kpi-anillo { max-width: 100%; display: flex; justify-content: center; }
+.red-estado-cuerpo { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.red-estado-cuerpo > * { min-width: 0; width: 100%; }
+
+/* ---------- Barra superior: chips sin cortes ---------- */
+.barra .chips, .barra #chips {
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 18px);
+  mask-image: linear-gradient(90deg, transparent 0, #000 18px);
+}
+@media (min-width: 760px) and (max-width: 1279.98px) {
+  .barra #chips .chip:not(:first-child):not(:nth-child(2)) { display: none; }
+}
+@media (max-width: 759.98px) {
+  .barra #chips, .barra .chips { -webkit-mask-image: none; mask-image: none; margin: 0; padding: 0; max-width: 100%; }
+  .barra { min-width: 0; max-width: 100vw; }
+  .aviso-clave { margin: 12px 12px 0; max-width: calc(100vw - 24px); min-width: 0; }
+  .aviso-clave > * { min-width: 0; }
+  .aviso-clave .boton { max-width: 100%; }
+  .actividad > li {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "punto titulo" ". detalle" ". hora";
+  }
+}
+@media (max-width: 559.98px) {
+  .actividad > li { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "punto titulo" ". detalle" ". hora"; }
+}
