@@ -24,6 +24,9 @@
   <link rel="stylesheet" href="/static/css/rutinas.css">
   <link rel="stylesheet" href="/static/css/tablero.css">
   <link rel="stylesheet" href="/static/css/red.css">
+  <link rel="stylesheet" href="/static/css/resumen.css">
+  <link rel="stylesheet" href="/static/css/inicio.css">
+  <link rel="stylesheet" href="/static/css/vidrio.css">
 </head>
 <body>
   <!-- Pantalla de inicio: las Pléyades se dibujan mientras llegan los datos (estilos en orion.css, lógica en carga.js) -->
@@ -101,7 +104,6 @@
         <svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
         <input type="search" id="buscar-global-entrada" name="q" placeholder="Buscar equipos…" aria-label="Buscar en el panel (equipos de la red)">
       </form>
-      <div id="chips" class="chips" aria-live="polite"></div>
       <div class="barra-der">
         <span id="ip-publica" class="tenue solo-escritorio"></span>
         <span id="actualizado" class="tenue"></span>
@@ -130,6 +132,7 @@
         <div class="marca"><img class="marca-logo" src="/static/img/pleyades-marca.svg" alt=""><b>Pleyades<span class="degradado">Home</span></b></div>
         <button type="button" id="btn-menu-cerrar" class="boton boton-icono" aria-label="Cerrar menú">✕</button>
       </div>
+      <a href="#inicio" class="pestana" data-pestana="inicio"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Inicio</span></a>
       <a href="#resumen" class="pestana" data-pestana="resumen"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Resumen</span></a>
       <a href="#luces" class="pestana" data-pestana="luces"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z"/></svg><span>Luces</span></a>
       <a href="#capturas" class="pestana" data-pestana="capturas"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg><span>Capturas</span></a>
@@ -147,7 +150,27 @@
     <button id="aviso-cambiar" class="boton" type="button">Cambiar ahora</button>
   </div>
 
+  <!-- Estado de los servicios (internet, cámaras, go2rtc...): en el cuerpo, no en la barra, para que nunca se corte -->
+  <section id="chips" class="chips estado-franja" aria-live="polite" aria-label="Estado de los servicios"></section>
+
+  <!-- Inicio: panel de casa tipo tableta de pared (docs/DISENO.md "Pestaña Inicio"); cada tarjeta la pinta static/js/inicio/ -->
+  <main id="pestana-inicio" class="inicio" hidden>
+    <section id="inicio-notas" class="inicio-notas" aria-label="Lo último en casa"></section>
+    <section id="inicio-reloj" class="inicio-reloj" aria-live="off"></section>
+    <section id="inicio-camara" class="tarjeta inicio-camara" aria-label="Cámaras"></section>
+    <section id="inicio-clima" class="tarjeta inicio-clima" aria-label="Clima"></section>
+    <section id="inicio-hab" class="tarjeta inicio-hab" aria-label="Habitación"></section>
+    <section id="inicio-habitaciones" class="tarjeta inicio-habitaciones"><h2>Habitaciones</h2><ul class="inicio-lista"></ul></section>
+    <section id="inicio-atajos" class="tarjeta inicio-atajos"><h2>Accesos directos</h2><div class="inicio-mosaicos"></div></section>
+    <section id="inicio-agenda" class="tarjeta inicio-agenda" aria-label="Agenda"></section>
+    <nav id="inicio-dock" class="inicio-dock" aria-label="Acciones rápidas"></nav>
+  </main>
+
   <main id="pestana-resumen" class="rejilla esperando">
+    <section id="sec-kpis" aria-label="Indicadores">
+      <div id="resumen-kpis" class="kpis"></div>
+    </section>
+
     <section id="sec-camaras" class="tarjeta">
       <h2>Cámaras</h2>
       <div id="camaras" class="camaras"></div>
@@ -167,7 +190,7 @@
 
     <section id="sec-caidas" class="tarjeta">
       <h2>Caídas · últimas 24 h</h2>
-      <div id="uptime" class="kpis"></div>
+      <div id="uptime" class="caidas-anillos"></div>
       <div id="cintas" class="cintas"></div>
       <h3>Caídas por hora del día</h3>
       <div id="caidas-hora"></div>
@@ -179,14 +202,13 @@
       <h2 id="consumo-titulo">Calidad por dispositivo</h2>
       <p id="consumo-aviso" class="aviso" hidden></p>
       <div id="consumo-dona"></div>
-      <div id="consumo-barras"></div>
+      <div id="consumo-barras" class="consumo-barras"></div>
     </section>
 
     <section id="sec-espacio" class="tarjeta">
       <h2>Almacenamiento de grabaciones</h2>
       <p id="espacio-aviso" class="aviso" hidden></p>
-      <div id="espacio-kpis" class="kpis"></div>
-      <div id="espacio-dona"></div>
+      <div id="espacio-kpis" class="espacio-anillo"></div>
       <div id="espacio-uso"></div>
     </section>
 
@@ -212,13 +234,13 @@
         <button type="button" class="filtro" data-grupo="luces">Luces</button>
         <button type="button" class="filtro" data-grupo="sistema">Sistema</button>
       </div>
-      <ol id="linea-tiempo" class="linea-tiempo"></ol>
+      <ol id="linea-tiempo" class="linea-tiempo actividad"></ol>
       <button id="mas-eventos" class="boton" type="button">Ver más</button>
     </section>
   </main>
 
   <main id="pestana-luces" class="luces-vista" hidden>
-    <section class="tarjeta">
+    <section class="tarjeta luces-focos">
       <div class="luces-vista-cabeza">
         <h2>Focos <span id="luces-sub-vista" class="tenue"></span></h2>
         <div class="luces-todas" id="luces-todas" hidden>
@@ -226,8 +248,14 @@
           <button type="button" class="boton" data-todas="0">Apagar todo</button>
         </div>
       </div>
+      <!-- Fila de indicadores: anillo, cifra de focos y una cifra por habitación con encendidos (las pone luces.js) -->
+      <div id="luces-kpis" class="kpis luces-kpis">
+        <div class="kpi luces-kpi-anillo"><div id="luces-anillo"></div></div>
+        <div class="kpi"><span class="kpi-titulo">Focos</span><span id="luces-cifra" class="cifra">–</span><span id="luces-cifra-texto" class="kpi-texto"></span></div>
+      </div>
       <p id="luces-aviso" class="aviso" hidden></p>
-      <ul id="luces-lista" class="luces-lista"></ul>
+      <!-- Grupos por habitación (los pinta luces.js) -->
+      <div id="luces-lista" class="luces-lista"></div>
     </section>
     <section class="tarjeta">
       <div id="rutinas" class="rutinas rutinas-vista" hidden>
@@ -503,6 +531,16 @@
   <script src="/static/js/red/escaner.js"></script>
   <script src="/static/js/red/velocidad.js"></script>
   <script src="/static/js/red/eventos.js"></script>
+  <script src="/static/js/inicio/nucleo.js"></script>
+  <script src="/static/js/inicio/notas.js"></script>
+  <script src="/static/js/inicio/reloj.js"></script>
+  <script src="/static/js/inicio/camara.js"></script>
+  <script src="/static/js/inicio/clima.js"></script>
+  <script src="/static/js/inicio/habitacion.js"></script>
+  <script src="/static/js/inicio/habitaciones.js"></script>
+  <script src="/static/js/inicio/atajos.js"></script>
+  <script src="/static/js/inicio/agenda.js"></script>
+  <script src="/static/js/inicio/dock.js"></script>
   <script src="/static/js/pestanas.js"></script>
 </body>
 </html>

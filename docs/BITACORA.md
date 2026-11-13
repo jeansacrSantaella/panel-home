@@ -127,3 +127,14 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | Revisión | Capturas con Chrome headless (panel + sonda real) en escritorio, tableta y celular para revisar el diseño. | Claude |
 | Arreglos | Gráficas: anillos dentro de su caja, área con relleno y línea continua (clip-path), bloques/progreso con degradado continuo (agente Sonnet, verificado con capturas). CSS: campos y selectores del tablero, rejilla de KPIs, nada desborda en celular, chips en la barra (agente Sonnet). Claude: equipos.js leía `detail` en vez de `detail.resumen` (tabla vacía), fabricante repetido, punto de estado invisible, tabla sin partir datos. | varios |
 | Prueba | Capturas finales escritorio/tableta: lateral, ruta, anillos segmentados, progreso, tabla de 15 equipos reales, velocidad, eventos. Suite 187/187. | Claude |
+
+## 2026-11-13 — Inicio tipo panel de pared + vidrio + clima + habitaciones
+
+| Paso | Qué | Quién |
+|---|---|---|
+| Ajuste | Indicadores de estado (`#chips`) bajados de la barra superior a una franja en el cuerpo: ya no se cortan según el ancho. Chip "Sonda de red" con RED_INTERNA. | Claude |
+| Diseño | Segunda referencia (glassmorphism, panel de casa): contrato "Piel de vidrio" y "Pestaña Inicio" en `docs/DISENO.md`; esqueleto de `#pestana-inicio` (portada), `static/js/inicio/nucleo.js`. | Claude |
+| C1 | `panel/clima.py`: Open-Meteo sin llave (ciudad geocodificada una vez o lat/lon), actual + 4 días, último dato guardado; `CLIMA_CIUDAD/LAT/LON`; tarea cada 15 min; `GET /api/clima`. | Gemini 3.5 flash-lite |
+| C2 | `panel/habitaciones.py`: habitación por foco (tabla `luz_habitacion`), resumen por habitación, aplicar a toda la habitación en paralelo; rutas `/api/luces/habitaciones`, `/api/luces/<id>/habitacion`, `/api/luces/habitacion`. 8 pruebas. | Gemini flash-lite vía agente Haiku (+ arreglo de validación) ; rutas: Claude |
+| Inicio | `reloj.js` + `dock.js`, `clima.js`, `camara.js` (Gemini); `habitacion.js` (arco) + `habitaciones.js` (agente Sonnet); `atajos.js`, `agenda.js`, campo Habitación en Luces, fecha de capturas desde la agenda (Gemini vía agente Haiku). Endurecido `iconoClima`. | varios |
+| Vidrio | `static/css/vidrio.css`: tokens de vidrio claro/oscuro, nebulosa de fondo, vidrio en tarjetas, barra, lateral, chips, diálogos y botones; sin desenfoque en celular. | Agente Claude Sonnet (verificado con capturas) |

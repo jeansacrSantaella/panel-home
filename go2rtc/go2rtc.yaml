@@ -1,0 +1,15 @@
+# Las cámaras NO se listan aquí; panel-home las registra por la API de go2rtc desde su base
+# de datos (tabla de cámaras de panel.db) y las quita al borrarlas. Así hay una sola fuente de verdad.
+# Solo el navegador NUNCA habla con go2rtc: lo hace panel-home por la red interna de compose.
+
+api:
+  listen: ":1984"
+
+rtsp:
+  listen: ":8554"
+
+ffmpeg:
+  bin: ffmpeg
+
+log:
+  level: info

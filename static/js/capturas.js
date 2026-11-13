@@ -12,6 +12,22 @@
     let capturas = [];
     let inicializado = false;
 
+    // Fecha pedida desde la agenda de Inicio (sessionStorage); se consume una sola vez
+    function consumirFechaPedida() {
+        let fecha = null;
+        try {
+            fecha = sessionStorage.getItem("capturas-fecha");
+            sessionStorage.removeItem("capturas-fecha");
+        } catch (_) {
+            return false;
+        }
+        if (!fecha || !/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !inputFecha) return false;
+        inputFecha.value = fecha;
+        return true;
+    }
+
+    consumirFechaPedida();
+
     // Obtiene la fecha de hoy en hora local (AAAA-MM-DD)
     function hoyLocal() {
         const d = new Date();
@@ -187,8 +203,11 @@
     // Carga inicial al mostrar la pestaña
     document.addEventListener("pestana", function(e) {
         if (e.detail === "capturas") {
+            const pedida = consumirFechaPedida();
             if (!inicializado) {
                 inicializado = true;
+                cargar();
+            } else if (pedida) {
                 cargar();
             }
         }

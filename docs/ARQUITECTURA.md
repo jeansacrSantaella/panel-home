@@ -179,3 +179,13 @@ class Avisador:
 - web: `POST /api/interno/red` (token, ≤ 2 MB, sin sesión); `GET /api/red/eventos|export.csv|sonda`, `POST /api/red/escanear|alias|network`.
 - `panel/tareas.py` (`Planificador`): descarga de fabricantes (7 días) y poda de sondeos (diaria).
 - `scripts/migrar_netwatch.py`: importa `netwatch.db` (idempotente).
+
+## Agregado: cámaras internas
+
+- Contrato completo en `docs/CAMARAS.md`. `CAMARAS_INTERNAS=1` (+ `INTERNO_TOKEN` para el detector, `ADMIN_PIN` opcional).
+- `panel/camaras/`: `registro.py` (tabla `camaras`), `go2rtc.py` (cliente + sincronizador), `vigilante.py` (salud y eventos), `grabaciones.py`, `onvif.py` (PTZ), `video.py` (sesiones y puente WebSocket), `servicio.py` (`Camaras`, la fachada).
+- `Recolector(cfg, db, red, camaras)`: con `camaras`, `_camaras` usa `lista()`/`salud()` (fuente "Cámaras") y el espacio sale de `camaras.espacio()`. Los eventos de caída no se derivan del estado: los emite el vigilante (`al_evento` -> `db.agregar_evento`, `avisado=0`).
+- `Config`: `interno_token`; con `camaras_internas` y sin `PANEL_AVISAR`, `avisar` suma `AVISOS_CAMARAS` (`camara_caida`, `camara_volvio`, `go2rtc_sin_respuesta`, `go2rtc_volvio`, `servidor_suspendido`).
+- `crear_servidor(..., camaras=None)`. web: `GET/POST /api/camaras`, `DELETE /api/camaras/<id>` (o `POST .../borrar`), `/salud`, `/config`, `/sesion[/<sid>/latido|salir]`, `/<id>/foto|mover|parar`, `/go2rtc/<script>`; `GET /api/camaras/video` (WebSocket hacia go2rtc, se atiende antes de cualquier otra respuesta; exige sesión del panel y de video, y solo cámaras registradas); `GET /api/interno/camaras` (Bearer `INTERNO_TOKEN`, sin claves, sin sesión; 404 si no hay token). Sin cámaras internas, 409.
+- `/api/grabaciones*` (días, lista, archivo con `Range`/206, borrar, borrar-dia, exportar zip sin `Content-Length`, cierra al terminar) funcionan con `not FOTOS_REMOTAS`, con o sin `CAMARAS_INTERNAS`; cuerpo de hasta 256 KB en la selección. Alta/baja/borrado exigen `X-Admin` si hay `ADMIN_PIN`.
+- `main.py`: crea `Camaras`, registra sus tareas, importa `cameras.json` de `CAMARAS_DATA` si la tabla está vacía. "Acerca de" muestra "Cámaras (internas)".

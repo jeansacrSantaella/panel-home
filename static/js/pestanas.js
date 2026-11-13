@@ -1,7 +1,7 @@
 /* Pestañas: Resumen, Capturas y los otros proyectos incrustados desde su dirección. */
 (function () {
   "use strict";
-  const NOMBRES = ["resumen", "luces", "capturas", "camaras", "red"];
+  const NOMBRES = ["inicio", "resumen", "luces", "capturas", "camaras", "red"];
   let urls = null;  // camaras_url y netwatch_url, vienen de /api/panel
 
   // Los iframes se cargan solo al abrir su pestaña (el panel de cámaras limita las sesiones abiertas)
@@ -15,7 +15,7 @@
   }
 
   function mostrar(nombre) {
-    if (!NOMBRES.includes(nombre)) nombre = "resumen";
+    if (!NOMBRES.includes(nombre)) nombre = "inicio";  // la portada es Inicio
     NOMBRES.forEach(n => { document.getElementById("pestana-" + n).hidden = n !== nombre; });
     document.querySelectorAll(".pestana").forEach(a => {
       a.classList.toggle("activa", a.dataset.pestana === nombre);

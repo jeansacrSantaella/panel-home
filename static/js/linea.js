@@ -56,7 +56,8 @@
 
   function crearNodoEvento(ev, esNuevo) {
     const li = document.createElement("li");
-    li.className = "ev " + (ev.nivel || "info") + (esNuevo ? " nuevo" : "");
+    li.dataset.nivel = ev.nivel || "info";  // punto de color (.actividad)
+    li.className = esNuevo ? "nuevo" : "";
 
     const spanHora = document.createElement("span");
     spanHora.className = "ev-hora";
@@ -65,10 +66,7 @@
     const mm = String(d.getMinutes()).padStart(2, "0");
     spanHora.textContent = hh + ":" + mm;
 
-    const spanPunto = document.createElement("span");
-    spanPunto.className = "ev-punto";
-
-    const divContenedor = document.createElement("div");
+    const divContenedor = document.createDocumentFragment();
 
     const divTitulo = document.createElement("div");
     divTitulo.className = "ev-titulo";
@@ -105,9 +103,9 @@
       divContenedor.appendChild(btnFoto);
     }
 
-    li.appendChild(spanHora);
-    li.appendChild(spanPunto);
+    // orden de .actividad: título, detalle, (foto), hora
     li.appendChild(divContenedor);
+    li.appendChild(spanHora);
 
     return li;
   }

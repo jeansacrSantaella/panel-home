@@ -1,0 +1,47 @@
+/* Resumen: solo lo propio de esta pestaña; lo genérico está en tablero.css */
+#sec-kpis { grid-area: kpis; min-width: 0; }
+#resumen-kpis { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+#pestana-resumen.rejilla {
+  grid-template-areas: "kpis" "camaras" "luces" "caidas" "eventos" "espacio" "sistema" "calor" "red" "consumo";
+}
+@media (min-width: 760px) {
+  #pestana-resumen.rejilla {
+    grid-template-areas: "kpis kpis" "camaras camaras" "luces caidas" "eventos eventos" "red sistema" "espacio consumo" "calor calor";
+  }
+}
+@media (min-width: 1200px) {
+  #pestana-resumen.rejilla {
+    grid-template-areas: "kpis kpis kpis" "camaras camaras eventos" "luces caidas eventos" "red sistema eventos" "espacio calor consumo";
+  }
+}
+
+#sec-caidas h3 { margin: 16px 0 8px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--tenue); }
+.caidas-anillos { margin-bottom: 8px; }
+.espacio-anillo { display: flex; justify-content: center; margin-bottom: 14px; }
+#sistema-barras { margin-bottom: 12px; }
+
+/* Contenedores del servidor */
+.contenedores .punto { margin-right: 4px; vertical-align: middle; }
+
+/* Línea de tiempo con el estilo .actividad */
+#linea-tiempo > li.dia {
+  display: block;
+  padding: 12px 0 6px;
+  border-bottom: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--tenue);
+  background: transparent;
+}
+#linea-tiempo > li.dia::before { display: none; }
+#linea-tiempo > li > .ev-foto-btn { grid-column: 2 / -1; justify-self: start; margin-top: 6px; }
+#linea-tiempo > li.nuevo { animation: resumen-nuevo 1.6s ease-out; }
+@keyframes resumen-nuevo { from { background: color-mix(in srgb, var(--acento) 18%, transparent); } to { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { #linea-tiempo > li.nuevo { animation: none; } }
+
+/* KPIs: 3 por fila en tableta (6 = 3 + 3), 6 en escritorio */
+@media (min-width: 560px) and (max-width: 1099.98px) { #resumen-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { #resumen-kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); } }

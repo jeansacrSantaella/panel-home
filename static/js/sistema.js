@@ -11,13 +11,6 @@
     return `${m} min`;
   }
 
-  // Devuelve la variable CSS del color según el porcentaje o valor
-  function obtenerColor(val) {
-    if (val >= 90) return "var(--mal)";
-    if (val >= 75) return "var(--alerta)";
-    return "var(--acento)";
-  }
-
   // Escucha el evento global emitido por la aplicación principal
   document.addEventListener("panel", function (e) {
     const s = e.detail ? e.detail.sistema : null;
@@ -48,34 +41,13 @@
     if (s.nucleos != null) partes.push(`${s.nucleos} núcleos`);
     subEl.textContent = partes.join(" · ");
 
-    // Construir la lista de barras de métricas (CPU, RAM, Temperatura)
+    // Anillos de CPU y memoria
     const items = [];
-    if (s.cpu != null) {
-      items.push({
-        etiqueta: "CPU",
-        valor: s.cpu,
-        texto: `${s.cpu} %`,
-        color: obtenerColor(s.cpu)
-      });
-    }
+    if (s.cpu != null) items.push({ etiqueta: "CPU", valor: s.cpu, max: 100 });
     if (s.ram && s.ram.total) {
-      const pct = (s.ram.usado / s.ram.total) * 100;
-      items.push({
-        etiqueta: "Memoria",
-        valor: pct,
-        texto: `${HChart.formatoBytes(s.ram.usado)} de ${HChart.formatoBytes(s.ram.total)}`,
-        color: obtenerColor(pct)
-      });
+      items.push({ etiqueta: "RAM " + HChart.formatoBytes(s.ram.usado) + " / " + HChart.formatoBytes(s.ram.total), valor: (s.ram.usado / s.ram.total) * 100, max: 100 });
     }
-    if (s.temperatura != null) {
-      items.push({
-        etiqueta: "Temperatura",
-        valor: s.temperatura,
-        texto: `${s.temperatura} °C`,
-        color: obtenerColor(s.temperatura)
-      });
-    }
-    HChart.barras(barrasEl, items, { max: 100, etiqueta: "Uso del servidor" });
+    HChart.anillos(barrasEl, items, { etiqueta: "Uso del servidor" });
 
     // Renderizar contenedores Docker
     contUl.textContent = "";
@@ -94,7 +66,8 @@
         } else if (c.estado === "restarting" || c.salud === "starting") {
           estadoClase = "alerta";
         }
-        punto.className = `punto ${estadoClase}`;
+        punto.className = "punto";
+        punto.dataset.estado = estadoClase;
         li.appendChild(punto);
 
         const b = document.createElement("b");

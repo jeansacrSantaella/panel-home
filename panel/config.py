@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 from pathlib import Path
-from typing import FrozenSet, Mapping
+from typing import FrozenSet, Mapping, Optional
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -22,6 +22,11 @@ YA_AVISADOS: FrozenSet[str] = frozenset({
 AVISOS_RED: FrozenSet[str] = frozenset({
     "internet_caido", "internet_ok", "red_local_caida", "red_local_ok", "dns_caido", "dns_ok",
     "equipo_nuevo", "cambio_ip",
+})
+
+# Lo que avisaba gestorCamaras; con CAMARAS_INTERNAS=1 lo avisa panel-home (vigilante de cámaras)
+AVISOS_CAMARAS: FrozenSet[str] = frozenset({
+    "camara_caida", "camara_volvio", "go2rtc_sin_respuesta", "go2rtc_volvio", "servidor_suspendido",
 })
 
 # Solo lo que nadie más avisa: cuando NetWatch o gestorCamaras dejan de responder.
@@ -58,9 +63,13 @@ class Config:
     caida_tras: int = 45
     onvif_timeout: float = 5.0
     camaras_iniciales: str = ""
+    interno_token: str = ""       # secreto del detector (GET /api/interno/camaras)
     red_interna: bool = False     # True: la red la mide la sonda (sonda/) y la procesa panel-home; ver docs/RED.md
     red_token: str = ""           # secreto compartido con la sonda (POST /api/interno/red)
     oui_archivo: Path = ROOT / "data" / "oui.txt"   # fabricantes por MAC (se descarga solo)
+    clima_ciudad: str = ""        # Open-Meteo: ciudad (se geocodifica una vez) o lat/lon exactos
+    clima_lat: Optional[float] = None
+    clima_lon: Optional[float] = None
 
     @property
     def telegram_activo(self) -> bool:
@@ -206,6 +215,10 @@ def cargar(env: Mapping[str, str] = os.environ) -> Config:
     if f_onvif is not None:
         kwargs["onvif_timeout"] = f_onvif
 
+    val = _obtener("INTERNO_TOKEN")
+    if val:
+        kwargs["interno_token"] = val
+
     val = _obtener("CAMARAS")
     if val:
         kwargs["camaras_iniciales"] = val
@@ -222,9 +235,20 @@ def cargar(env: Mapping[str, str] = os.environ) -> Config:
     if val:
         kwargs["oui_archivo"] = Path(val).expanduser()
 
+    val = _obtener("CLIMA_CIUDAD")
+    if val:
+        kwargs["clima_ciudad"] = val
+    for clave, campo in (("CLIMA_LAT", "clima_lat"), ("CLIMA_LON", "clima_lon")):
+        n = _decimal(clave)
+        if n is not None:
+            kwargs[campo] = n
+
     # Sin NetWatch, los avisos de la red los manda panel-home (salvo que PANEL_AVISAR diga otra cosa)
-    if kwargs.get("red_interna") and "avisar" not in kwargs:
-        kwargs["avisar"] = TIPOS_AVISO | AVISOS_RED
+    if "avisar" not in kwargs:
+        extra = (AVISOS_RED if kwargs.get("red_interna") else frozenset()) | \
+                (AVISOS_CAMARAS if kwargs.get("camaras_internas") else frozenset())
+        if extra:
+            kwargs["avisar"] = TIPOS_AVISO | extra
 
     return Config(**kwargs)
 

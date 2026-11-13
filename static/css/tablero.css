@@ -117,7 +117,7 @@
 @media (max-width: 759.98px) {
   .ruta { display: none; }
   /* buscador en su propia fila bajo la marca */
-  .barra { grid-template-areas: "menu marca der" "buscar buscar buscar" "chips chips chips"; }
+  .barra { grid-template-areas: "menu marca der" "buscar buscar buscar"; }
   .barra-der { gap: 6px; }
   .barra #btn-notif:disabled { display: none; }
 }
@@ -137,7 +137,7 @@
     margin: 0;
     padding: 10px 20px;
     grid-template-columns: auto auto minmax(140px, 300px) minmax(0, 1fr) auto;
-    grid-template-areas: "menu ruta buscar chips der";
+    grid-template-areas: "menu ruta buscar . der";
     background: color-mix(in srgb, var(--superficie) 88%, transparent);
     backdrop-filter: saturate(1.4) blur(10px);
     border-bottom: 1px solid var(--borde);
@@ -145,7 +145,6 @@
   .barra > .marca { display: none; }   /* la marca vive en la lateral */
   .barra .btn-menu { display: none; grid-area: menu; }
   .seccion-actual { display: none; }
-  .chips { justify-content: flex-end; }
 
   .pestanas {
     position: fixed;
@@ -455,18 +454,7 @@
 .red-estado-cuerpo { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .red-estado-cuerpo > * { min-width: 0; width: 100%; }
 
-/* ---------- Barra superior: chips sin cortes ---------- */
-.barra .chips, .barra #chips {
-  min-width: 0;
-  overflow-x: auto;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 18px);
-  mask-image: linear-gradient(90deg, transparent 0, #000 18px);
-}
-@media (min-width: 760px) and (max-width: 1279.98px) {
-  .barra #chips .chip:not(:first-child):not(:nth-child(2)) { display: none; }
-}
 @media (max-width: 759.98px) {
-  .barra #chips, .barra .chips { -webkit-mask-image: none; mask-image: none; margin: 0; padding: 0; max-width: 100%; }
   .barra { min-width: 0; max-width: 100vw; }
   .aviso-clave { margin: 12px 12px 0; max-width: calc(100vw - 24px); min-width: 0; }
   .aviso-clave > * { min-width: 0; }
@@ -479,3 +467,18 @@
 @media (max-width: 559.98px) {
   .actividad > li { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "punto titulo" ". detalle" ". hora"; }
 }
+
+/* ---------- Franja de estado (antes en la barra superior, donde se cortaba según el ancho) ---------- */
+.estado-franja {
+  grid-area: auto;
+  display: flex;
+  flex-wrap: wrap;           /* varias líneas si no caben: nunca se ocultan */
+  gap: 8px;
+  overflow: visible;
+  max-width: 1440px;
+  margin: 12px 12px 0;
+  padding: 0;
+}
+.estado-franja:empty { display: none; }
+@media (min-width: 760px) { .estado-franja { margin: 12px 20px 0; } }
+@media (min-width: 1480px) { .estado-franja { margin: 12px auto 0; } }

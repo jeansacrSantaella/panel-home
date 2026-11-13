@@ -32,10 +32,11 @@ MAPA_CAMARA = {
 
 
 class Recolector:
-    def __init__(self, cfg, db, red=None):
+    def __init__(self, cfg, db, red=None, camaras=None):
         self.cfg = cfg
         self.db = db
         self.red = red  # panel.red.servicio.Red: la red la mide la sonda (RED_INTERNA=1); None = leer NetWatch
+        self.camaras = camaras  # panel.camaras.servicio.Camaras (CAMARAS_INTERNAS=1); None = leer gestorCamaras
         self.ultimo = {"ts": 0, "netwatch": None, "camaras": None, "salud": None, "espacio": None, "sistema": None}
         self._espacio_ts = 0
         self._malos = {}  # lecturas seguidas con el contenedor caído
@@ -55,7 +56,8 @@ class Recolector:
         if ahora - self._espacio_ts >= 300:  # el disco cambia despacio: cada 5 min basta
             self._espacio_ts = ahora
             try:
-                self.ultimo["espacio"] = fuentes.camaras_espacio(self.cfg)
+                self.ultimo["espacio"] = (self.camaras.espacio() if self.camaras is not None
+                                          else fuentes.camaras_espacio(self.cfg))
             except Exception:
                 log.exception("falló espacio")
         self.ultimo["ts"] = ahora
@@ -124,12 +126,16 @@ class Recolector:
         return n
 
     def _camaras(self, ahora: int, silencio: bool) -> int:
-        self.ultimo["camaras"] = fuentes.camaras_lista(self.cfg)
-        salud = fuentes.camaras_salud(self.cfg)
+        if self.camaras is not None:
+            self.ultimo["camaras"] = self.camaras.lista()
+            salud = self.camaras.salud()
+        else:
+            self.ultimo["camaras"] = fuentes.camaras_lista(self.cfg)
+            salud = fuentes.camaras_salud(self.cfg)
         self.ultimo["salud"] = salud
         n = self._fuente("Cámaras", salud is not None, ahora, silencio)
-        if not salud:
-            return n
+        if not salud or self.camaras is not None:
+            return n  # con cámaras internas los eventos de caída los emite el vigilante (al_evento)
         previos = self.db.get("camaras", {})
         nuevos = {"_go2rtc": bool(salud.get("go2rtc"))}
         for cid, s in (salud.get("camaras") or {}).items():

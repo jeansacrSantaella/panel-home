@@ -1,7 +1,23 @@
 # Las URLs del .env deben usar la IP de la red (ej. 192.168.1.94), no localhost,
 # porque dentro del contenedor localhost es el propio contenedor y el navegador del celular tampoco lo resolvería.
+# La imagen de go2rtc va en latest, igual que en gestorCamaras (sin etiqueta fija).
 
 services:
+  go2rtc:
+    # gestorCamaras usaba alexxit/go2rtc sin etiqueta (latest); para fijar una versión, cámbiala aquí
+    image: alexxit/go2rtc:latest
+    container_name: go2rtc
+    restart: unless-stopped
+    volumes:
+      - ./go2rtc/go2rtc.yaml:/config/go2rtc.yaml
+    # ports: ["1984:1984"]   # solo para depurar: visor y API de go2rtc desde el navegador de esta laptop
+    # Por defecto no se publica; solo es accesible desde la red interna de compose (panel-home y detector).
+    # El RTSP 8554 tampoco se publica (solo interno).
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   panel-home:
     build: .
     container_name: panel-home
@@ -21,6 +37,41 @@ services:
       PANEL_HOST: "0.0.0.0"
       PANEL_DB: /data/panel.db
       LUCES_ARCHIVO: /data/devices.json   # llaves de los focos (docs/LUCES.md); data/ no se sube a git
+      # CAMARAS_INTERNAS: "1"   # opción: cámaras y su vigilante dentro de panel-home (ver docs/CAMARAS.md); también puede ponerse en .env
+      GO2RTC_INTERNO_URL: "http://go2rtc:1984"
+      CAMARAS_DATA: "/data"
+    depends_on:
+      - go2rtc
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  detector:
+    build: ./detector
+    container_name: detector-camaras
+    restart: unless-stopped
+    # Solo arranca con docker compose --profile camaras up -d mientras se prueba la migración de cámaras.
+    profiles:
+      - camaras
+    depends_on:
+      - go2rtc
+      - panel-home
+    volumes:
+      - ./data:/data
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      TZ: America/Mexico_City
+      PANEL_URL: "http://panel-home:8770"
+      GO2RTC_URL: "http://go2rtc:1984"
+      RTSP_URL: "rtsp://go2rtc:8554"
+      INTERNO_TOKEN: "${INTERNO_TOKEN:-}"   # el mismo que en .env para panel-home
+      INTERVALO: "1.5"   # segundos entre capturas para inferencia
+      CONFIANZA: "0.5"   # umbral mínimo de confianza del modelo
+      RETENCION_HORAS: "24"   # horas que se conservan los clips grabados
+      CLIP_SEG: "15"   # duración de cada segmento de video grabado
     logging:
       options:
         max-size: "10m"

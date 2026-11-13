@@ -305,7 +305,7 @@ input[type="color"].luz-color {
 .luz-mini:not(.apagada) .luz-punto { box-shadow: 0 0 10px 1px var(--luz, transparent); }
 
 /* ---- Vista Luces: estado de conexión de cada foco ---- */
-li.luz { grid-template-areas: "icono info switch" "conexion conexion conexion" "brillo brillo brillo" "mas mas mas"; }
+li.luz { grid-template-areas: "icono info switch" "conexion conexion conexion" "hab hab hab" "brillo brillo brillo" "mas mas mas"; }
 .luz-conexion { grid-area: conexion; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12px; }
 .luz-conexion .tenue { overflow-wrap: anywhere; }
 .luz-estado { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
@@ -326,3 +326,21 @@ li.luz.sin-red .luz-icono, li.luz.sin-red .luz-info, li.luz.sin-red .luz-brillo 
 }
 @media (max-width: 759.98px) { .luces-vista { padding: 12px; gap: 12px; } }
 .luces-todas .boton { white-space: nowrap; }
+
+/* Campo "Habitación" de cada foco */
+label.luz-hab {
+  grid-area: hab;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--tenue);
+}
+input.luz-habitacion {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 13px;
+}

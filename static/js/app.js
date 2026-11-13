@@ -40,6 +40,7 @@
       pintarMapa(d);
       pintarCaidas(d);
       pintarConsumo(d);
+      pintarKpis(d);
       document.dispatchEvent(new CustomEvent("panel", { detail: d }));  // otras tarjetas (espacio.js)
     } catch (err) {
       if (elActualizado) {
@@ -67,7 +68,7 @@
     cont.textContent = "";
 
     if (!d.red) {
-      cont.appendChild(crearChip("NetWatch sin datos", "alerta"));
+      cont.appendChild(crearChip(d.red_interna ? "Sonda de red sin datos" : "NetWatch sin datos", "alerta"));
     } else {
       const checks = d.red.checks || {};
       if (checks.wan) {
@@ -324,6 +325,47 @@
   }
 
   /**
+   * Fila de indicadores con anillos al inicio del Resumen.
+   */
+  function pintarKpis(d) {
+    const cont = document.getElementById("resumen-kpis");
+    if (!cont) return;
+    const up = (d.red && d.red.uptime) || {};
+    const equipos = d.equipos || [];
+    const enLinea = equipos.filter(e => e.online).length;
+    const cams = d.camaras || [];
+    const okCams = cams.filter(c => c.estado === "ok").length;
+    const esp = d.espacio;
+    const pctLibre = esp && esp.total > 0 ? Math.round((esp.libre / esp.total) * 100) : null;
+    const items = [
+      { titulo: "Internet", texto: "Disponibilidad 24 h", opc: { valor: up.wan != null ? up.wan : null } },
+      { titulo: "Red local", texto: "Disponibilidad 24 h", opc: { valor: up.lan != null ? up.lan : null } },
+      { titulo: "DNS", texto: "Disponibilidad 24 h", opc: { valor: up.dns != null ? up.dns : null } },
+      { titulo: "Equipos", texto: enLinea + " de " + equipos.length + " en línea", opc: equipos.length ? { valor: enLinea, max: equipos.length, sufijo: "" } : { valor: null } },
+      { titulo: "Cámaras", texto: okCams + " de " + cams.length + " OK", opc: cams.length ? { valor: okCams, max: cams.length, sufijo: "" } : { valor: null } },
+      { titulo: "Disco libre", texto: esp ? HChart.formatoBytes(esp.libre) + " libres" : "Sin datos", opc: { valor: pctLibre } }
+    ];
+    cont.textContent = "";
+    items.forEach(it => {
+      const k = document.createElement("div");
+      k.className = "kpi";
+      const ac = document.createElement("div");
+      ac.className = "kpi-anillo";
+      const o = it.opc;
+      if (o.valor != null && o.sufijo == null) o.valor = Math.round(o.valor * 10) / 10;
+      HChart.anillo(ac, Object.assign({ tamano: 96, segmentos: 30 }, o));
+      const t = document.createElement("div");
+      t.className = "kpi-titulo";
+      t.textContent = it.titulo;
+      const x = document.createElement("div");
+      x.className = "kpi-texto";
+      x.textContent = it.texto;
+      k.append(ac, t, x);
+      cont.appendChild(k);
+    });
+  }
+
+  /**
    * Pinta la sección de caídas, cintas de disponibilidad y latencia.
    */
   function pintarCaidas(d) {
@@ -341,26 +383,11 @@
     }
 
     if (contUptime) {
-      contUptime.textContent = "";
-      const servicios = [
-        { key: "wan", label: "Internet" },
-        { key: "lan", label: "Red local" },
-        { key: "dns", label: "DNS" }
-      ];
-      servicios.forEach(s => {
-        const val = d.red.uptime ? d.red.uptime[s.key] : null;
-        const valTxt = val != null ? `${val.toFixed(2)}%` : "–";
-
-        const div = document.createElement("div");
-        div.className = "kpi";
-        const b = document.createElement("b");
-        b.textContent = valTxt;
-        const span = document.createElement("span");
-        span.textContent = s.label;
-        div.appendChild(b);
-        div.appendChild(span);
-        contUptime.appendChild(div);
-      });
+      const nombres = [["wan", "Internet"], ["lan", "Red local"], ["dns", "DNS"]];
+      HChart.anillos(contUptime, nombres.map(([k, l]) => {
+        const v = d.red.uptime ? d.red.uptime[k] : null;
+        return { valor: v != null ? v : null, max: 100, etiqueta: l };
+      }), { etiqueta: "Disponibilidad 24 h" });
     }
 
     if (contCintas) {
@@ -402,19 +429,16 @@
 
     if (contLat) {
       const series = d.red.series || {};
-      let claveSerie = "1.1.1.1";
-      if (!series[claveSerie]) {
-        claveSerie = Object.keys(series).find(k => k !== "gateway") || Object.keys(series)[0];
+      const hora = ts => new Date(ts * 1000).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
+      const lista = Object.keys(series).map(k => ({
+        nombre: k === "gateway" ? "Router" : k,
+        puntos: (series[k] || []).filter(p => p && p[2]).map(p => ({ x: p[0], y: p[1] }))
+      })).filter(s2 => s2.puntos.length);
+      if (lista.length) {
+        HChart.area(contLat, lista, { alto: 180, formatoY: v => Math.round(v) + " ms", formatoX: hora, etiqueta: "Latencia a internet, última hora" });
+      } else {
+        contLat.textContent = "Sin datos de latencia";
       }
-
-      const serie = series[claveSerie] || [];
-      const valores = serie.map(p => (p && p[2] ? p[1] : null));
-
-      HChart.columnas(contLat, valores, {
-        alto: 60,
-        formato: v => (v == null ? "sin respuesta" : Math.round(v) + " ms"),
-        color: v => (v == null ? "var(--mal)" : (v > 100 ? "var(--alerta)" : "var(--acento)"))
-      });
     }
   }
 
@@ -441,14 +465,14 @@
           .filter(e => e.online && e.q && e.q.avg != null)
           .sort((a, b) => (b.q ? b.q.avg : 0) - (a.q ? a.q.avg : 0));
 
-        const items = equiposCon.map(e => ({
-          etiqueta: e.nombre,
+        const maxLat = Math.max(50, ...equiposCon.map(e => e.q.avg));
+        const items = equiposCon.slice(0, 10).map(e => ({
+          etiqueta: `${e.nombre} · ${Math.round(e.q.avg)} ms` + (e.q.loss > 0 ? ` · ${e.q.loss}% pérdida` : ""),
           valor: e.q.avg,
-          texto: `${Math.round(e.q.avg)} ms · ${e.q.loss}% pérdida`,
-          color: e.q.loss >= 20 ? "var(--mal)" : (e.q.loss > 0 ? "var(--alerta)" : "var(--acento)")
+          max: maxLat
         }));
 
-        HChart.barras(contBarras, items);
+        HChart.bloques(contBarras, items, { bloques: 20 });
       }
     } else {
       if (aviso) aviso.setAttribute("hidden", "");

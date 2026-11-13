@@ -56,3 +56,41 @@ Cada función limpia `cont`, respeta `prefers-reduced-motion` y deja texto acces
 `nucleo.js` define `window.RedPanel` y despacha `document` → `red-datos` con `{resumen, sonda, vivo}` (la forma de
 `/api/summary` de NetWatch en `resumen`). Cada tarjeta es un script: `estado.js`, `equipos.js`, `escaner.js`,
 `velocidad.js`, `eventos.js`.
+
+## Piel de vidrio (`static/css/vidrio.css`, se carga al final)
+
+Segunda referencia del dueño (panel de casa tipo tableta de pared): paneles de **vidrio translúcido** sobre el cielo
+de Astreo (obsidiana + nebulosa violeta/cian), esquinas de 22 px, borde de 1 px con brillo arriba, desenfoque
+`backdrop-filter: blur(18px) saturate(1.3)`, sombras suaves; botones y mosaicos redondeados. Aplica a `.tarjeta`,
+barra superior, lateral, chips y diálogos en TODAS las pestañas. Tokens: `--vidrio`, `--vidrio-borde`,
+`--vidrio-brillo`, `--vidrio-desenfoque` (claro y oscuro). En < 760 px y con `prefers-reduced-transparency: reduce`
+→ sin `backdrop-filter`, fondo sólido semitransparente.
+
+## Pestaña Inicio (`#pestana-inicio`, la de entrada)
+
+Rejilla tipo tableta horizontal (en celular se apila en este mismo orden):
+
+```
+[ chips de estado (franja #chips) ............................ ][ reloj #inicio-reloj ]
+[ cámara #inicio-camara (video + selector) ][ clima #inicio-clima ][ habitación #inicio-hab ]
+[ habitaciones #inicio-habitaciones ][ atajos #inicio-atajos ][ agenda #inicio-agenda ........ ]
+[ dock inferior #inicio-dock: luces encendidas · cámaras · internet · clima · rutina ......... ]
+```
+
+- `static/js/inicio/nucleo.js` → `window.InicioPanel`: `api`, `el`, `hace`, `iconoClima(nombre) -> SVG string fijo`
+  y eventos document: `inicio-luces` `{luces (con habitacion), habitaciones (resumen), rutinas}` cada 10 s,
+  `inicio-clima` (datos de `/api/clima`) cada 10 min; además se reutiliza el evento `panel` de app.js (cámaras, red,
+  ip, salud). Solo pide datos con la pestaña Inicio abierta. `InicioPanel.recargarLuces()`.
+- API: `GET /api/luces` (cada foco trae `habitacion`), `GET /api/luces/habitaciones` → `{habitaciones: resumen, nombres}`,
+  `POST /api/luces/<id>/habitacion {habitacion}`, `POST /api/luces/habitacion {habitacion, encendida?|brillo?|temperatura?|color?}`
+  → `{habitacion, total, ok, fallaron}`, `GET /api/rutinas`, `POST /api/rutinas/<id>/ejecutar`, `POST /api/luces/todas {encendida}`,
+  `GET /api/clima` → `{configurado, ciudad, actualizado, error, actual: {temp, sensacion, humedad, codigo, descripcion, icono, es_dia},
+  hoy: {max, min}, dias: [{fecha, dia, codigo, descripcion, icono, max, min}]}`.
+- Tarjetas (un script cada una en `static/js/inicio/`): `reloj.js` (HH:MM grande + segundos pequeños + fecha larga),
+  `camara.js` (una sola cámara a la vez con `stream.html` de go2rtc como `app.js`; botones con el nombre de cada cámara
+  a la derecha, la activa resaltada; quita el iframe al salir de Inicio para liberar la sesión de video), `clima.js`,
+  `habitacion.js` (arco grande tipo termostato: brillo promedio de la habitación elegida, − / + de 10 en 10, botones
+  encender/apagar/"Noche" (primera rutina cuyo nombre contenga "noche") y selector de habitación), `habitaciones.js`
+  (lista: ícono por nombre, nombre, insignia con focos encendidos, toque = encender/apagar la habitación), `atajos.js`
+  (mosaicos de focos y rutinas; encendido = mosaico claro), `agenda.js` (Hoy / Ayer con `/api/eventos?desde=` y el
+  mes con los días que tienen capturas `/api/capturas` → clic abre `#capturas` con esa fecha), `dock.js`.

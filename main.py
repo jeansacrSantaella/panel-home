@@ -73,8 +73,32 @@ def main() -> None:
         if not cfg.red_token:
             log.warning("RED_INTERNA=1 sin RED_TOKEN: la sonda no podrá mandar lecturas (docs/RED.md)")
         log.info("Red interna: esperando lecturas de la sonda en POST /api/interno/red")
+    camaras = None
+    if cfg.camaras_internas:
+        from panel.camaras.servicio import Camaras
+
+        def al_evento_camara(ev: dict) -> None:
+            db.agregar_evento({**ev, "avisado": 0})
+
+        camaras = Camaras(cfg, db, al_evento_camara)
+        viejo = cfg.camaras_data / "cameras.json"
+        if not camaras.registro.lista() and viejo.is_file():
+            try:
+                log.info("Cámaras: %d importadas de %s", camaras.registro.importar_json(viejo), viejo)
+            except (OSError, ValueError):
+                log.exception("no pude importar %s", viejo)
+        for t in camaras.tareas():
+            planificador.agregar(t)
+        log.info("Cámaras internas: %d registradas · go2rtc %s", len(camaras.registro.lista()), cfg.go2rtc_interno_url)
+    from panel.clima import Clima
+    from panel.tareas import cada
+    clima = Clima(db, cfg.clima_ciudad, cfg.clima_lat, cfg.clima_lon)
+    if clima.configurado:
+        planificador.agregar(cada("clima", 900, clima.actualizar, retraso=2))
+    else:
+        log.info("Clima: pon CLIMA_CIUDAD (o CLIMA_LAT y CLIMA_LON) en el .env para verlo en Inicio")
     planificador.iniciar()
-    recolector = Recolector(cfg, db, red)
+    recolector = Recolector(cfg, db, red, camaras)
     avisador = Avisador(cfg, db)
     if not avisador.activo:
         log.info("Sin TELEGRAM_TOKEN/TELEGRAM_CHAT_ID ni NTFY_URL: los avisos solo se verán en la web")
@@ -114,8 +138,9 @@ def main() -> None:
     if luces.configurado:
         rutinas.iniciar()
 
-    servidor = crear_servidor(cfg, db, recolector, auth, luces, rutinas, red)
-    log.info("Red: %s · Cámaras: %s · go2rtc: %s", "sonda (interna)" if red else cfg.netwatch_url, cfg.camaras_url, cfg.go2rtc_url or "(host de la página):1984")
+    from panel.habitaciones import Habitaciones
+    servidor = crear_servidor(cfg, db, recolector, auth, luces, rutinas, red, clima, Habitaciones(db), camaras)
+    log.info("Red: %s · Cámaras: %s · go2rtc: %s", "sonda (interna)" if red else cfg.netwatch_url, "internas" if camaras else cfg.camaras_url, cfg.go2rtc_url or "(host de la página):1984")
     log.info("Panel en http://%s:%d", cfg.host, cfg.port)
     try:
         servidor.serve_forever()
