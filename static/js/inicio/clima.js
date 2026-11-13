@@ -31,7 +31,7 @@
     if (datos.configurado === false) {
       const msg = document.createElement("div");
       msg.className = "inicio-clima-aviso";
-      msg.innerHTML = 'Agrega <code>CLIMA_CIUDAD</code> al <code>.env</code> para ver el clima';
+      msg.innerHTML = 'No pude ubicar la casa para el clima: permite la ubicación del navegador o pon <code>CLIMA_CIUDAD</code> en el <code>.env</code>';
       contenedor.appendChild(msg);
       return;
     }

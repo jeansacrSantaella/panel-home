@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 
 URL_PRONOSTICO = "https://api.open-meteo.com/v1/forecast"
 URL_GEO = "https://geocoding-api.open-meteo.com/v1/search"
+URL_IP = "https://ipapi.co/json/"
 
 # código WMO -> (descripción en español, ícono)
 CODIGOS: dict[int, tuple[str, str]] = {
@@ -64,17 +65,54 @@ class Clima:
         self.reloj = reloj
         self.error: str | None = None
         self._memoria: dict | None = None
+        self._cache_dispositivos: list[tuple[tuple[float, float], float, dict]] = []
 
     @property
     def configurado(self) -> bool:
-        return bool(self._lat is not None and self._lon is not None) or bool(self._ciudad)
+        return True
+
+    @property
+    def origen(self) -> str:
+        if self._lat is not None and self._lon is not None:
+            return "coordenadas"
+        if self._ciudad:
+            return "ciudad"
+        return "ip"
 
     def ubicacion(self) -> tuple[float, float, str] | None:
         if self._lat is not None and self._lon is not None:
             return (self._lat, self._lon, self._ciudad)
         
         if not self._ciudad:
-            return None
+            # Ubicar por IP
+            ahora = int(self.reloj())
+            guardado = self.db.get("clima:ubicacion_ip")
+            if guardado and (ahora - guardado.get("ts", 0)) < 86400:
+                return (guardado["lat"], guardado["lon"], guardado["ciudad"])
+
+            try:
+                raw = self.fetch(URL_IP)
+                data = json.loads(raw.decode("utf-8"))
+                if data.get("error") or "latitude" not in data or "longitude" not in data:
+                    self.error = "Error al obtener ubicación por IP"
+                    if guardado:
+                        return (guardado["lat"], guardado["lon"], guardado["ciudad"])
+                    return None
+                
+                lat = float(data["latitude"])
+                lon = float(data["longitude"])
+                city = data.get("city", "")
+                region = data.get("region", "")
+                ciudad_fmt = f"{city}, {region}" if region else city
+                
+                ubic = {"lat": lat, "lon": lon, "ciudad": ciudad_fmt, "ts": ahora}
+                self.db.set("clima:ubicacion_ip", ubic)
+                return (lat, lon, ciudad_fmt)
+            except Exception as e:
+                self.error = str(e)
+                if guardado:
+                    return (guardado["lat"], guardado["lon"], guardado["ciudad"])
+                return None
 
         # Verificar si ya está en db
         guardado = self.db.get("clima:ubicacion")
@@ -105,12 +143,7 @@ class Clima:
             self.error = str(e)
             return None
 
-    def actualizar(self) -> bool:
-        ubic = self.ubicacion()
-        if not ubic:
-            return False
-        lat, lon, _ = ubic
-
+    def _pronostico(self, lat: float, lon: float, ciudad: str, origen: str = "") -> dict:
         params = {
             "latitude": lat,
             "longitude": lon,
@@ -120,67 +153,76 @@ class Clima:
             "forecast_days": "5"
         }
         url = f"{URL_PRONOSTICO}?{urllib.parse.urlencode(params)}"
+        raw = self.fetch(url)
+        data = json.loads(raw.decode("utf-8"))
+        
+        cur = data.get("current", {})
+        daily = data.get("daily", {})
+        
+        codigo_act = cur.get("weather_code")
+        desc, icono = describir(codigo_act)
+        
+        actual = {
+            "temp": round(float(cur.get("temperature_2m", 0)), 1),
+            "sensacion": round(float(cur.get("apparent_temperature", 0)), 1),
+            "humedad": int(cur.get("relative_humidity_2m", 0)),
+            "codigo": int(codigo_act) if codigo_act is not None else 0,
+            "descripcion": desc,
+            "icono": icono,
+            "es_dia": bool(cur.get("is_day", 1))
+        }
+
+        times = daily.get("time", [])
+        tmax = daily.get("temperature_2m_max", [])
+        tmin = daily.get("temperature_2m_min", [])
+        wc = daily.get("weather_code", [])
+
+        hoy = None
+        dias = []
+        
+        for i, fecha_str in enumerate(times):
+            max_t = round(float(tmax[i]), 1) if i < len(tmax) and tmax[i] is not None else 0.0
+            min_t = round(float(tmin[i]), 1) if i < len(tmin) and tmin[i] is not None else 0.0
+            c_dia = wc[i] if i < len(wc) else 0
+            d_desc, d_ico = describir(c_dia)
+            
+            dt = datetime.strptime(fecha_str, "%Y-%m-%d")
+            dia_sem = DIAS_SEMANA[dt.weekday()]
+            
+            item = {
+                "fecha": fecha_str,
+                "dia": dia_sem,
+                "codigo": int(c_dia) if c_dia is not None else 0,
+                "descripcion": d_desc,
+                "icono": d_ico,
+                "max": max_t,
+                "min": min_t
+            }
+            if i == 0:
+                hoy = {"max": max_t, "min": min_t}
+            else:
+                dias.append(item)
+
+        orig = origen if origen else self.origen
+        return {
+            "configurado": True,
+            "origen": orig,
+            "ciudad": ciudad,
+            "actualizado": int(self.reloj()),
+            "error": None,
+            "actual": actual,
+            "hoy": hoy,
+            "dias": dias
+        }
+
+    def actualizar(self) -> bool:
+        ubic = self.ubicacion()
+        if not ubic:
+            return False
+        lat, lon, nombre_ciudad = ubic
+
         try:
-            raw = self.fetch(url)
-            data = json.loads(raw.decode("utf-8"))
-            
-            cur = data.get("current", {})
-            daily = data.get("daily", {})
-            
-            codigo_act = cur.get("weather_code")
-            desc, icono = describir(codigo_act)
-            
-            actual = {
-                "temp": round(float(cur.get("temperature_2m", 0)), 1),
-                "sensacion": round(float(cur.get("apparent_temperature", 0)), 1),
-                "humedad": int(cur.get("relative_humidity_2m", 0)),
-                "codigo": int(codigo_act) if codigo_act is not None else 0,
-                "descripcion": desc,
-                "icono": icono,
-                "es_dia": bool(cur.get("is_day", 1))
-            }
-
-            times = daily.get("time", [])
-            tmax = daily.get("temperature_2m_max", [])
-            tmin = daily.get("temperature_2m_min", [])
-            wc = daily.get("weather_code", [])
-
-            hoy = None
-            dias = []
-            
-            for i, fecha_str in enumerate(times):
-                max_t = round(float(tmax[i]), 1) if i < len(tmax) and tmax[i] is not None else 0.0
-                min_t = round(float(tmin[i]), 1) if i < len(tmin) and tmin[i] is not None else 0.0
-                c_dia = wc[i] if i < len(wc) else 0
-                d_desc, d_ico = describir(c_dia)
-                
-                dt = datetime.strptime(fecha_str, "%Y-%m-%d")
-                dia_sem = DIAS_SEMANA[dt.weekday()]
-                
-                item = {
-                    "fecha": fecha_str,
-                    "dia": dia_sem,
-                    "codigo": int(c_dia) if c_dia is not None else 0,
-                    "descripcion": d_desc,
-                    "icono": d_ico,
-                    "max": max_t,
-                    "min": min_t
-                }
-                if i == 0:
-                    hoy = {"max": max_t, "min": min_t}
-                else:
-                    dias.append(item)
-
-            _, _, nombre_ciudad = ubic
-            resultado = {
-                "configurado": True,
-                "ciudad": nombre_ciudad,
-                "actualizado": int(self.reloj()),
-                "error": None,
-                "actual": actual,
-                "hoy": hoy,
-                "dias": dias
-            }
+            resultado = self._pronostico(lat, lon, nombre_ciudad)
             self.error = None
             self._memoria = resultado
             self.db.set("clima:ultimo", resultado)
@@ -194,6 +236,7 @@ class Clima:
             else:
                 self._memoria = {
                     "configurado": self.configurado,
+                    "origen": self.origen,
                     "ciudad": self._ciudad,
                     "actualizado": None,
                     "error": self.error,
@@ -202,6 +245,34 @@ class Clima:
                     "dias": []
                 }
             return False
+
+    def datos_para(self, lat: float, lon: float) -> dict:
+        if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+            raise ValueError("coordenadas inválidas")
+        
+        lat_r = round(lat, 2)
+        lon_r = round(lon, 2)
+        clave_coord = (lat_r, lon_r)
+        ahora = self.reloj()
+
+        # Limpiar caché y buscar
+        self._cache_dispositivos = [item for item in self._cache_dispositivos if ahora - item[1] < 900]
+        for coord, ts, res in self._cache_dispositivos:
+            if coord == clave_coord:
+                return res
+
+        try:
+            res = self._pronostico(lat_r, lon_r, "Tu ubicación", origen="dispositivo")
+            self._cache_dispositivos.append((clave_coord, ahora, res))
+            if len(self._cache_dispositivos) > 50:
+                self._cache_dispositivos.pop(0)
+            return res
+        except Exception as e:
+            self.error = str(e)
+            casa = self.datos()
+            casa_copia = dict(casa)
+            casa_copia["error"] = self.error
+            return casa_copia
 
     def datos(self) -> dict:
         if self._memoria is not None:
@@ -214,6 +285,7 @@ class Clima:
 
         return {
             "configurado": self.configurado,
+            "origen": self.origen,
             "ciudad": self._ciudad,
             "actualizado": None,
             "error": self.error,

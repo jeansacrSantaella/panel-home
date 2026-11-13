@@ -93,10 +93,9 @@ def main() -> None:
     from panel.clima import Clima
     from panel.tareas import cada
     clima = Clima(db, cfg.clima_ciudad, cfg.clima_lat, cfg.clima_lon)
-    if clima.configurado:
-        planificador.agregar(cada("clima", 900, clima.actualizar, retraso=2))
-    else:
-        log.info("Clima: pon CLIMA_CIUDAD (o CLIMA_LAT y CLIMA_LON) en el .env para verlo en Inicio")
+    # sin CLIMA_CIUDAD ni CLIMA_LAT/LON se ubica la casa por su IP pública; cada navegador puede mandar la suya
+    planificador.agregar(cada("clima", 900, clima.actualizar, retraso=2))
+    log.info("Clima: ubicación de la casa por %s", clima.origen)
     planificador.iniciar()
     recolector = Recolector(cfg, db, red, camaras)
     avisador = Avisador(cfg, db)

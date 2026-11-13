@@ -249,6 +249,12 @@ def crear_servidor(cfg, db, recolector, auth, luces=None, rutinas=None, red=None
                 if url.path == "/api/clima":
                     if clima is None:
                         return self._json({"configurado": False})
+                    if q.get("lat") and q.get("lon"):  # ubicación del dispositivo (la manda el navegador)
+                        try:
+                            lat, lon = float(q["lat"]), float(q["lon"])
+                        except ValueError:
+                            raise ValueError("coordenadas inválidas")
+                        return self._json(clima.datos_para(lat, lon))
                     return self._json(clima.datos())
                 if url.path == "/api/rutinas":
                     return self._json({"rutinas": rutinas.lista() if rutinas is not None else []})

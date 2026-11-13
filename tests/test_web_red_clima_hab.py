@@ -218,7 +218,22 @@ class TestClima(Base):
         self.servidor(clima=clima)
         st, d, _ = self.pedir("GET", "/api/clima", cab=self.sesion())
         self.assertEqual(st, 200)
-        self.assertFalse(d["configurado"])
+        # sin ciudad ni coordenadas el clima se ubica por la IP pública (modo automático)
+        self.assertTrue(d["configurado"])
+        self.assertEqual(d["origen"], "ip")
+
+    def test_ubicacion_del_dispositivo(self):
+        llamadas = []
+        def fetch(url, timeout=10):
+            llamadas.append(url)
+            raise OSError("sin red en la prueba")
+        self.servidor(clima=Clima(Db(":memory:"), fetch=fetch))
+        st, d, _ = self.pedir("GET", "/api/clima?lat=20.67&lon=-103.33", cab=self.sesion())
+        self.assertEqual(st, 200)
+        self.assertTrue(any("latitude=20.67" in u for u in llamadas))
+        self.assertTrue(d.get("error"))
+        st, _, _ = self.pedir("GET", "/api/clima?lat=200&lon=0", cab=self.sesion())
+        self.assertEqual(st, 400)
 
     def test_sin_objeto_clima_responde_solo_configurado_false(self):
         self.servidor(clima=None)

@@ -95,7 +95,7 @@ class TestClima(unittest.TestCase):
         self.assertIn("Fallo de red", d["error"])
 
     def test_sin_configuracion(self):
+        # sin ciudad ni coordenadas se ubica por la IP pública (modo automático)
         c = Clima(self.db)
-        self.assertFalse(c.configurado)
-        d = c.datos()
-        self.assertFalse(d["configurado"])
+        self.assertTrue(c.configurado)
+        self.assertEqual(c.origen, "ip")

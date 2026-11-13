@@ -74,9 +74,32 @@
     } catch (_) { /* se reintenta en la siguiente vuelta */ }
   }
 
+  // Ubicación del dispositivo para el clima: solo en páginas seguras (HTTPS o localhost), con permiso del usuario,
+  // redondeada a ~1 km y recordada 1 h. Sin ella, el servidor usa la de la casa (configurada o por IP pública).
+  const GEO_CLAVE = "clima-ubicacion";
+  function leerGeo() {
+    try {
+      const g = JSON.parse(localStorage.getItem(GEO_CLAVE) || "null");
+      return g && Date.now() - g.ts < 3600000 ? g : null;
+    } catch (_) { return null; }
+  }
+  function pedirGeo() {
+    return new Promise(resolver => {
+      if (!window.isSecureContext || !navigator.geolocation) return resolver(null);
+      const guardada = leerGeo();
+      if (guardada) return resolver(guardada);
+      navigator.geolocation.getCurrentPosition(p => {
+        const g = { lat: Math.round(p.coords.latitude * 100) / 100, lon: Math.round(p.coords.longitude * 100) / 100, ts: Date.now() };
+        try { localStorage.setItem(GEO_CLAVE, JSON.stringify(g)); } catch (_) { /* sin almacenamiento */ }
+        resolver(g);
+      }, () => resolver(null), { enableHighAccuracy: false, timeout: 8000, maximumAge: 1800000 });
+    });
+  }
+
   async function cargarClima() {
     try {
-      ultimo.clima = await api("/api/clima");
+      const g = await pedirGeo();
+      ultimo.clima = await api(g ? `/api/clima?lat=${g.lat}&lon=${g.lon}` : "/api/clima");
       document.dispatchEvent(new CustomEvent("inicio-clima", { detail: ultimo.clima }));
     } catch (_) { /* idem */ }
   }

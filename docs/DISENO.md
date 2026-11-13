@@ -84,7 +84,7 @@ Rejilla tipo tableta horizontal (en celular se apila en este mismo orden):
 - API: `GET /api/luces` (cada foco trae `habitacion`), `GET /api/luces/habitaciones` → `{habitaciones: resumen, nombres}`,
   `POST /api/luces/<id>/habitacion {habitacion}`, `POST /api/luces/habitacion {habitacion, encendida?|brillo?|temperatura?|color?}`
   → `{habitacion, total, ok, fallaron}`, `GET /api/rutinas`, `POST /api/rutinas/<id>/ejecutar`, `POST /api/luces/todas {encendida}`,
-  `GET /api/clima` → `{configurado, ciudad, actualizado, error, actual: {temp, sensacion, humedad, codigo, descripcion, icono, es_dia},
+  `GET /api/clima[?lat=&lon=]` (con coordenadas: pronóstico de la ubicación del dispositivo, `origen: "dispositivo"`) → `{configurado, origen, ciudad, actualizado, error, actual: {temp, sensacion, humedad, codigo, descripcion, icono, es_dia},
   hoy: {max, min}, dias: [{fecha, dia, codigo, descripcion, icono, max, min}]}`.
 - Tarjetas (un script cada una en `static/js/inicio/`): `reloj.js` (HH:MM grande + segundos pequeños + fecha larga),
   `camara.js` (una sola cámara a la vez con `stream.html` de go2rtc como `app.js`; botones con el nombre de cada cámara
