@@ -20,6 +20,18 @@
     img.addEventListener("load", listo);
     img.addEventListener("error", listo);
 
+    // Reproductor de clips (se crea al primer uso)
+    var video = null;
+    function quitarVideo() {
+        if (video) {
+            video.pause();
+            video.removeAttribute("src");
+            video.load();
+            video.hidden = true;
+        }
+    }
+    dlg.addEventListener("close", quitarVideo);
+
     // Estado interno del visor
     var fotos = [];
     var indiceActual = 0;
@@ -33,9 +45,27 @@
         var actual = fotos[i];
         var total = fotos.length;
 
-        marco.classList.add("cargando");  // anillo de carga hasta que llegue la foto
-        img.src = "/api/foto?ref=" + encodeURIComponent(actual.ref);
-        img.alt = actual.texto || "";
+        quitarVideo();
+        if (actual.video) {
+            // clip: <video controls> con Range en el servidor
+            if (!video) {
+                video = document.createElement("video");
+                video.controls = true;
+                video.preload = "metadata";
+                video.className = "visor-video";
+                marco.insertBefore(video, img);
+            }
+            marco.classList.remove("cargando");
+            img.hidden = true;
+            video.hidden = false;
+            video.setAttribute("aria-label", actual.texto || "Clip");
+            video.src = actual.video;
+        } else {
+            img.hidden = false;
+            marco.classList.add("cargando");  // anillo de carga hasta que llegue la foto
+            img.src = "/api/foto?ref=" + encodeURIComponent(actual.ref);
+            img.alt = actual.texto || "";
+        }
         txt.textContent = actual.texto || "";
         lblPos.textContent = (i + 1) + " / " + total;
 
@@ -53,10 +83,10 @@
         btnSig.disabled = (i === total - 1);
 
         // Precarga de imagen anterior y siguiente
-        if (i > 0) {
+        if (i > 0 && !fotos[i - 1].video) {
             new Image().src = "/api/foto?ref=" + encodeURIComponent(fotos[i - 1].ref);
         }
-        if (i < total - 1) {
+        if (i < total - 1 && !fotos[i + 1].video) {
             new Image().src = "/api/foto?ref=" + encodeURIComponent(fotos[i + 1].ref);
         }
     }
@@ -79,8 +109,8 @@
 
     // Navegación con teclado (flechas ← y →)
     dlg.addEventListener("keydown", function (e) {
-        if (!dlg.open) {
-            return;
+        if (!dlg.open || e.target === video) {
+            return;  // con el foco en el video, las flechas adelantan el clip
         }
         if (e.key === "ArrowLeft") {
             e.preventDefault();

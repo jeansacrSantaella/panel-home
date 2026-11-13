@@ -70,6 +70,9 @@ class Config:
     clima_ciudad: str = ""        # Open-Meteo: ciudad (se geocodifica una vez) o lat/lon exactos
     clima_lat: Optional[float] = None
     clima_lon: Optional[float] = None
+    resumen_cada_h: int = 2       # resumen de detecciones por Telegram, en horas múltiplo de este valor
+    silencio_desde: int = 23      # sin fotos por Telegram desde esta hora...
+    silencio_hasta: int = 7       # ...hasta esta (las fotos se guardan igual)
 
     @property
     def telegram_activo(self) -> bool:
@@ -242,6 +245,14 @@ def cargar(env: Mapping[str, str] = os.environ) -> Config:
         n = _decimal(clave)
         if n is not None:
             kwargs[campo] = n
+
+    n = _entero("RESUMEN_CADA_H", minimo=1)
+    if n is not None:
+        kwargs["resumen_cada_h"] = min(24, n)
+    for clave, campo in (("SILENCIO_DESDE", "silencio_desde"), ("SILENCIO_HASTA", "silencio_hasta")):
+        n = _entero(clave)
+        if n is not None:
+            kwargs[campo] = n % 24
 
     # Sin NetWatch, los avisos de la red los manda panel-home (salvo que PANEL_AVISAR diga otra cosa)
     if "avisar" not in kwargs:

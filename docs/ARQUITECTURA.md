@@ -189,3 +189,10 @@ class Avisador:
 - `crear_servidor(..., camaras=None)`. web: `GET/POST /api/camaras`, `DELETE /api/camaras/<id>` (o `POST .../borrar`), `/salud`, `/config`, `/sesion[/<sid>/latido|salir]`, `/<id>/foto|mover|parar`, `/go2rtc/<script>`; `GET /api/camaras/video` (WebSocket hacia go2rtc, se atiende antes de cualquier otra respuesta; exige sesión del panel y de video, y solo cámaras registradas); `GET /api/interno/camaras` (Bearer `INTERNO_TOKEN`, sin claves, sin sesión; 404 si no hay token). Sin cámaras internas, 409.
 - `/api/grabaciones*` (días, lista, archivo con `Range`/206, borrar, borrar-dia, exportar zip sin `Content-Length`, cierra al terminar) funcionan con `not FOTOS_REMOTAS`, con o sin `CAMARAS_INTERNAS`; cuerpo de hasta 256 KB en la selección. Alta/baja/borrado exigen `X-Admin` si hay `ADMIN_PIN`.
 - `main.py`: crea `Camaras`, registra sus tareas, importa `cameras.json` de `CAMARAS_DATA` si la tabla está vacía. "Acerca de" muestra "Cámaras (internas)".
+
+## Agregado: bot y resumen
+
+- `panel/telegram.py`: cliente mínimo con urllib (`Telegram`: `enviar_texto`, `enviar_foto`, `enviar_album` hasta 10 fotos, `actualizaciones` con long polling; multipart a mano; errores como `TelegramError`). `avisos.py` lo usa para sus envíos a Telegram.
+- `panel/bot.py`: `Bot` con `atender(texto)` (`/estado`, `/foto [id|nombre]`, `/eventos`, `/hoy`, `/luces`, `/apagar`, `/rutina <nombre>`, `/ayuda`) y un hilo de long polling que solo responde al `TELEGRAM_CHAT_ID`.
+- `panel/resumen_detecciones.py`: cada `RESUMEN_CADA_H` (2) horas, en horas múltiplo, manda el conteo de detecciones por cámara y clase del bloque anterior; entre `SILENCIO_DESDE` (23) y `SILENCIO_HASTA` (7) va sin fotos. Guarda el último bloque enviado en `estado` (`resumen_detecciones_ultimo`) para no repetir; tarea cada 60 s.
+- `main.py` los activa solo con Telegram configurado Y `CAMARAS_INTERNAS=1`: mientras gestorCamaras siga encendido, su bot usa el mismo token y dos `getUpdates` chocan (409), y su detector manda su propio resumen. Si no, registra en el log por qué están apagados.

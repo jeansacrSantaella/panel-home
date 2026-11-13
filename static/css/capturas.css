@@ -1,0 +1,87 @@
+/* Pestaña Capturas: rejilla de vidrio, selección, chips de clase y clips */
+.capturas-barra .boton-peligro { color: var(--mal); border-color: color-mix(in srgb, var(--mal) 40%, var(--borde)); }
+.capturas-barra .boton-peligro:hover:not(:disabled) { background: color-mix(in srgb, var(--mal) 14%, transparent); border-color: var(--mal); }
+.capturas-acciones { padding-bottom: 12px; border-bottom: 1px solid var(--borde); }
+.capturas-acciones [hidden] { display: none; }
+#capturas-nota { margin: 0 0 12px; }
+#capturas-estado { margin: 0 0 8px; min-height: 1.2em; font-size: 12.5px; }
+
+.capturas-grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+
+.captura-celda { position: relative; border-radius: 16px; }
+.captura-celda .captura {
+  width: 100%;
+  border-radius: 16px;
+  background: var(--vidrio, var(--tarjeta-2));
+  border: 1px solid var(--vidrio-borde, var(--borde));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+  transition: transform .15s, border-color .15s;
+}
+.captura-celda .captura:hover { border-color: var(--acento); transform: translateY(-2px); }
+.captura-celda .captura:focus-visible { outline: none; box-shadow: var(--foco); }
+.captura-celda.marcada .captura { border-color: var(--acento); box-shadow: 0 0 0 2px var(--acento); }
+
+.captura-marco { position: relative; display: block; }
+.captura-celda .captura img,
+.captura-marco video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #000;
+}
+.captura-pie { display: flex; flex-direction: column; gap: 6px; }
+
+.captura-play {
+  position: absolute; inset: 0; margin: auto;
+  width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgba(11, 15, 23, .6);
+  border: 1px solid rgba(255, 255, 255, .35);
+  color: #fff; font-size: 18px; padding-left: 3px;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+.captura-dur {
+  position: absolute; right: 8px; bottom: 8px;
+  padding: 1px 7px; border-radius: 999px;
+  background: rgba(11, 15, 23, .72); color: #fff;
+  font-size: 11.5px; font-variant-numeric: tabular-nums;
+}
+.captura-dur:empty { display: none; }
+
+.captura-clases { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip-clase {
+  padding: 1px 8px; border-radius: 999px;
+  font-size: 11px; line-height: 1.5; text-transform: capitalize;
+  color: var(--acento);
+  background: var(--acento-suave);
+  border: 1px solid color-mix(in srgb, var(--acento) 30%, transparent);
+}
+
+/* Casilla de selección sobre la miniatura (solo en modo selección) */
+.captura-casilla {
+  position: absolute; top: 10px; left: 10px;
+  width: 22px; height: 22px; margin: 0;
+  accent-color: var(--acento); cursor: pointer;
+}
+.captura-casilla[hidden] { display: none; }
+.captura-casilla:focus-visible { outline: none; box-shadow: var(--foco); }
+
+.capturas-vacio {
+  grid-column: 1 / -1;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 48px 16px; text-align: center;
+  border: 1px dashed var(--borde); border-radius: 16px;
+}
+.capturas-vacio strong { font-size: 15px; }
+
+/* Visor: video del clip */
+.visor-video { display: block; width: 100%; max-height: calc(94dvh - 90px); background: #000; border-radius: var(--radio-sm); }
+.visor-video[hidden] { display: none; }
+#capturas-dlg-texto { margin: 0 0 8px; font-size: 14px; }
+
+@media (max-width: 759.98px) {
+  .capturas-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .capturas-acciones .boton { flex: 1 1 140px; justify-content: center; }
+}

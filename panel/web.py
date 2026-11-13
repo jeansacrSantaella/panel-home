@@ -64,6 +64,7 @@ def estado_panel(cfg, db, recolector, ahora=None, luces=None) -> dict:
         movs.setdefault(cid, ev)  # vienen del más nuevo al más viejo
     return {
         "ahora": ahora, "actualizado": u.get("ts", 0), "go2rtc_url": cfg.go2rtc_url,
+        "camaras_internas": cfg.camaras_internas,
         "camaras_url": cfg.camaras_url, "netwatch_url": cfg.netwatch_url, "red_interna": cfg.red_interna,
         "red": {k: nw.get(k) for k in CLAVES_RED} if nw else None,
         "equipos": equipos, "consumo_activo": bool(cfg.consumo_cmd),

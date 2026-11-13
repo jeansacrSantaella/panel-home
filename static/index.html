@@ -25,7 +25,9 @@
   <link rel="stylesheet" href="/static/css/tablero.css">
   <link rel="stylesheet" href="/static/css/red.css">
   <link rel="stylesheet" href="/static/css/resumen.css">
+  <link rel="stylesheet" href="/static/css/capturas.css">
   <link rel="stylesheet" href="/static/css/inicio.css">
+  <link rel="stylesheet" href="/static/css/camaras.css">
   <link rel="stylesheet" href="/static/css/vidrio.css">
 </head>
 <body>
@@ -271,20 +273,93 @@
   <main id="pestana-capturas" class="capturas" hidden>
     <section class="tarjeta">
       <div class="capturas-barra">
-        <h2>Capturas del detector</h2>
-        <label>Día <input type="date" id="capturas-fecha"></label>
+        <h2>Capturas y clips</h2>
+        <label>Día <input type="date" id="capturas-fecha" list="capturas-dias"></label>
+        <datalist id="capturas-dias"></datalist>
         <label>Cámara <select id="capturas-camara"><option value="">Todas</option></select></label>
-        <span id="capturas-cuenta" class="tenue"></span>
+        <label>Tipo <select id="capturas-tipo"><option value="todo">Todo</option><option value="fotos">Fotos</option><option value="clips">Clips</option></select></label>
+        <span id="capturas-cuenta" class="tenue" aria-live="polite"></span>
         <button id="capturas-recargar" class="boton" type="button">Recargar</button>
       </div>
+      <div id="capturas-acciones" class="capturas-barra capturas-acciones">
+        <button id="capturas-seleccionar" class="boton" type="button" aria-pressed="false">Seleccionar</button>
+        <button id="capturas-todo" class="boton" type="button" hidden>Seleccionar todo</button>
+        <span id="capturas-sel-cuenta" class="tenue" aria-live="polite" hidden></span>
+        <button id="capturas-desc-sel" class="boton" type="button" disabled hidden>Descargar selección</button>
+        <button id="capturas-desc-dia" class="boton" type="button">Descargar día</button>
+        <button id="capturas-borrar-sel" class="boton boton-peligro" type="button" disabled hidden>Borrar selección</button>
+        <button id="capturas-borrar-dia" class="boton boton-peligro" type="button">Borrar día</button>
+      </div>
+      <p id="capturas-nota" class="aviso" hidden></p>
+      <p id="capturas-estado" class="tenue" role="status" aria-live="polite"></p>
       <div id="capturas-grid" class="capturas-grid"></div>
     </section>
+    <dialog id="capturas-dlg" class="dlg-clave" aria-labelledby="capturas-dlg-titulo">
+      <form id="capturas-form" method="dialog" novalidate>
+        <h2 id="capturas-dlg-titulo">Confirmar</h2>
+        <p id="capturas-dlg-texto"></p>
+        <div id="capturas-dlg-pin" hidden>
+          <label for="capturas-pin">PIN de administrador</label>
+          <input id="capturas-pin" type="password" autocomplete="off" inputmode="numeric">
+        </div>
+        <p id="capturas-dlg-error" class="acceso-error" role="alert" hidden></p>
+        <div class="dlg-acciones">
+          <button type="button" id="capturas-dlg-cancelar" class="boton">Cancelar</button>
+          <button type="submit" id="capturas-dlg-ok" class="boton boton-primario">Aceptar</button>
+        </div>
+      </form>
+    </dialog>
   </main>
 
-  <!-- Los otros proyectos, desde su propia dirección (con todas sus funciones: mover, zoom, escáner...) -->
-  <main id="pestana-camaras" class="externa" hidden>
-    <div class="externa-barra"><span>gestorCamaras</span><a class="externa-enlace" target="_blank" rel="noopener">Abrir en otra ventana ↗</a></div>
-    <iframe class="externa-marco" title="Panel de cámaras" data-url="camaras_url" allow="fullscreen"></iframe><!-- sin "autoplay": los videos arrancan en silencio -->
+  <!-- Cámaras propias: video por el panel (docs/CAMARAS.md); lo pinta static/js/camaras/ -->
+  <main id="pestana-camaras" class="camaras-vista" hidden>
+    <section class="tarjeta camaras-cab" aria-label="Cámaras">
+      <h2>Cámaras</h2>
+      <div class="camaras-acciones">
+        <button type="button" class="boton" data-camaras-modo="grande" aria-pressed="true">1 grande</button>
+        <button type="button" class="boton" data-camaras-modo="dos" aria-pressed="false">2 columnas</button>
+        <button type="button" id="camaras-agregar" class="boton">Agregar cámaras</button>
+      </div>
+    </section>
+    <p id="camaras-error" class="camaras-error" role="alert" hidden></p>
+    <section id="camaras-aviso" class="tarjeta camaras-aviso" hidden>
+      <p>Las cámaras internas no están activas en este panel.</p>
+      <a id="camaras-respaldo" target="_blank" rel="noopener" hidden>Abrir gestorCamaras ↗</a>
+    </section>
+    <p id="camaras-vacio" class="camaras-vacio" hidden>No hay cámaras. Agrega una con el botón de arriba.</p>
+    <div id="camaras-rejilla" class="camaras-rejilla" hidden></div>
+
+    <dialog id="dlg-camara-alta" class="dlg-camara" aria-labelledby="camara-alta-titulo">
+      <form id="camara-alta-form">
+        <h2 id="camara-alta-titulo">Agregar cámaras</h2>
+        <label>IPs (una por línea o separadas por comas)<textarea id="camara-ips" rows="3" required></textarea></label>
+        <label>Nombre<input id="camara-nombre" type="text" autocomplete="off"></label>
+        <div class="fila">
+          <label>Puerto RTSP<input id="camara-rtsp" type="number" min="1" max="65535" placeholder="554"></label>
+          <label>Puerto ONVIF<input id="camara-onvif" type="number" min="1" max="65535" placeholder="8899"></label>
+        </div>
+        <label>Ruta RTSP<input id="camara-ruta" type="text" autocomplete="off" placeholder="/stream1"></label>
+        <div class="fila">
+          <label>Usuario<input id="camara-usuario" type="text" autocomplete="off"></label>
+          <label>Clave<input id="camara-clave" type="password" autocomplete="new-password"></label>
+        </div>
+        <p id="camara-alta-error" class="dlg-error" role="alert"></p>
+        <div class="dlg-pie">
+          <button type="button" id="camara-alta-cancelar" class="boton">Cancelar</button>
+          <button type="submit" class="boton">Agregar</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="dlg-camara-pin" class="dlg-camara" aria-labelledby="camara-pin-titulo">
+      <form method="dialog">
+        <h2 id="camara-pin-titulo">PIN de administración</h2>
+        <label>PIN<input id="camara-pin" type="password" autocomplete="off" required></label>
+        <div class="dlg-pie">
+          <button value="cancelar" class="boton">Cancelar</button>
+          <button value="ok" class="boton">Continuar</button>
+        </div>
+      </form>
+    </dialog>
   </main>
   <!-- Red propia (sonda + panel-home, docs/RED.md). Cada tarjeta la pinta su script en static/js/red/ -->
   <main id="pestana-red" class="red-vista" hidden>
@@ -519,6 +594,7 @@
   <script src="/static/js/hchart-calor.js"></script>
   <script src="/static/js/hchart-tablero.js"></script>
   <script src="/static/js/visor.js"></script>
+  <script src="/static/js/camaras/reproductor.js"></script>
   <script src="/static/js/app.js"></script>
   <script src="/static/js/espacio.js"></script>
   <script src="/static/js/calor.js"></script>
@@ -541,6 +617,7 @@
   <script src="/static/js/inicio/atajos.js"></script>
   <script src="/static/js/inicio/agenda.js"></script>
   <script src="/static/js/inicio/dock.js"></script>
+  <script src="/static/js/camaras/camaras.js"></script>
   <script src="/static/js/pestanas.js"></script>
 </body>
 </html>

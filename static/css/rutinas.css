@@ -4,14 +4,14 @@
 .rutinas-cabeza { display: flex; justify-content: space-between; align-items: center; margin: 0 0 10px; }
 .rutinas-cabeza h3 { margin: 0; }
 
-.rutinas-lista { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
-li.rutina { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--tarjeta-2); }
+.rutinas-lista { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+li.rutina { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 18px; background: var(--vidrio); border: 1px solid var(--vidrio-borde); }
 li.rutina.ocupada { opacity: .6; pointer-events: none; }
 .rutina-info { flex: 1; min-width: 0; }
 .rutina-info b { display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rutina-info .tenue { font-size: 12px; }
 li.rutina.pausada .rutina-info { opacity: .55; }
-.rutinas-vacio { font-size: 13px; padding: 6px 2px; }
+.rutinas-vacio { font-size: 13px; padding: 6px 2px; grid-column: 1 / -1; }
 
 /* ▶ ejecutar */
 .rutina-ejecutar {

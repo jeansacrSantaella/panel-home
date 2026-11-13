@@ -100,6 +100,7 @@
   function pintarCamaras(d) {
     const cont = document.getElementById("camaras");
     if (!cont) return;
+    Reproductor.configurar({ internas: !!d.camaras_internas, go2rtc_url: d.go2rtc_url || "" });
 
     const cams = d.camaras || [];
     if (cams.length === 0) {
@@ -111,13 +112,13 @@
       cont.textContent = "";
     }
 
-    const base = d.go2rtc_url || `${location.protocol}//${location.hostname}:1984`;
     const idsActuales = new Set(cams.map(c => String(c.id)));
 
     // Quitar cámaras que ya no existen
     Array.from(cont.querySelectorAll(".camara")).forEach(div => {
       const id = div.getAttribute("data-id");
       if (!idsActuales.has(id)) {
+        if (div.reproductor) div.reproductor.destruir();
         div.remove();
       }
     });
@@ -132,20 +133,15 @@
         div.className = "camara";
         div.setAttribute("data-id", camId);
 
-        const iframe = document.createElement("iframe");
-        iframe.src = `${base}/stream.html?src=${encodeURIComponent(cam.id)}&mode=mse`;
-        iframe.title = `Video de ${cam.nombre || cam.id}`;
-        iframe.loading = "lazy";
-        // Sin permiso "autoplay" el navegador solo deja arrancar el video en silencio;
-        // el reproductor de go2rtc conserva el botón de volumen para activarlo a mano.
-        iframe.setAttribute("allow", "fullscreen");
-
+        const vista = document.createElement("div");
+        vista.className = "camara-video";
         const pie = document.createElement("div");
         pie.className = "camara-pie";
 
-        div.appendChild(iframe);
+        div.appendChild(vista);
         div.appendChild(pie);
         cont.appendChild(div);
+        div.reproductor = Reproductor.crear(vista, cam);  // solo se crea una vez por cámara
       }
 
       // Actualizar pie

@@ -1,0 +1,75 @@
+/* Pestaña Cámaras: rejilla de video, controles PTZ y diálogos (vidrio de Astreo) */
+.camaras-vista { max-width: 1440px; margin: 0 auto; padding: 12px 20px 24px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.camaras-cab { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.camaras-cab h2 { margin: 0; }
+.camaras-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.camaras-acciones .boton[aria-pressed="true"] { border-color: var(--acento); background: var(--acento-suave); }
+.camaras-error { margin: 0; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--mal); color: var(--mal); background: color-mix(in srgb, var(--mal) 10%, transparent); font-size: 13.5px; }
+.camaras-aviso { padding: 16px; display: grid; gap: 8px; }
+.camaras-aviso p { margin: 0; }
+.camaras-aviso a { color: var(--acento); font-weight: 500; }
+.camaras-vacio { margin: 0; padding: 24px; text-align: center; color: var(--tenue); }
+.camaras-vista [hidden] { display: none !important; }
+
+.camaras-rejilla { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.camaras-rejilla[data-modo="dos"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.camaras-rejilla[data-modo="grande"] .cam-grande { grid-column: 1 / -1; }
+
+.cam {
+  position: relative; display: grid; gap: 8px; padding: 10px; min-width: 0;
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 18px; outline: none;
+}
+.cam:focus-visible { box-shadow: var(--foco); border-color: var(--acento); }
+.cam-vista {
+  position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 12px; background: #070a12;
+  --zoom: 1; --dx: 0px; --dy: 0px;
+}
+.cam-vista.ampliada { cursor: grab; touch-action: none; }
+.cam-vista:fullscreen { border-radius: 0; }
+.reproductor-nodo, .cam-vista video-stream { display: block; width: 100%; height: 100%; border: 0; transform: scale(var(--zoom, 1)) translate(var(--dx, 0px), var(--dy, 0px)); transform-origin: center; }
+.reproductor-aviso { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 12px; text-align: center; color: #cfd6e4; font-size: 13px; }
+.reproductor-aviso p { margin: 0; }
+
+.cam-cab { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13px; }
+.cam-nombre { background: none; border: 0; padding: 0; color: var(--texto); font: inherit; font-weight: 600; cursor: pointer; }
+.cam-nombre:hover { color: var(--acento); }
+.cam-dato { font-size: 12px; }
+.cam-barra { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cam-btn { min-height: 32px; padding: 0 10px; font-size: 12.5px; }
+.cam-zoom-valor { min-width: 2.4em; text-align: center; font-size: 12.5px; color: var(--tenue); }
+
+.cam-cruz { display: grid; grid-template: ". n ." "o . e" ". s ." / 40px 40px 40px; gap: 4px; justify-content: center; }
+.cam-flecha { min-height: 36px; padding: 0; justify-content: center; touch-action: none; user-select: none; }
+.cam-flecha:active { background: var(--acento-suave); border-color: var(--acento); }
+.cam-n { grid-area: n; } .cam-o { grid-area: o; } .cam-e { grid-area: e; } .cam-s { grid-area: s; }
+
+/* miniaturas: solo video y nombre */
+.camaras-rejilla[data-modo="grande"] .cam:not(.cam-grande) .cam-barra,
+.camaras-rejilla[data-modo="grande"] .cam:not(.cam-grande) .cam-cruz,
+.camaras-rejilla[data-modo="grande"] .cam:not(.cam-grande) .cam-dato { display: none; }
+
+/* diálogos */
+dialog.dlg-camara { width: min(520px, 94vw); max-height: 90dvh; overflow: auto; padding: 22px; }
+.dlg-camara form { display: flex; flex-direction: column; gap: 6px; }
+.dlg-camara h2 { display: block; font-size: 17px; margin: 0 0 8px; }
+.dlg-camara label { font-size: 12.5px; color: var(--tenue); display: grid; gap: 4px; }
+.dlg-camara input, .dlg-camara textarea {
+  min-height: 40px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--borde);
+  background: var(--tarjeta-2); color: var(--texto); font: inherit; font-size: 14px;
+}
+.dlg-camara input:focus, .dlg-camara textarea:focus { outline: none; border-color: var(--acento); }
+.dlg-camara .fila { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dlg-camara .dlg-pie { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.dlg-camara .dlg-error { margin: 4px 0 0; color: var(--mal); font-size: 13px; min-height: 1em; }
+
+@media (max-width: 759.98px) {
+  .camaras-vista { padding: 8px; }
+  .camaras-rejilla, .camaras-rejilla[data-modo="dos"] { grid-template-columns: 1fr; }
+  .camaras-rejilla[data-modo="grande"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cam-flecha { min-height: 44px; }
+  .cam-cruz { grid-template-columns: 52px 52px 52px; }
+}
+
+/* tarjeta de cámaras del Resumen */
+.camara-video { position: relative; aspect-ratio: 16 / 9; background: #000; overflow: hidden; }
+.camara-video .reproductor-nodo { width: 100%; height: 100%; }

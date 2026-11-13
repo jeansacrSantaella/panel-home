@@ -23,7 +23,8 @@
   let pestañaVisible = true;
   let visorEl = null;
   let listaEl = null;
-  let iframeEl = null;
+  let iframeEl = null;  // contenedor del reproductor
+  let repro = null, reproId = null;
   let infoEl = null;
 
   function obtenerCamaraActivaGuardada(camaras) {
@@ -76,10 +77,8 @@
       const cuerpo = InicioPanel.el("div", "inicio-camara-cuerpo");
       
       visorEl = InicioPanel.el("div", "inicio-camara-visor");
-      iframeEl = InicioPanel.el("iframe", "inicio-camara-iframe", {
-        allow: "fullscreen",
-        title: "Cámara en vivo"
-      });
+      iframeEl = InicioPanel.el("div", "inicio-camara-iframe");
+      repro = null; reproId = null;
       
       infoEl = InicioPanel.el("div", "inicio-camara-info");
       const infoIzq = InicioPanel.el("div", "inicio-camara-detalles");
@@ -110,21 +109,17 @@
       contenedor.appendChild(cuerpo);
     }
 
-    // Actualizar src del iframe solo si la pestaña está visible
-    const base = (panel && panel.go2rtc_url) || `${location.protocol}//${location.hostname}:1984`;
-    const esperadoSrc = `${base}/stream.html?src=${encodeURIComponent(camaraActualId)}&mode=mse`;
-    
+    // El video solo corre con la pestaña visible y se recrea solo si cambia la cámara
     if (pestañaVisible) {
-      if (iframeEl.src !== esperadoSrc) {
-        iframeEl.src = esperadoSrc;
+      if (!repro || reproId !== camaraActualId) {
+        if (repro) repro.destruir();
+        repro = Reproductor.crear(iframeEl, camaraActiva);
+        reproId = camaraActualId;
       }
-    } else {
-      if (iframeEl.src) {
-        iframeEl.src = "";
-      }
+    } else if (repro) {
+      repro.destruir();
+      repro = null; reproId = null;
     }
-
-    iframeEl.title = `Cámara ${camaraActiva.nombre || camaraActualId}`;
 
     // Actualizar información inferior
     const tituloEl = infoEl.querySelector(".inicio-camara-titulo");

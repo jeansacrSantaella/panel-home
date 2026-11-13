@@ -1,40 +1,136 @@
-/* Tarjeta de Luces - Estilos y controles */
+/* Estilos de la pestaña Luces - Piel de vidrio */
 
-/* Acciones globales superiores */
+/* Layout principal de la vista */
+.luces-vista {
+  display: grid;
+  gap: 16px;
+  padding: 16px 20px;
+  max-width: 1440px;
+  margin: 0 auto;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.luces-vista-cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.luces-vista-cabeza h2 {
+  margin: 0;
+}
+
 .luces-todas {
   display: flex;
   gap: 8px;
-  margin: 0 0 12px;
 }
 
 .luces-todas .boton {
-  flex: 1;
+  white-space: nowrap;
 }
 
-/* Lista principal de luces */
-ul.luces-lista {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
+.rutinas.rutinas-vista {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* KPIs y anillo de estado */
+.luces-focos .kpis {
+  margin-bottom: 16px;
+}
+
+.luces-kpi-anillo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Grupos de luces */
+.luces-grupo {
+  margin-top: 18px;
+  transition: opacity 0.2s;
+}
+
+.luces-grupo.ocupada {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.luces-grupo-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
+  margin-bottom: 10px;
 }
 
-/* Item de luz individual */
+.luces-grupo-cabeza h3 {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: none;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.luces-grupo-cabeza .tenue {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--tenue);
+}
+
+.luces-grupo-accion {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+/* Lista de focos por grupo */
+ul.luces-grupo-focos,
+.luces-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+/* Mosaico individual de luz */
 li.luz {
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr) auto;
   grid-template-areas:
     "icono info switch"
-    "brillo brillo brillo"
     "mas mas mas";
-  gap: 8px 12px;
-  align-items: center;
-  padding: 12px;
-  border-radius: 12px;
-  background: var(--tarjeta-2);
-  border: 1px solid transparent;
-  transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+  gap: 10px 12px;
+  padding: 14px;
+  border-radius: 20px;
+  background: var(--vidrio);
+  border: 1px solid var(--vidrio-borde);
+  box-shadow: var(--vidrio-sombra);
+  backdrop-filter: blur(var(--vidrio-desenfoque)) saturate(1.3);
+  transition: background 0.2s, box-shadow 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+li.luz.encendida {
+  background: color-mix(in srgb, var(--luz, #8B5CF6) 16%, var(--vidrio-fuerte));
+  box-shadow: 0 0 30px -6px var(--luz, transparent), var(--vidrio-sombra);
+}
+
+li.luz.apagada {
+  opacity: 0.92;
+}
+
+li.luz.sin-red .luz-icono,
+li.luz.sin-red .luz-info {
+  opacity: 0.6;
 }
 
 li.luz.ocupada {
@@ -42,11 +138,7 @@ li.luz.ocupada {
   pointer-events: none;
 }
 
-li.luz.sin-red {
-  opacity: 0.55;
-}
-
-/* Icono del foco con iluminación */
+/* Icono con destello */
 .luz-icono {
   grid-area: icono;
   width: 40px;
@@ -73,7 +165,7 @@ li.luz.apagada .luz-icono {
   box-shadow: none;
 }
 
-/* Nombre y estado de la luz */
+/* Información del foco */
 .luz-info {
   grid-area: info;
   min-width: 0;
@@ -83,9 +175,10 @@ li.luz.apagada .luz-icono {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--texto);
 }
 
 .luz-info .tenue {
@@ -93,7 +186,7 @@ li.luz.apagada .luz-icono {
   color: var(--tenue);
 }
 
-/* Switch encendido/apagado */
+/* Interruptores switch */
 button.luz-switch {
   grid-area: switch;
   width: 46px;
@@ -137,19 +230,58 @@ button.luz-switch:focus-visible {
   outline: none;
 }
 
-/* Sliders de brillo y temperatura */
+/* Desplegable de detalles y ajustes */
+details.luz-mas {
+  grid-area: mas;
+  border-top: 1px solid var(--borde);
+  padding-top: 10px;
+  margin-top: 2px;
+}
+
+details.luz-mas > summary {
+  font-size: 12.5px;
+  color: var(--tenue);
+  cursor: pointer;
+  list-style: none;
+}
+
+details.luz-mas > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.luz-mas > summary::before {
+  content: "▸ ";
+}
+
+details.luz-mas[open] > summary::before {
+  content: "▾ ";
+}
+
+details.luz-mas > summary ~ * {
+  margin-top: 10px;
+}
+
+details.luz-mas label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--tenue);
+}
+
+details.luz-mas label input.luz-brillo,
+details.luz-mas label input.luz-temp {
+  flex: 1;
+}
+
+/* Sliders y selector de color */
 .luz-brillo,
 .luz-temp {
-  width: 100%;
   accent-color: var(--acento);
   height: 28px;
 }
 
-.luz-brillo {
-  grid-area: brillo;
-}
-
-/* Control de temperatura con degradado */
 input[type="range"].luz-temp {
   -webkit-appearance: none;
   appearance: none;
@@ -177,49 +309,6 @@ input[type="range"].luz-temp::-moz-range-thumb {
   cursor: pointer;
 }
 
-/* Desplegable de más opciones */
-details.luz-mas {
-  grid-area: mas;
-}
-
-details.luz-mas > summary {
-  font-size: 12.5px;
-  color: var(--tenue);
-  cursor: pointer;
-  list-style: none;
-}
-
-details.luz-mas > summary::-webkit-details-marker {
-  display: none;
-}
-
-details.luz-mas > summary::before {
-  content: "▸ ";
-}
-
-details.luz-mas[open] > summary::before {
-  content: "▾ ";
-}
-
-details.luz-mas > summary + * {
-  display: grid;
-  gap: 10px;
-  padding: 8px 0 0;
-}
-
-details.luz-mas label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12.5px;
-  color: var(--tenue);
-}
-
-details.luz-mas label input {
-  flex: 1;
-}
-
-/* Input de color */
 input[type="color"].luz-color {
   width: 44px;
   height: 30px;
@@ -230,18 +319,19 @@ input[type="color"].luz-color {
   cursor: pointer;
 }
 
-/* Presets de colores rápido */
+/* Presets de colores rápidos */
 .luz-presets {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .luz-presets button {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 2px solid var(--tarjeta);
+  border: 2px solid var(--vidrio);
   box-shadow: 0 0 0 1px var(--borde);
   cursor: pointer;
   transition: transform 0.2s;
@@ -252,10 +342,94 @@ input[type="color"].luz-color {
   transform: scale(1.1);
 }
 
-/* Ajustes táctiles para dispositivos móviles */
-@media (max-width: 760px) {
+/* Campo Habitación */
+label.luz-hab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--tenue);
+}
+
+input.luz-habitacion {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 13px;
+  background: var(--tarjeta-2);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  color: var(--texto);
+}
+
+/* Estado de conexión */
+.luz-conexion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 12px;
+}
+
+.luz-conexion .tenue {
+  overflow-wrap: anywhere;
+}
+
+.luz-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.luz-estado::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.luz-estado.ok {
+  color: var(--ok);
+}
+
+.luz-estado.mal {
+  color: var(--mal);
+}
+
+/* Resumen compacto */
+.tarjeta-enlace { margin-left: auto; font-size: 12.5px; font-weight: 500; color: var(--acento); text-decoration: none; }
+.tarjeta-enlace:hover { text-decoration: underline; }
+.luces-resumen { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.luz-mini { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 10px; }
+.luz-mini:nth-child(odd) { background: var(--tarjeta-2); }
+.luz-mini b { flex: 1; min-width: 0; font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.luz-mini.sin-red { opacity: .55; }
+.luz-mini.ocupada { opacity: .6; pointer-events: none; }
+.luz-punto {
+  flex: none; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--luz, color-mix(in srgb, var(--tenue) 35%, transparent));
+}
+.luz-mini:not(.apagada) .luz-punto { box-shadow: 0 0 10px 1px var(--luz, transparent); }
+
+/* Adaptación responsive */
+@media (min-width: 1100px) {
+  .luces-vista {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 759.98px) {
+  .luces-vista {
+    padding: 12px;
+    gap: 12px;
+  }
+
   li.luz {
-    padding: 12px 12px;
+    backdrop-filter: none;
   }
 
   button.luz-switch {
@@ -278,69 +452,14 @@ input[type="color"].luz-color {
   }
 }
 
-/* Accesibilidad: movimiento reducido */
+/* Movimiento reducido */
 @media (prefers-reduced-motion: reduce) {
   li.luz,
   .luz-icono,
   button.luz-switch,
   button.luz-switch::after,
-  .luz-presets button {
+  .luz-presets button,
+  .luces-grupo {
     transition: none;
   }
-}
-
-/* ---- Resumen compacto: punto de color, nombre e interruptor ---- */
-.tarjeta-enlace { margin-left: auto; font-size: 12.5px; font-weight: 500; color: var(--acento); text-decoration: none; }
-.tarjeta-enlace:hover { text-decoration: underline; }
-.luces-resumen { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
-.luz-mini { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 10px; }
-.luz-mini:nth-child(odd) { background: var(--tarjeta-2); }
-.luz-mini b { flex: 1; min-width: 0; font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.luz-mini.sin-red { opacity: .55; }
-.luz-mini.ocupada { opacity: .6; pointer-events: none; }
-.luz-punto {
-  flex: none; width: 14px; height: 14px; border-radius: 50%;
-  background: var(--luz, color-mix(in srgb, var(--tenue) 35%, transparent));
-}
-.luz-mini:not(.apagada) .luz-punto { box-shadow: 0 0 10px 1px var(--luz, transparent); }
-
-/* ---- Vista Luces: estado de conexión de cada foco ---- */
-li.luz { grid-template-areas: "icono info switch" "conexion conexion conexion" "hab hab hab" "brillo brillo brillo" "mas mas mas"; }
-.luz-conexion { grid-area: conexion; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12px; }
-.luz-conexion .tenue { overflow-wrap: anywhere; }
-.luz-estado { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
-.luz-estado::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-.luz-estado.ok { color: var(--ok); }
-.luz-estado.mal { color: var(--mal); }
-li.luz.sin-red { opacity: 1; }                     /* en la vista detallada se ve completo para leer el motivo */
-li.luz.sin-red .luz-icono, li.luz.sin-red .luz-info, li.luz.sin-red .luz-brillo { opacity: .55; }
-
-.luces-vista { display: grid; gap: 16px; padding: 16px 20px; max-width: 1440px; margin: 0 auto; grid-template-columns: minmax(0, 1fr); align-items: start; }
-.luces-vista-cabeza { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-.luces-vista-cabeza h2 { margin: 0; }
-.luces-vista-cabeza .luces-todas { margin: 0; }
-.rutinas.rutinas-vista { margin-top: 0; padding-top: 0; border-top: 0; }
-@media (min-width: 1100px) {
-  .luces-vista { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
-  .luces-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 759.98px) { .luces-vista { padding: 12px; gap: 12px; } }
-.luces-todas .boton { white-space: nowrap; }
-
-/* Campo "Habitación" de cada foco */
-label.luz-hab {
-  grid-area: hab;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  color: var(--tenue);
-}
-input.luz-habitacion {
-  flex: 1;
-  min-width: 0;
-  height: 34px;
-  padding: 0 12px;
-  font: inherit;
-  font-size: 13px;
 }

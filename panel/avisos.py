@@ -1,16 +1,14 @@
 """Enviador de notificaciones a través de Telegram y ntfy."""
 from __future__ import annotations
 
-import json
 import logging
 import time
 import urllib.error
-import urllib.parse
 import urllib.request
-import uuid
 from typing import Any
 
 from panel import fuentes
+from panel.telegram import Telegram, TelegramError
 
 logger = logging.getLogger("panel.avisos")
 
@@ -90,54 +88,20 @@ class Avisador:
         return any(resultados) if resultados else False
 
     def _telegram_texto(self, texto: str) -> bool:
-        """Envía un mensaje de texto por la API de Telegram."""
-        url = f"https://api.telegram.org/bot{self.cfg.telegram_token}/sendMessage"
-        datos = urllib.parse.urlencode({
-            "chat_id": self.cfg.telegram_chat_id,
-            "text": texto,
-        }).encode("utf-8")
-
-        req = urllib.request.Request(url, data=datos, method="POST")
+        """Envía un mensaje de texto por Telegram."""
         try:
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                res = json.loads(resp.read().decode("utf-8"))
-                return bool(res.get("ok"))
-        except Exception as e:
+            Telegram(self.cfg.telegram_token, self.cfg.telegram_chat_id).enviar_texto(texto)
+            return True
+        except TelegramError as e:
             logger.warning("Error enviando texto por Telegram: %s", e)
             return False
 
     def _telegram_foto(self, contenido_foto: bytes, nombre: str, texto: str) -> bool:
-        """Envía una foto con descripción por la API de Telegram."""
-        boundary = uuid.uuid4().hex
-        crlf = b"\r\n"
-        body = bytearray()
-
-        # Campo chat_id
-        body.extend(f"--{boundary}".encode("utf-8") + crlf)
-        body.extend(b'Content-Disposition: form-data; name="chat_id"' + crlf + crlf)
-        body.extend(str(self.cfg.telegram_chat_id).encode("utf-8") + crlf)
-
-        # Campo caption
-        body.extend(f"--{boundary}".encode("utf-8") + crlf)
-        body.extend(b'Content-Disposition: form-data; name="caption"' + crlf + crlf)
-        body.extend(texto.encode("utf-8") + crlf)
-
-        # Archivo photo
-        body.extend(f"--{boundary}".encode("utf-8") + crlf)
-        body.extend(f'Content-Disposition: form-data; name="photo"; filename="{nombre}"'.encode("utf-8") + crlf)
-        body.extend(b"Content-Type: image/jpeg" + crlf + crlf)
-        body.extend(contenido_foto + crlf)
-        body.extend(f"--{boundary}--".encode("utf-8") + crlf)
-
-        url = f"https://api.telegram.org/bot{self.cfg.telegram_token}/sendPhoto"
-        headers = {"Content-Type": f"multipart/form-data; boundary={boundary}"}
-        req = urllib.request.Request(url, data=bytes(body), headers=headers, method="POST")
-
+        """Envía una foto con descripción por Telegram."""
         try:
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                res = json.loads(resp.read().decode("utf-8"))
-                return bool(res.get("ok"))
-        except Exception as e:
+            Telegram(self.cfg.telegram_token, self.cfg.telegram_chat_id).enviar_foto(contenido_foto, texto)
+            return True
+        except TelegramError as e:
             logger.warning("Error enviando foto por Telegram: %s", e)
             return False
 

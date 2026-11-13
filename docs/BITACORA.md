@@ -138,3 +138,19 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | C2 | `panel/habitaciones.py`: habitación por foco (tabla `luz_habitacion`), resumen por habitación, aplicar a toda la habitación en paralelo; rutas `/api/luces/habitaciones`, `/api/luces/<id>/habitacion`, `/api/luces/habitacion`. 8 pruebas. | Gemini flash-lite vía agente Haiku (+ arreglo de validación) ; rutas: Claude |
 | Inicio | `reloj.js` + `dock.js`, `clima.js`, `camara.js` (Gemini); `habitacion.js` (arco) + `habitaciones.js` (agente Sonnet); `atajos.js`, `agenda.js`, campo Habitación en Luces, fecha de capturas desde la agenda (Gemini vía agente Haiku). Endurecido `iconoClima`. | varios |
 | Vidrio | `static/css/vidrio.css`: tokens de vidrio claro/oscuro, nebulosa de fondo, vidrio en tarjetas, barra, lateral, chips, diálogos y botones; sin desenfoque en celular. | Agente Claude Sonnet (verificado con capturas) |
+
+## 2026-11-13 — Puntos 4 (diseño) y 5 (migración de cámaras) de una vez
+
+| Paso | Qué | Quién |
+|---|---|---|
+| Contrato | `docs/CAMARAS.md`: módulos, fachada y rutas. Se quitó `static/demo-tablero.html` (era pública). | Claude |
+| T65 | `panel/camaras/onvif.py`: PTZ por SOAP + WS-Security sin dependencias, `ControlPTZ` con reintento y autoparada. Prueba real de lectura: perfil `PROFILE_000` en .74 y .76. 13 pruebas. | Agente Claude Sonnet |
+| T66 | `panel/camaras/video.py`: sesiones de video y puente WebSocket a go2rtc (copia de bytes). 7 pruebas; prueba real pendiente (la .94 no respondía). | Agente Claude Sonnet |
+| T68 | `panel/camaras/servicio.py` + todas las rutas de cámaras, PTZ, video, sesiones, grabaciones (Range, zip en streaming) e interna para el detector; recolector y main con `CAMARAS_INTERNAS`; `INTERNO_TOKEN`; avisos de cámaras. Pruebas web. | Agente Claude Sonnet |
+| Detector | `detector/` en el repo: cámaras desde `/api/interno/camaras`, sin Telegram; utilidades probadas sin torch. 8 pruebas. | Gemini flash-lite vía agente Haiku |
+| Bot | `panel/telegram.py`, `panel/bot.py` (/estado /foto /eventos /hoy /luces /apagar /rutina /ayuda), `panel/resumen_detecciones.py` (cada 2 h, silencio 23–7); solo con CAMARAS_INTERNAS para no chocar con gestorCamaras. 11 pruebas. | Agente Claude Sonnet |
+| Despliegue | `docker-compose.yml` (go2rtc interno + panel + detector con perfil `camaras`), `go2rtc/go2rtc.yaml`, `scripts/migrar_camaras.py`, `docs/DESPLIEGUE.md`. | Gemini flash-lite vía agente Haiku |
+| Cámaras | Pestaña Cámaras propia (sin iframe): `static/js/camaras/reproductor.js` (sesión compartida, `<video-stream>` por el panel o iframe de respaldo), `camaras.js` (rejilla, PTZ, zoom digital, alta/baja con PIN), `camaras.css`; Inicio y Resumen usan el reproductor. | Agente Claude Sonnet |
+| Capturas | Fotos y clips, selección, borrar con PIN, zip, clips en el visor; modo remoto conservado. | Agente Claude Sonnet |
+| Diseño | Resumen con anillos/área/progreso/actividad (Sonnet), Luces agrupadas por habitación en mosaicos (Gemini vía Haiku), notas de "lo último en casa" junto al reloj de Inicio (Gemini + CSS de Claude). | varios |
+| Prueba | Suite 265/265 (dos corridas), todos los JS compilan, sin referencias a :1984/:8080 en el navegador. | Claude |

@@ -126,6 +126,7 @@
   function fila(luz) {
     const prendida = luz.en_linea && luz.encendida;
     const li = el("li", "luz" + (prendida ? " encendida" : " apagada") + (luz.en_linea ? "" : " sin-red"));
+    if (prendida) li.style.setProperty("--luz", colorDe(luz));  // halo del mosaico con el color del foco
 
     const icono = el("span", "luz-icono");
     icono.setAttribute("aria-hidden", "true");
@@ -175,7 +176,9 @@
       mas.append(colorLab, presets);
     }
 
-    const hab = el("input", "luz-habitacion", { type: "text", value: luz.habitacion || "", list: "luz-hab-" + luz.id, placeholder: "Sin habitación", maxLength: 40 });
+    // "list" es de solo lectura en el elemento: se pone con setAttribute
+    const hab = el("input", "luz-habitacion", { type: "text", value: luz.habitacion || "", placeholder: "Sin habitación", maxLength: 40 });
+    hab.setAttribute("list", "luz-hab-" + luz.id);
     hab.setAttribute("aria-label", "Habitación de " + luz.nombre);
     const lista2 = el("datalist", "", { id: "luz-hab-" + luz.id });
     nombresHab.forEach(n => lista2.append(el("option", "", { value: n })));

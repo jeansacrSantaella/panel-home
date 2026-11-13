@@ -139,7 +139,27 @@ def main() -> None:
         rutinas.iniciar()
 
     from panel.habitaciones import Habitaciones
-    servidor = crear_servidor(cfg, db, recolector, auth, luces, rutinas, red, clima, Habitaciones(db), camaras)
+    habitaciones = Habitaciones(db)
+    bot = plan_resumen = None
+    if not cfg.telegram_activo:
+        log.info("Bot y resumen de detecciones apagados: falta TELEGRAM_TOKEN/TELEGRAM_CHAT_ID")
+    elif camaras is None:
+        log.info("Bot y resumen de detecciones apagados: con CAMARAS_INTERNAS=0 el bot y el detector de "
+                 "gestorCamaras usan el mismo token (error 409 de Telegram)")
+    else:
+        from panel.bot import Bot
+        from panel.resumen_detecciones import ResumenDetecciones
+        from panel.telegram import Telegram
+        tg = Telegram(cfg.telegram_token, cfg.telegram_chat_id)
+        resumen_det = ResumenDetecciones(cfg, camaras.grabaciones,
+                                         lambda: {c["id"]: c["nombre"] for c in camaras.lista()}, tg, db=db)
+        # el planificador principal ya arrancó: el resumen va en uno propio
+        plan_resumen = Planificador([cada("resumen-detecciones", 60, resumen_det.vuelta, retraso=10)])
+        plan_resumen.iniciar()
+        bot = Bot(cfg, db, tg, red, camaras, luces, habitaciones, rutinas)
+        bot.iniciar()
+        log.info("Bot de Telegram activo; resumen de detecciones cada %d h", cfg.resumen_cada_h)
+    servidor = crear_servidor(cfg, db, recolector, auth, luces, rutinas, red, clima, habitaciones, camaras)
     log.info("Red: %s · Cámaras: %s · go2rtc: %s", "sonda (interna)" if red else cfg.netwatch_url, "internas" if camaras else cfg.camaras_url, cfg.go2rtc_url or "(host de la página):1984")
     log.info("Panel en http://%s:%d", cfg.host, cfg.port)
     try:
@@ -148,6 +168,9 @@ def main() -> None:
         pass
     finally:
         parar.set()
+        if bot:
+            bot.detener()
+            plan_resumen.detener()
         planificador.detener()
         servidor.server_close()
 
