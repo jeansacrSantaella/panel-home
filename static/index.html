@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="/static/css/capturas.css">
   <link rel="stylesheet" href="/static/css/inicio.css">
   <link rel="stylesheet" href="/static/css/camaras.css">
+  <link rel="stylesheet" href="/static/css/esqueletos.css">
   <link rel="stylesheet" href="/static/css/vidrio.css">
 </head>
 <body>
@@ -157,72 +158,72 @@
 
   <!-- Inicio: panel de casa tipo tableta de pared (docs/DISENO.md "Pestaña Inicio"); cada tarjeta la pinta static/js/inicio/ -->
   <main id="pestana-inicio" class="inicio" hidden>
-    <section id="inicio-notas" class="inicio-notas" aria-label="Lo último en casa"></section>
+    <section id="inicio-notas" data-esqueleto="pildoras" data-esqueleto-n="3" class="inicio-notas" aria-label="Lo último en casa"></section>
     <section id="inicio-reloj" class="inicio-reloj" aria-live="off"></section>
-    <section id="inicio-camara" class="tarjeta inicio-camara" aria-label="Cámaras"></section>
-    <section id="inicio-clima" class="tarjeta inicio-clima" aria-label="Clima"></section>
-    <section id="inicio-hab" class="tarjeta inicio-hab" aria-label="Habitación"></section>
-    <section id="inicio-habitaciones" class="tarjeta inicio-habitaciones"><h2>Habitaciones</h2><ul class="inicio-lista"></ul></section>
-    <section id="inicio-atajos" class="tarjeta inicio-atajos"><h2>Accesos directos</h2><div class="inicio-mosaicos"></div></section>
-    <section id="inicio-agenda" class="tarjeta inicio-agenda" aria-label="Agenda"></section>
-    <nav id="inicio-dock" class="inicio-dock" aria-label="Acciones rápidas"></nav>
+    <section id="inicio-camara" data-esqueleto="video" class="tarjeta inicio-camara" aria-label="Cámaras"></section>
+    <section id="inicio-clima" data-esqueleto="anillo" class="tarjeta inicio-clima" aria-label="Clima"></section>
+    <section id="inicio-hab" data-esqueleto="anillo" class="tarjeta inicio-hab" aria-label="Habitación"></section>
+    <section id="inicio-habitaciones" class="tarjeta inicio-habitaciones"><h2>Habitaciones</h2><ul class="inicio-lista" data-esqueleto="lista" data-esqueleto-n="4"></ul></section>
+    <section id="inicio-atajos" class="tarjeta inicio-atajos"><h2>Accesos directos</h2><div class="inicio-mosaicos" data-esqueleto="mosaicos"></div></section>
+    <section id="inicio-agenda" data-esqueleto="agenda" class="tarjeta inicio-agenda" aria-label="Agenda"></section>
+    <nav id="inicio-dock" data-esqueleto="pildoras" data-esqueleto-n="5" class="inicio-dock" aria-label="Acciones rápidas"></nav>
   </main>
 
   <main id="pestana-resumen" class="rejilla esperando">
     <section id="sec-kpis" aria-label="Indicadores">
-      <div id="resumen-kpis" class="kpis"></div>
+      <div id="resumen-kpis" data-esqueleto="kpis" data-esqueleto-n="6" class="kpis"></div>
     </section>
 
     <section id="sec-camaras" class="tarjeta">
       <h2>Cámaras</h2>
-      <div id="camaras" class="camaras"></div>
+      <div id="camaras" data-esqueleto="video" data-esqueleto-n="2" class="camaras"></div>
     </section>
 
     <section id="sec-luces" class="tarjeta">
       <h2>Luces <span id="luces-sub" class="tenue"></span><a href="#luces" class="tarjeta-enlace">Ver todo →</a></h2>
       <p id="luces-aviso-resumen" class="aviso" hidden></p>
-      <ul id="luces-resumen" class="luces-resumen"></ul>
+      <ul id="luces-resumen" data-esqueleto="lista" data-esqueleto-n="4" class="luces-resumen"></ul>
     </section>
 
     <section id="sec-red" class="tarjeta">
       <h2>Mapa de la red <span id="red-cuenta" class="tenue"></span></h2>
-      <div id="mapa" class="mapa"></div>
+      <div id="mapa" data-esqueleto="grafica" class="mapa"></div>
       <div id="detalle-equipo" class="detalle" hidden></div>
     </section>
 
     <section id="sec-caidas" class="tarjeta">
       <h2>Caídas · últimas 24 h</h2>
-      <div id="uptime" class="caidas-anillos"></div>
+      <div id="uptime" data-esqueleto="kpis" data-esqueleto-n="3" class="caidas-anillos"></div>
       <div id="cintas" class="cintas"></div>
       <h3>Caídas por hora del día</h3>
-      <div id="caidas-hora"></div>
+      <div id="caidas-hora" data-esqueleto="grafica"></div>
       <h3>Latencia a internet · última hora</h3>
-      <div id="latencia"></div>
+      <div id="latencia" data-esqueleto="grafica"></div>
     </section>
 
     <section id="sec-consumo" class="tarjeta">
       <h2 id="consumo-titulo">Calidad por dispositivo</h2>
       <p id="consumo-aviso" class="aviso" hidden></p>
       <div id="consumo-dona"></div>
-      <div id="consumo-barras" class="consumo-barras"></div>
+      <div id="consumo-barras" data-esqueleto="lista" class="consumo-barras"></div>
     </section>
 
     <section id="sec-espacio" class="tarjeta">
       <h2>Almacenamiento de grabaciones</h2>
       <p id="espacio-aviso" class="aviso" hidden></p>
-      <div id="espacio-kpis" class="espacio-anillo"></div>
+      <div id="espacio-kpis" data-esqueleto="anillo" class="espacio-anillo"></div>
       <div id="espacio-uso"></div>
     </section>
 
     <section id="sec-calor" class="tarjeta">
       <h2>Movimiento por día y hora <span id="calor-sub" class="tenue"></span></h2>
-      <div id="calor-mapa"></div>
+      <div id="calor-mapa" data-esqueleto="grafica"></div>
     </section>
 
     <section id="sec-sistema" class="tarjeta">
       <h2>Servidor <span id="sistema-sub" class="tenue"></span></h2>
       <p id="sistema-aviso" class="aviso" hidden></p>
-      <div id="sistema-barras"></div>
+      <div id="sistema-barras" data-esqueleto="kpis" data-esqueleto-n="2"></div>
       <ul id="sistema-contenedores" class="contenedores"></ul>
     </section>
 
@@ -236,7 +237,7 @@
         <button type="button" class="filtro" data-grupo="luces">Luces</button>
         <button type="button" class="filtro" data-grupo="sistema">Sistema</button>
       </div>
-      <ol id="linea-tiempo" class="linea-tiempo actividad"></ol>
+      <ol id="linea-tiempo" data-esqueleto="lista" data-esqueleto-n="6" class="linea-tiempo actividad"></ol>
       <button id="mas-eventos" class="boton" type="button">Ver más</button>
     </section>
   </main>
@@ -257,7 +258,7 @@
       </div>
       <p id="luces-aviso" class="aviso" hidden></p>
       <!-- Grupos por habitación (los pinta luces.js) -->
-      <div id="luces-lista" class="luces-lista"></div>
+      <div id="luces-lista" data-esqueleto="mosaicos" class="luces-lista"></div>
     </section>
     <section class="tarjeta">
       <div id="rutinas" class="rutinas rutinas-vista" hidden>
@@ -265,7 +266,7 @@
           <h3>Rutinas</h3>
           <button type="button" id="rutina-nueva" class="boton">+ Nueva rutina</button>
         </div>
-        <ul id="rutinas-lista" class="rutinas-lista"></ul>
+        <ul id="rutinas-lista" data-esqueleto="lista" data-esqueleto-n="3" class="rutinas-lista"></ul>
       </div>
     </section>
   </main>
@@ -292,7 +293,7 @@
       </div>
       <p id="capturas-nota" class="aviso" hidden></p>
       <p id="capturas-estado" class="tenue" role="status" aria-live="polite"></p>
-      <div id="capturas-grid" class="capturas-grid"></div>
+      <div id="capturas-grid" data-esqueleto="mosaicos" data-esqueleto-n="8" class="capturas-grid"></div>
     </section>
     <dialog id="capturas-dlg" class="dlg-clave" aria-labelledby="capturas-dlg-titulo">
       <form id="capturas-form" method="dialog" novalidate>
@@ -385,7 +386,7 @@
         <h2>Estado de la red <span id="red-estado-sub" class="tenue"></span></h2>
         <a id="red-csv" class="boton" href="/api/red/export.csv" download>Exportar CSV</a>
       </div>
-      <div id="red-estado-cuerpo" class="red-estado-cuerpo"></div>
+      <div id="red-estado-cuerpo" data-esqueleto="kpis" class="red-estado-cuerpo"></div>
     </section>
     <section id="red-equipos" class="tarjeta red-equipos">
       <div class="red-cabeza">
@@ -396,7 +397,7 @@
           <select id="red-equipos-filas" aria-label="Filas por página"><option>10</option><option selected>25</option><option>50</option></select>
         </div>
       </div>
-      <div id="red-equipos-tabla" class="red-tabla-envoltura"></div>
+      <div id="red-equipos-tabla" data-esqueleto="tabla" data-esqueleto-n="8" class="red-tabla-envoltura"></div>
       <div id="red-equipos-paginas" class="red-paginas"></div>
     </section>
     <section id="red-escaner" class="tarjeta red-escaner">
@@ -410,7 +411,7 @@
     </section>
     <section id="red-velocidad" class="tarjeta red-velocidad">
       <h2>Velocidad <span id="red-velocidad-sub" class="tenue"></span></h2>
-      <div id="red-velocidad-grafica"></div>
+      <div id="red-velocidad-grafica" data-esqueleto="grafica"></div>
     </section>
     <section id="red-eventos" class="tarjeta red-eventos">
       <div class="red-cabeza">
@@ -422,7 +423,7 @@
           <select id="red-eventos-filas" aria-label="Filas por página"><option>10</option><option selected>25</option><option>50</option></select>
         </form>
       </div>
-      <div id="red-eventos-tabla" class="red-tabla-envoltura"></div>
+      <div id="red-eventos-tabla" data-esqueleto="lista" class="red-tabla-envoltura"></div>
       <div id="red-eventos-paginas" class="red-paginas"></div>
     </section>
   </main>
@@ -596,6 +597,7 @@
   </dialog>
 
   <script src="/static/js/tema.js"></script>
+  <script src="/static/js/esqueletos.js"></script>
   <script src="/static/js/menu.js"></script>
   <script src="/static/js/carga.js"></script>
   <script src="/static/js/cuenta.js"></script>

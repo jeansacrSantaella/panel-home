@@ -128,7 +128,7 @@
   }
 
   function dibujar() {
-    if (!datos) return vacio("Cargando luces…");
+    if (!datos) return;  // sin datos aún: se queda el esqueleto de carga
     if (!datos.configurado) return vacio(datos.motivo || "Las luces no están configuradas");
     const h = actual();
     if (!h) {

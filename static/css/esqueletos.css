@@ -1,0 +1,182 @@
+@keyframes esq-aparece {
+  from { opacity: 0; }
+  to { opacity: .8; }
+}
+
+@keyframes esq-brillo {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.esq {
+  width: 100%;
+  min-width: 0;
+  opacity: 0;
+  animation: esq-aparece .2s ease 300ms both;
+}
+
+.esq-b, .esq-c, .esq-celda {
+  min-width: 0;
+  background-color: color-mix(in srgb, var(--texto) 8%, transparent);
+  background-image: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--texto) 14%, transparent) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: esq-brillo 1.4s infinite linear;
+}
+
+.esq-b { border-radius: 8px; }
+.esq-c { border-radius: 50%; }
+
+.esq-fila {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+
+.esq-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.esq-celda {
+  height: 14px;
+  width: 100%;
+  min-width: 0;
+  border-radius: 6px;
+}
+
+/* Formas de esqueletos */
+.esq-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.esq-kpis .esq-b {
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.esq-kpis .esq-c { width: 72px; height: 72px; flex-shrink: 0; }
+
+.esq-anillo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+.esq-anillo .esq-c { width: 140px; height: 140px; }
+.esq-anillo .esq-b { width: 60%; height: 14px; }
+.esq-anillo .esq-celda { width: 40%; }
+
+.esq-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.esq-lista .esq-fila .esq-c { width: 32px; height: 32px; flex-shrink: 0; }
+.esq-lista .esq-col { flex-grow: 1; }
+.esq-lista .esq-celda:nth-child(1) { width: 80%; }
+.esq-lista .esq-celda:nth-child(2) { width: 50%; }
+
+.esq-tabla {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.esq-tabla .esq-fila {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.esq-tabla .esq-b { height: 24px; }
+
+.esq-mosaicos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+.esq-mosaicos .esq-b {
+  height: 96px;
+  border-radius: 18px;
+}
+
+.esq-grafica .esq-b {
+  height: 180px;
+  width: 100%;
+}
+
+.esq-video {
+  aspect-ratio: 16 / 9;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.esq-video .esq-c { width: 48px; height: 48px; }
+
+.esq-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.esq-texto .esq-b:nth-child(1) { width: 100%; height: 14px; }
+.esq-texto .esq-b:nth-child(2) { width: 85%; height: 14px; }
+.esq-texto .esq-b:nth-child(3) { width: 60%; height: 14px; }
+
+.esq-agenda {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 16px;
+  min-width: 0;
+}
+.esq-agenda-grilla {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 6px;
+  min-width: 0;
+}
+.esq-agenda-grilla .esq-b { height: 28px; }
+
+.esq-pildoras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.esq-pildoras .esq-b {
+  width: 180px;
+  height: 44px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+}
+.esq-pildoras .esq-c { width: 24px; height: 24px; flex-shrink: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .esq {
+    animation: none;
+    opacity: .8;
+  }
+  .esq-b, .esq-c {
+    animation: none;
+    background-image: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .esq-agenda {
+    grid-template-columns: 1fr;
+  }
+  .esq-tabla .esq-fila {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Dentro de rejillas (mosaicos, tarjetas de Inicio) el esqueleto ocupa toda la fila, no una celda */
+[data-esqueleto] > .esq { grid-column: 1 / -1; }

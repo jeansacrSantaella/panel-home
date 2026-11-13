@@ -94,3 +94,12 @@ Rejilla tipo tableta horizontal (en celular se apila en este mismo orden):
   (lista: ícono por nombre, nombre, insignia con focos encendidos, toque = encender/apagar la habitación), `atajos.js`
   (mosaicos de focos y rutinas; encendido = mosaico claro), `agenda.js` (Hoy / Ayer con `/api/eventos?desde=` y el
   mes con los días que tienen capturas `/api/capturas` → clic abre `#capturas` con esa fecha), `dock.js`.
+
+## Esqueletos de carga (`static/js/esqueletos.js` + `static/css/esqueletos.css`)
+
+Regla: **toda tarjeta o vista nueva lleva esqueleto** mientras carga. Marca el contenedor que se llena con datos con
+`data-esqueleto="<forma>"` (y `data-esqueleto-n` opcional): `kpis`, `anillo`, `lista`, `tabla`, `mosaicos`, `grafica`,
+`video`, `texto`, `agenda`, `pildoras`. Se pinta solo al cargar la página, aparece con un fundido a los 300 ms (una
+carga rápida no parpadea) y se quita solo en cuanto el script agrega contenido (MutationObserver). Para cargas
+posteriores (filtros, páginas): `Esqueleto.mientras(cont, promesa, forma, n)`. Mientras no haya datos, el script de la
+tarjeta NO debe escribir "Cargando…" (borraría el esqueleto): simplemente no toca el contenedor.

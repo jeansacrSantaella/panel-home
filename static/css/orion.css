@@ -517,17 +517,7 @@ body.iniciando {
   }
 }
 
-/* Tarjetas en espera: solo el título y tres estrellas de las Pléyades pulsando (carga.js quita .esperando al llegar los datos) */
-.rejilla.esperando .tarjeta > :not(h2) { display: none !important; }
-.rejilla.esperando .tarjeta::after {
-  content: ""; display: block; width: 8px; height: 8px; margin: 26px auto 22px; border-radius: 50%;
-  transform: translateX(-16px);
-  background: var(--marca-cian);
-  box-shadow: 0 0 10px var(--marca-cian), 16px -6px 0 0 var(--marca-azul), 32px -12px 0 0 var(--marca-violeta);
-  animation: orion-espera 1.2s ease-in-out infinite;
-}
-@keyframes orion-espera { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .rejilla.esperando .tarjeta::after { animation: none; opacity: .8; } }
+/* Tarjetas en espera: ahora las muestran los esqueletos de carga (static/js/esqueletos.js + esqueletos.css) */
 
 /* Nombre con degradado dentro del menú vertical */
 .menu-cabeza .degradado { background: var(--marca-degradado); -webkit-background-clip: text; background-clip: text; color: transparent; }

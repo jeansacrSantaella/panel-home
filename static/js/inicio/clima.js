@@ -19,14 +19,8 @@
   }
 
   function renderizar(contenedor, datos) {
+    if (!datos) return;  // sin datos aún: se queda el esqueleto de carga
     contenedor.innerHTML = "";
-
-    if (!datos) {
-      contenedor.appendChild(
-        InicioPanel.el("div", "inicio-clima-aviso", { textContent: "Cargando clima…" })
-      );
-      return;
-    }
 
     if (datos.configurado === false) {
       const msg = document.createElement("div");
