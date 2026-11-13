@@ -154,3 +154,13 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | Capturas | Fotos y clips, selección, borrar con PIN, zip, clips en el visor; modo remoto conservado. | Agente Claude Sonnet |
 | Diseño | Resumen con anillos/área/progreso/actividad (Sonnet), Luces agrupadas por habitación en mosaicos (Gemini vía Haiku), notas de "lo último en casa" junto al reloj de Inicio (Gemini + CSS de Claude). | varios |
 | Prueba | Suite 265/265 (dos corridas), todos los JS compilan, sin referencias a :1984/:8080 en el navegador. | Claude |
+| Arreglo | Healthcheck de Docker a `/salud` (público, sin datos): antes pegaba en `/api/panel` → 401 → "unhealthy" y el panel avisaba de sí mismo. Contenedores `panel-go2rtc`/`panel-detector` para no chocar con los de gestorCamaras en la semana en paralelo. | Claude |
+
+## 2026-11-13 — README, prueba del navegador y pruebas web
+
+| Paso | Qué | Quién |
+|---|---|---|
+| README | Reescrito con el proyecto actual: pestañas, modos de transición (`RED_INTERNA`, `CAMARAS_INTERNAS`), despliegue en 5 pasos, variables por grupo, scripts, bot, estructura e índice de docs. | Agente Claude Haiku |
+| Navegador | `scripts/prueba_navegador.py` + `tests/test_navegador.py`: levanta el panel aislado con datos falsos, inyecta un capturador de errores y abre cada pestaña con Chrome headless; falla si hay errores de JS. 6/6 pestañas OK (verificado que sí detecta un error inyectado). | Agente Claude Sonnet |
+| Web | `tests/test_web_red_clima_hab.py`: 18 pruebas de `/salud`, sonda (404/401/200/413/409), resumen, eventos, CSV, alias, clima y habitaciones. Sin bugs. | Agente Claude Haiku |
+| Prueba | Suite completa 284/284. | Claude |

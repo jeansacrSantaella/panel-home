@@ -6,7 +6,7 @@ services:
   go2rtc:
     # gestorCamaras usaba alexxit/go2rtc sin etiqueta (latest); para fijar una versión, cámbiala aquí
     image: alexxit/go2rtc:latest
-    container_name: go2rtc
+    container_name: panel-go2rtc   # distinto del de gestorCamaras para poder correr ambos en paralelo
     restart: unless-stopped
     volumes:
       - ./go2rtc/go2rtc.yaml:/config/go2rtc.yaml
@@ -49,7 +49,7 @@ services:
 
   detector:
     build: ./detector
-    container_name: detector-camaras
+    container_name: panel-detector
     restart: unless-stopped
     # Solo arranca con docker compose --profile camaras up -d mientras se prueba la migración de cámaras.
     profiles:

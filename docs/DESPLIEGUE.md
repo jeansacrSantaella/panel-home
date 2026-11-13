@@ -77,7 +77,7 @@ Cuando la semana de prueba esté bien:
 2. Detén NetWatch (cierra el programa o detén su servicio).
 3. En `.env` quita `PANEL_AVISAR` (o déjala vacía) para que panel-home avise la red y las cámaras.
 4. En la carpeta de panel-home, ejecuta `docker compose --profile camaras up -d`.
-5. Verifica con `docker compose ps` que panel-home, go2rtc y detector-camaras estén en "running".
+5. Verifica con `docker compose ps` que panel-home, panel-go2rtc y panel-detector estén en "running".
 
 ## Respaldo de data
 

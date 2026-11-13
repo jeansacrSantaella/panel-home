@@ -212,6 +212,8 @@ def crear_servidor(cfg, db, recolector, auth, luces=None, rutinas=None, red=None
                     if STATIC.resolve() in ruta.parents and ruta.is_file():
                         return self._archivo(ruta)
                     return self._json({"error": "no existe"}, 404)
+                if url.path == "/salud":  # healthcheck de Docker: sin sesión y sin datos de la casa
+                    return self._json({"ok": True})
                 if url.path in PUBLICAS:
                     return self._archivo(STATIC / "login.html", "no-store")
                 if url.path == "/api/interno/camaras":
