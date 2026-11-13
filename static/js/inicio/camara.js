@@ -144,7 +144,7 @@
     }
 
     if (latenciaEl) {
-      latenciaEl.textContent = camaraActiva.latencia_ms !== undefined ? `${camaraActiva.latencia_ms} ms` : "";
+      latenciaEl.textContent = camaraActiva.latencia_ms != null ? `${camaraActiva.latencia_ms} ms` : "";  // null = aún sin medir
     }
 
     // Renderizar lista lateral de botones

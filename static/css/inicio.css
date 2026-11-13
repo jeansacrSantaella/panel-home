@@ -80,7 +80,7 @@
 .inicio-camara-visor {
   position: relative;
   min-width: 0;
-  min-height: 220px;
+  width: 100%;   /* sin min-height: con aspect-ratio 16:9 obligaba ~391 px de ancho y desbordaba en celular */
   aspect-ratio: 16 / 9;
   border-radius: 16px;
   overflow: hidden;

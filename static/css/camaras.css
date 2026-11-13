@@ -67,7 +67,7 @@ dialog.dlg-camara { width: min(520px, 94vw); max-height: 90dvh; overflow: auto; 
 .dlg-camara .dlg-error { margin: 4px 0 0; color: var(--mal); font-size: 13px; min-height: 1em; }
 
 @media (max-width: 759.98px) {
-  .camaras-vista { padding: 8px; }
+  .camaras-vista { padding: 12px; }  /* mismo margen lateral que las demás tarjetas en celular */
   .camaras-rejilla, .camaras-rejilla[data-modo="dos"] { grid-template-columns: 1fr; }
   .camaras-rejilla[data-modo="grande"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cam-flecha { min-height: 44px; }
