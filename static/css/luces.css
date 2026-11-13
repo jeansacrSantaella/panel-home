@@ -11,6 +11,26 @@
   align-items: start;
 }
 
+/* Habitaciones: la lista usa las mismas clases .inicio-lista/.inicio-fila/.inicio-ico/.inicio-insignia
+   que Inicio (inicio.css), así que define aquí las mismas variables. Tarjeta a todo lo ancho, arriba. */
+.luces-habitaciones h2 small { font-weight: 400; margin-left: 6px; }
+.luces-habitaciones {
+  grid-column: 1 / -1; order: -1;
+  --ini-grad: linear-gradient(135deg, #8B5CF6, #5aa8ff 55%, #00E5FF);
+  --ini-violeta: #8B5CF6;
+  --ini-azul: #5aa8ff;
+  --ini-cian: #00E5FF;
+  --ini-fondo: color-mix(in srgb, var(--texto) 7%, transparent);
+  --ini-fondo-2: color-mix(in srgb, var(--texto) 12%, transparent);
+  --ini-claro: rgba(255,255,255,.92);
+  --ini-sobre-claro: #1b2142;
+  --ini-sol: #e0a21c;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .luces-habitaciones { --ini-sobre-claro: #ffffff; --ini-claro: #5b4ee0; --ini-sol: #c98a0a; }
+}
+:root[data-theme="light"] .luces-habitaciones { --ini-sobre-claro: #ffffff; --ini-claro: #5b4ee0; --ini-sol: #c98a0a; }
+
 .luces-vista-cabeza {
   display: flex;
   flex-wrap: wrap;

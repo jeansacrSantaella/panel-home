@@ -8,7 +8,7 @@
    - .inicio-hab-acciones: fila de botones redondos .inicio-hab-accion (+ .activo si la habitación está encendida)
      con .inicio-hab-accion-etq (texto bajo el ícono)
    - .inicio-hab-error: texto breve de error; .inicio-hab-vacio: mensaje sin habitaciones o sin luces
-   Escucha document "inicio-luces" y "inicio-elegir-hab" (detail = nombre de habitación). */
+   Escucha document "inicio-luces". */
 (function () {
   "use strict";
   const RAIZ = document.getElementById("inicio-hab");
@@ -212,6 +212,5 @@
     datos = e.detail;
     if (pendiente === null) dibujar();
   });
-  document.addEventListener("inicio-elegir-hab", e => { if (typeof e.detail === "string") elegir(e.detail); });
   dibujar();
 })();

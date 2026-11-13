@@ -73,7 +73,7 @@ Rejilla tipo tableta horizontal (en celular se apila en este mismo orden):
 ```
 [ chips de estado (franja #chips) ............................ ][ reloj #inicio-reloj ]
 [ cámara #inicio-camara (video + selector) ][ clima #inicio-clima ][ habitación #inicio-hab ]
-[ habitaciones #inicio-habitaciones ][ atajos #inicio-atajos ][ agenda #inicio-agenda ........ ]
+[ última hora #inicio-capturas (carrusel) ][ atajos #inicio-atajos ][ agenda #inicio-agenda ........ ]
 [ dock inferior #inicio-dock: luces encendidas · cámaras · internet · clima · rutina ......... ]
 ```
 
@@ -103,3 +103,7 @@ Regla: **toda tarjeta o vista nueva lleva esqueleto** mientras carga. Marca el c
 carga rápida no parpadea) y se quita solo en cuanto el script agrega contenido (MutationObserver). Para cargas
 posteriores (filtros, páginas): `Esqueleto.mientras(cont, promesa, forma, n)`. Mientras no haya datos, el script de la
 tarjeta NO debe escribir "Cargando…" (borraría el esqueleto): simplemente no toca el contenedor.
+
+**Cambio (2026-11-13):** la lista de Habitaciones vive ahora en la pestaña Luces (`static/js/luces-habitaciones.js`,
+carga propia de `/api/luces/habitaciones`); en Inicio su lugar lo ocupa "Última hora" (`static/js/inicio/capturas-recientes.js`
++ `static/css/inicio-carrusel.css`): carrusel de las capturas de movimiento de los últimos 60 min de todas las cámaras.

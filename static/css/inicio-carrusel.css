@@ -1,0 +1,211 @@
+/* Estilos del carrusel de capturas de la última hora en Inicio */
+
+.inicio-car-contenedor {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  border-radius: 18px;
+  background: var(--vidrio);
+  border: 1px solid var(--vidrio-borde);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  outline: none;
+}
+
+.inicio-car-slide {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-width: 0;
+}
+
+.inicio-car-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: zoom-in;
+  display: block;
+}
+
+.inicio-car-pie {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.inicio-car-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.inicio-car-hace {
+  opacity: 0.9;
+  margin-left: 4px;
+}
+
+.inicio-car-clases {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.inicio-car-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--vidrio);
+  border: 1px solid var(--vidrio-borde);
+  color: var(--texto);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  z-index: 2;
+}
+
+.inicio-car-contenedor:hover .inicio-car-btn,
+.inicio-car-contenedor:focus-within .inicio-car-btn {
+  opacity: 1;
+}
+
+.inicio-car-ant {
+  left: 12px;
+}
+
+.inicio-car-sig {
+  right: 12px;
+}
+
+.inicio-car-btn:hover {
+  background: var(--vidrio-brillo);
+}
+
+.inicio-car-tira {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.05);
+  border-top: 1px solid var(--borde);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  min-width: 0;
+}
+
+.inicio-car-punto {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: var(--vidrio);
+  color: var(--tenue);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease, outline 0.2s ease;
+}
+
+.inicio-car-punto[aria-pressed="true"] {
+  border-color: transparent;
+  outline: 2px solid var(--marca-cian);
+  background: var(--vidrio-brillo);
+  color: var(--texto);
+}
+
+.inicio-car-contador {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--tenue);
+  white-space: nowrap;
+}
+
+.inicio-car-vacio,
+.inicio-car-error {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--tenue);
+  background: var(--vidrio);
+  border: 1px solid var(--vidrio-borde);
+  border-radius: 18px;
+  font-size: 0.9rem;
+}
+
+.inicio-car-enlace {
+  color: var(--marca-azul);
+  text-decoration: none;
+  font-weight: 500;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+.inicio-car-enlace:hover {
+  text-decoration: underline;
+}
+
+@media (hover: none) {
+  .inicio-car-btn {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 760px) {
+  .inicio-car-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  
+  .inicio-car-ant {
+    left: 8px;
+  }
+  
+  .inicio-car-sig {
+    right: 8px;
+  }
+
+  .inicio-car-punto {
+    width: 56px;
+    height: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inicio-car-btn,
+  .inicio-car-punto,
+  .inicio-car-contenedor * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* miniaturas con la foto dentro del botón de la tira */
+.inicio-car-punto { padding: 0; overflow: hidden; }
+.inicio-car-mini { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }

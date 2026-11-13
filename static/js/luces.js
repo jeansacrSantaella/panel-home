@@ -258,6 +258,7 @@
       }
 
       const section = el("section", "luces-grupo");
+      section.dataset.habitacion = nombreHab;
       const header = el("header", "luces-grupo-cabeza");
       const h3 = el("h3", "", { textContent: nombreHab });
       if (encGroup > 0) {
@@ -386,4 +387,6 @@
   setInterval(cargar, 20000);
   // al ejecutar una rutina los focos cambian: refrescar enseguida
   document.addEventListener("rutina-ejecutada", () => setTimeout(cargar, 300));
+  // la lista de habitaciones avisa al cambiar una habitación completa
+  document.addEventListener("luces-recargar", () => cargar());
 })();

@@ -27,6 +27,7 @@
   <link rel="stylesheet" href="/static/css/resumen.css">
   <link rel="stylesheet" href="/static/css/capturas.css">
   <link rel="stylesheet" href="/static/css/inicio.css">
+  <link rel="stylesheet" href="/static/css/inicio-carrusel.css">
   <link rel="stylesheet" href="/static/css/camaras.css">
   <link rel="stylesheet" href="/static/css/esqueletos.css">
   <link rel="stylesheet" href="/static/css/vidrio.css">
@@ -163,7 +164,7 @@
     <section id="inicio-camara" data-esqueleto="video" class="tarjeta inicio-camara" aria-label="Cámaras"></section>
     <section id="inicio-clima" data-esqueleto="anillo" class="tarjeta inicio-clima" aria-label="Clima"></section>
     <section id="inicio-hab" data-esqueleto="anillo" class="tarjeta inicio-hab" aria-label="Habitación"></section>
-    <section id="inicio-habitaciones" class="tarjeta inicio-habitaciones"><h2>Habitaciones</h2><ul class="inicio-lista" data-esqueleto="lista" data-esqueleto-n="4"></ul></section>
+    <section id="inicio-capturas" class="tarjeta inicio-capturas" aria-label="Últimas capturas de la última hora" aria-roledescription="carrusel"><h2>Última hora <small id="inicio-capturas-sub" class="tenue"></small></h2><div id="inicio-capturas-cuerpo" class="inicio-capturas-cuerpo" data-esqueleto="video"></div></section>
     <section id="inicio-atajos" class="tarjeta inicio-atajos"><h2>Accesos directos</h2><div class="inicio-mosaicos" data-esqueleto="mosaicos"></div></section>
     <section id="inicio-agenda" data-esqueleto="agenda" class="tarjeta inicio-agenda" aria-label="Agenda"></section>
     <nav id="inicio-dock" data-esqueleto="pildoras" data-esqueleto-n="5" class="inicio-dock" aria-label="Acciones rápidas"></nav>
@@ -243,6 +244,7 @@
   </main>
 
   <main id="pestana-luces" class="luces-vista" hidden>
+    <section id="luces-habitaciones" class="tarjeta luces-habitaciones"><h2>Habitaciones <small id="luces-habitaciones-sub" class="tenue"></small></h2><ul class="inicio-lista habitaciones-lista" data-esqueleto="lista" data-esqueleto-n="4"></ul></section>
     <section class="tarjeta luces-focos">
       <div class="luces-vista-cabeza">
         <h2>Focos <span id="luces-sub-vista" class="tenue"></span></h2>
@@ -627,7 +629,8 @@
   <script src="/static/js/inicio/camara.js"></script>
   <script src="/static/js/inicio/clima.js"></script>
   <script src="/static/js/inicio/habitacion.js"></script>
-  <script src="/static/js/inicio/habitaciones.js"></script>
+  <script src="/static/js/inicio/capturas-recientes.js"></script>
+  <script src="/static/js/luces-habitaciones.js"></script>
   <script src="/static/js/inicio/atajos.js"></script>
   <script src="/static/js/inicio/agenda.js"></script>
   <script src="/static/js/inicio/dock.js"></script>

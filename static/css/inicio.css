@@ -407,7 +407,7 @@
 @media (min-width: 1200px) {
   .inicio { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); }
   #inicio-camara { grid-column: auto; }
-  .inicio-habitaciones { grid-column: 1; }
+  .inicio-capturas { grid-column: 1; }
   .inicio-atajos { grid-column: 2 / 4; }
   .inicio-atajos .inicio-mosaicos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   #inicio-agenda { grid-column: 1 / -1; }
