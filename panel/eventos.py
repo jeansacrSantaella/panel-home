@@ -32,9 +32,10 @@ MAPA_CAMARA = {
 
 
 class Recolector:
-    def __init__(self, cfg, db):
+    def __init__(self, cfg, db, red=None):
         self.cfg = cfg
         self.db = db
+        self.red = red  # panel.red.servicio.Red: la red la mide la sonda (RED_INTERNA=1); None = leer NetWatch
         self.ultimo = {"ts": 0, "netwatch": None, "camaras": None, "salud": None, "espacio": None, "sistema": None}
         self._espacio_ts = 0
         self._malos = {}  # lecturas seguidas con el contenedor caído
@@ -108,9 +109,13 @@ class Recolector:
         return n
 
     def _red(self, ahora: int, silencio: bool) -> int:
-        r = fuentes.netwatch_resumen(self.cfg)
+        if self.red is not None:
+            r = self.red.resumen_vivo(ahora)  # None si la sonda dejó de mandar lecturas
+            n = self._fuente("Sonda de red", r is not None, ahora, silencio)
+        else:
+            r = fuentes.netwatch_resumen(self.cfg)
+            n = self._fuente("NetWatch", r is not None, ahora, silencio)
         self.ultimo["netwatch"] = r
-        n = self._fuente("NetWatch", r is not None, ahora, silencio)
         for e in (r or {}).get("events", []):
             kind, detalle = e.get("kind", ""), e.get("detail", "")
             tipo, nivel, titulo = MAPA_RED.get(kind, (f"red_{kind}", "bajo", kind))

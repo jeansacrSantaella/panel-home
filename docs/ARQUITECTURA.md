@@ -169,3 +169,13 @@ class Avisador:
   Hilo cada 20 s: ejecuta las que tocan (ventana de 2 min, `ultima` evita repetir). Ejecuta las acciones en paralelo
   con `Luces.aplicar` y registra `rutina_ejecutada`.
 - `GET /api/rutinas`, `POST /api/rutinas` (crear/editar), `POST /api/rutinas/<id>/ejecutar|activa|borrar`.
+
+## Agregado: red interna (sonda)
+
+- Contrato completo en `docs/RED.md`. `RED_INTERNA=1` + `RED_TOKEN`.
+- `sonda/` (fuera de Docker, independiente de `panel/`): `medir.py` (ping, DNS, ARP, gateway en macOS/Linux/Windows), `sonda.py` (`Sonda`: lecturas, cola, envío), `python3 -m sonda`.
+- `panel/red/`: `almacen.py` (`RedDb`, tablas `red_*`), `estado.py` (`EstadoRed`: reglas de NetWatch), `fabricantes.py`, `resumen.py` (`ResumenRed` = `/api/summary`), `consultas.py`, `escaner.py`, `servicio.py` (`Red`, la fachada).
+- `Recolector(cfg, db, red)`: con `red`, `_red` usa `red.resumen_vivo()` (fuente "Sonda de red") en vez de NetWatch.
+- web: `POST /api/interno/red` (token, ≤ 2 MB, sin sesión); `GET /api/red/eventos|export.csv|sonda`, `POST /api/red/escanear|alias|network`.
+- `panel/tareas.py` (`Planificador`): descarga de fabricantes (7 días) y poda de sondeos (diaria).
+- `scripts/migrar_netwatch.py`: importa `netwatch.db` (idempotente).

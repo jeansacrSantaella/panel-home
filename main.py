@@ -14,6 +14,7 @@ from panel.db import Db
 from panel.eventos import Recolector
 from panel.luces import Luces
 from panel.rutinas import Rutinas
+from panel.tareas import Planificador
 from panel.web import crear_servidor
 
 log = logging.getLogger("panel")
@@ -62,7 +63,18 @@ def main() -> None:
         return
     if auth.asegurar_admin():
         log.warning("Cuenta creada: admin / 1234. Entra al panel y cámbiala.")
-    recolector = Recolector(cfg, db)
+    red = None
+    planificador = Planificador()
+    if cfg.red_interna:
+        from panel.red.servicio import Red
+        red = Red(db, cfg.oui_archivo)
+        for t in red.tareas():
+            planificador.agregar(t)
+        if not cfg.red_token:
+            log.warning("RED_INTERNA=1 sin RED_TOKEN: la sonda no podrá mandar lecturas (docs/RED.md)")
+        log.info("Red interna: esperando lecturas de la sonda en POST /api/interno/red")
+    planificador.iniciar()
+    recolector = Recolector(cfg, db, red)
     avisador = Avisador(cfg, db)
     if not avisador.activo:
         log.info("Sin TELEGRAM_TOKEN/TELEGRAM_CHAT_ID ni NTFY_URL: los avisos solo se verán en la web")
@@ -102,8 +114,8 @@ def main() -> None:
     if luces.configurado:
         rutinas.iniciar()
 
-    servidor = crear_servidor(cfg, db, recolector, auth, luces, rutinas)
-    log.info("NetWatch: %s · Cámaras: %s · go2rtc: %s", cfg.netwatch_url, cfg.camaras_url, cfg.go2rtc_url or "(host de la página):1984")
+    servidor = crear_servidor(cfg, db, recolector, auth, luces, rutinas, red)
+    log.info("Red: %s · Cámaras: %s · go2rtc: %s", "sonda (interna)" if red else cfg.netwatch_url, cfg.camaras_url, cfg.go2rtc_url or "(host de la página):1984")
     log.info("Panel en http://%s:%d", cfg.host, cfg.port)
     try:
         servidor.serve_forever()
@@ -111,6 +123,7 @@ def main() -> None:
         pass
     finally:
         parar.set()
+        planificador.detener()
         servidor.server_close()
 
 

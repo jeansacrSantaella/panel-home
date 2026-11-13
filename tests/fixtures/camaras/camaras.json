@@ -1,0 +1,22 @@
+[
+    {
+        "id": "camara1",
+        "nombre": "C\u00e1mara 1",
+        "ip": "192.168.1.74",
+        "puerto_rtsp": 554,
+        "ruta_rtsp": "/live/ch00_0",
+        "puerto_onvif": 8899,
+        "usuario": "",
+        "tiene_clave": false
+    },
+    {
+        "id": "camara2",
+        "nombre": "C\u00e1mara 2",
+        "ip": "192.168.1.76",
+        "puerto_rtsp": 554,
+        "ruta_rtsp": "/live/ch00_0",
+        "puerto_onvif": 8899,
+        "usuario": "",
+        "tiene_clave": false
+    }
+]

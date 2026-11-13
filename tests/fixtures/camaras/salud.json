@@ -1,0 +1,21 @@
+{
+    "go2rtc": true,
+    "camaras": {
+        "camara1": {
+            "nombre": "C\u00e1mara 1",
+            "ip": "192.168.1.74",
+            "estado": "ok",
+            "desde": 1794581858.8859215,
+            "latencia_ms": 7,
+            "cortes_24h": 8
+        },
+        "camara2": {
+            "nombre": "C\u00e1mara 2",
+            "ip": "192.168.1.76",
+            "estado": "ok",
+            "desde": 1794581858.8935266,
+            "latencia_ms": 7,
+            "cortes_24h": 4
+        }
+    }
+}

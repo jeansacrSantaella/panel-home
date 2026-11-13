@@ -1,9 +1,9 @@
 # Imagen base Python slim
 FROM python:3.12-slim
 
-# Instala tzdata para el manejo de hora local en nombres de fotos
+# tzdata: hora local en nombres de fotos · iputils-ping: escáner de equipos de la pestaña Red
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    tzdata \
+    tzdata iputils-ping \
     && rm -rf /var/lib/apt/lists/*
 
 # Variables de entorno por defecto
@@ -18,6 +18,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia de código fuente
 COPY main.py .
 COPY panel/ ./panel/
+# sonda/: el escáner de equipos de la pestaña Red usa sus funciones de ping y DNS (la sonda en sí corre fuera de Docker)
+COPY sonda/ ./sonda/
 COPY static/ ./static/
 
 VOLUME /data

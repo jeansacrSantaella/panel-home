@@ -10,6 +10,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+import hmac
 import platform
 import re
 import sqlite3
@@ -88,7 +89,9 @@ def acerca(cfg, db, recolector, ahora=None) -> dict:
         "sistema": f"{platform.system()} {platform.machine()}", "inicio": INICIO, "ahora": ahora,
         "db_bytes": db_bytes, "eventos": total["n"], "eventos_desde": total["desde"],
         "servicios": [
-            servicio("NetWatch", cfg.netwatch_url, u.get("netwatch") is not None, "red, caídas y equipos"),
+            (servicio("Sonda de red", "POST /api/interno/red", u.get("netwatch") is not None, "red, caídas y equipos")
+             if cfg.red_interna else
+             servicio("NetWatch", cfg.netwatch_url, u.get("netwatch") is not None, "red, caídas y equipos")),
             servicio("gestorCamaras", cfg.camaras_url, u.get("salud") is not None, "cámaras, capturas y clips"),
             servicio("go2rtc", cfg.go2rtc_url or "(host):1984", salud.get("go2rtc") if salud else None, "video en vivo"),
             servicio("Docker", cfg.docker_sock or "—", sistema.get("contenedores") is not None, "estado de contenedores"),
@@ -110,10 +113,11 @@ def capturas(cfg, recolector, fecha: str) -> dict:
 
 
 MAX_CUERPO = 4096
+MAX_LECTURAS = 2 * 1024 * 1024  # lote de la sonda de red
 PUBLICAS = ("/login", "/login.html")  # además de /static/: todo lo demás pide sesión
 
 
-def crear_servidor(cfg, db, recolector, auth, luces=None, rutinas=None) -> ThreadingHTTPServer:
+def crear_servidor(cfg, db, recolector, auth, luces=None, rutinas=None, red=None) -> ThreadingHTTPServer:
     from panel.auth import COOKIE, DURACION_SESION, Bloqueado
 
     class Manejador(BaseHTTPRequestHandler):
@@ -205,6 +209,8 @@ def crear_servidor(cfg, db, recolector, auth, luces=None, rutinas=None) -> Threa
                     tipos = [t for t in q.get("tipos", "").split(",") if t]
                     return self._json({"eventos": db.eventos(_entero(q.get("desde")), _entero(q.get("hasta")),
                                                              tipos, _entero(q.get("limite"), 200))})
+                if url.path.startswith("/api/red/"):
+                    return self._red_get(url.path[len("/api/red/"):], q)
                 if url.path == "/api/capturas":
                     return self._json(capturas(cfg, recolector, q.get("fecha") or time.strftime("%Y-%m-%d")))
                 if url.path == "/api/foto":
@@ -263,8 +269,63 @@ def crear_servidor(cfg, db, recolector, auth, luces=None, rutinas=None) -> Threa
             except RuntimeError as e:
                 return self._json({"error": str(e)}, 504)
 
+        # --- red interna (docs/RED.md) ---
+        def _sin_red(self):
+            return self._json({"error": "La red interna no está activa (RED_INTERNA=1)"}, 409)
+
+        def _red_get(self, que: str, q: dict):
+            if red is None:
+                return self._sin_red()
+            if que == "eventos":
+                return self._json(red.eventos(q))  # ValueError -> 400 en do_GET
+            if que == "export.csv":
+                nombre = time.strftime("red-%Y%m%d-%H%M.csv")
+                return self._enviar(200, red.csv().encode("utf-8"), "text/csv; charset=utf-8",
+                                    extra=[("Content-Disposition", f'attachment; filename="{nombre}"')])
+            if que == "sonda":
+                return self._json({"sonda": red.sonda()})
+            return self._json({"error": "no existe"}, 404)
+
+        def _red_post(self, que: str, datos: dict):
+            if red is None:
+                return self._sin_red()
+            try:
+                if que == "escanear":
+                    return self._json(red.escanear(datos.get("host"), datos.get("ports")))
+                if que == "alias":
+                    red.alias(datos)
+                    return self._json({"ok": True})
+                if que == "network":
+                    red.network(datos)
+                    return self._json({"ok": True})
+            except (ValueError, KeyError, TypeError) as e:
+                return self._json({"error": str(e) or "petición inválida"}, 400)
+            return self._json({"error": "no existe"}, 404)
+
+        def _red_ingesta(self):
+            """Lecturas de la sonda: token propio (no sesión) y lotes de hasta 2 MB."""
+            if red is None or not cfg.red_token:
+                return self._json({"error": "no existe"}, 404)
+            dado = (self.headers.get("Authorization") or "").removeprefix("Bearer ").strip()
+            if not hmac.compare_digest(dado.encode(), cfg.red_token.encode()):
+                log.warning("sonda de red con token incorrecto desde %s", self._ip())
+                return self._json({"error": "token incorrecto"}, 401)
+            try:
+                largo = int(self.headers.get("Content-Length") or 0)
+            except ValueError:
+                largo = -1
+            if largo <= 0 or largo > MAX_LECTURAS:
+                return self._json({"error": "cuerpo inválido"}, 413)
+            try:
+                n = red.recibir(json.loads(self.rfile.read(largo)))
+            except ValueError as e:
+                return self._json({"error": str(e) or "JSON inválido"}, 400)
+            return self._json({"ok": True, "recibidas": n})
+
         def do_POST(self):
             url = urlparse(self.path)
+            if url.path == "/api/interno/red":
+                return self._red_ingesta()
             # Solo JSON del mismo origen: junto con SameSite=Strict evita peticiones forjadas desde otras páginas
             origen = self.headers.get("Origin")
             if origen and urlparse(origen).netloc != self.headers.get("Host", ""):
@@ -303,6 +364,8 @@ def crear_servidor(cfg, db, recolector, auth, luces=None, rutinas=None) -> Threa
                 return self._json({"error": "sin sesión"}, 401)
             if url.path == "/api/rutinas" or url.path.startswith("/api/rutinas/"):
                 return self._rutinas_post(url.path[len("/api/rutinas"):], datos)
+            if url.path.startswith("/api/red/"):
+                return self._red_post(url.path[len("/api/red/"):], datos)
             if url.path.startswith("/api/luces/"):
                 return self._luces_post(url.path[len("/api/luces/"):], datos)
             if url.path == "/api/contrasena":

@@ -1,0 +1,59 @@
+services:
+  go2rtc:
+    image: alexxit/go2rtc
+    container_name: go2rtc
+    restart: unless-stopped
+    ports:
+      - "1984:1984"   # visor y API de go2rtc
+      - "8554:8554"   # RTSP re-publicado
+    volumes:
+      - ./go2rtc.yaml:/config/go2rtc.yaml
+    logging:
+      options: { max-size: "10m", max-file: "3" }
+
+  panel:
+    build: ./panel
+    container_name: panel-camaras
+    restart: unless-stopped
+    depends_on:
+      - go2rtc
+    ports:
+      - "8080:8080"   # panel web
+    volumes:
+      - ./data:/data  # aquí se guarda cameras.json (y eventos.log)
+    env_file:
+      - path: .env     # TELEGRAM_TOKEN y TELEGRAM_CHAT_ID (ver .env.example)
+        required: false
+    environment:
+      GO2RTC_URL: "http://go2rtc:1984"
+      TZ: America/Mexico_City
+      ADMIN_PIN: ""          # si lo llenas, pedirá este PIN para agregar o quitar cámaras
+      MAX_SESIONES: "2"
+      VIGILAR_CADA: "10"     # segundos entre revisiones de salud
+      CAIDA_TRAS: "45"       # segundos seguidos sin video antes de avisar por Telegram
+      # Solo se usa la primera vez, si no existe data/cameras.json:
+      CAMARAS: "camara1=192.168.1.69,camara2=192.168.1.72"
+
+  detector:
+    build: ./detector
+    container_name: detector-camaras
+    restart: unless-stopped
+    depends_on:
+      - go2rtc
+      - panel
+    volumes:
+      - ./data:/data  # fotos en data/fotos/AAAA-MM-DD/ y clips en data/clips/AAAA-MM-DD/
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      TZ: America/Mexico_City
+      INTERVALO: "1.5"       # segundos entre fotos analizadas por cámara
+      CONFIANZA: "0.5"       # certeza mínima de YOLO (0-1)
+      RETENCION_HORAS: "24"  # fotos y clips se borran solos pasado este tiempo
+      CLIP_SEG: "15"         # segundos de video al detectar una persona (0 = sin clips)
+      RESUMEN_CADA_H: "2"    # único aviso de detecciones: resumen por Telegram en horas pares
+      SILENCIO_DESDE: "23"   # de 23:00 a 07:00 el resumen llega sin fotos
+      SILENCIO_HASTA: "7"
+    logging:
+      options: { max-size: "10m", max-file: "3" }

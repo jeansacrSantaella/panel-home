@@ -46,6 +46,26 @@ docker compose up -d --build
 - Actualizar: `git pull` y `docker compose up -d --build`. Ver la bitácora: `docker logs -f panel-home`.
 - Corre una sola copia del panel con Telegram configurado; si hay dos, cada aviso llega dos veces.
 
+## Red sin NetWatch (sonda)
+
+La red ya puede medirse sin NetWatch: una **sonda** pequeña (`sonda/`, sin dependencias) corre **fuera de Docker**
+en un equipo de la red (Docker no ve las MAC de la casa) y manda sus lecturas a panel-home, que decide caídas,
+equipos nuevos y desconexiones, guarda el historial y avisa. Detalle y contrato en [docs/RED.md](docs/RED.md).
+
+```bash
+# en el .env de panel-home
+RED_INTERNA=1
+RED_TOKEN=<secreto>            # python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# en el equipo que mide (macOS, Linux o Windows), desde la carpeta del repo
+python3 -m sonda --panel http://192.168.1.94:8770 --token <secreto>
+
+# una sola vez: traer el historial de NetWatch (equipos, alias, eventos, velocidad)
+python3 scripts/migrar_netwatch.py ../analizadorRed/NetWhatch/netwatch.db
+```
+
+Si la sonda deja de mandar lecturas 90 s, el panel lo marca como "Sonda de red no responde".
+
 ## Luces (focos Tuya)
 
 Tarjeta **Luces** en el Resumen: encender/apagar, brillo, blanco cálido-frío y color de cada foco, y "Apagar todo".

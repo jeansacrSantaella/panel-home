@@ -67,3 +67,51 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | T42 | Rutinas de luces: `panel/rutinas.py` (validación, ejecución en paralelo, reloj de horarios sin repetir), rutas `/api/rutinas`, `rutinas.js` (Gemini) + `rutinas.css` (Claude, el worker se atoró), 4 pruebas. Prueba real: rutina con 4 focos → 4 de 4. Arreglo: Ejecutar/Borrar mandaban POST sin JSON. | Claude + Gemini |
 | T43 | Luces en dos niveles: tarjeta del Resumen compacta (punto de color, nombre e interruptor, "Ver todo →") y pestaña nueva **Luces** con detalle por foco (brillo, blanco, color), estado de conexión (Conectado / Sin respuesta, IP, "contestó hace…", motivo) y las rutinas. Barra inferior del celular con 5 pestañas. | Claude |
 | T44 | Menú responsivo: en el celular, botón ☰ que abre un menú vertical deslizante (marca, 5 secciones con ícono, se cierra con ✕, fondo, Escape o al elegir; `inert` cuando está cerrado) y la sección actual bajo la marca; se quitó la barra inferior. Tableta: chips en su propia fila. Campana 🔔 compacta en el celular. Arreglos: ☰ visible en escritorio y fondo oscuro encima del menú. | Claude |
+
+## 2026-11-13 — Plan de migración (cámaras + red) y camino a móvil
+
+| Paso | Qué | Quién |
+|---|---|---|
+| Plan | `docs/PLAN_MIGRACION.md`: inventario de NetWatch y gestorCamaras, decisiones D1–D6, fases 0–9 (T45–T96) hasta app Android/iOS con Capacitor. | Claude |
+
+## 2026-11-13 — Fase 0 de la migración (rama `feature/integracion`)
+
+| Paso | Qué | Quién |
+|---|---|---|
+| T45 | `docs/origen/`: README, compose, go2rtc.yaml, env.example (sin secretos), guía PDF y código de referencia de gestorCamaras; README y docs técnicos de NetWatch; contrato HTTP de gestorCamaras en `docs/origen/README.md`. | Claude |
+| T46 | `tests/fixtures/camaras/`: respuestas reales de gestorCamaras en la .94 (`camaras`, `salud`, `espacio`, `fotos_dias`, `fotos_dia`, `clips_dia`, `config_estado`). Las de NetWatch se posponen con la revisión de red. | Claude |
+| T47 | `panel/tareas.py`: `Tarea`, `Planificador` (un hilo por tarea, sobrevive a errores, `detener()`), `cada()`. | Gemini 3.5 flash-lite, revisado por Claude |
+| T48 | `Config`: `CAMARAS_INTERNAS`, `GO2RTC_INTERNO_URL`, `ADMIN_PIN`, `MAX_CAMARAS`, `MAX_SESIONES`, `SESION_CADUCA`, `VIGILAR_CADA`, `CAIDA_TRAS`, `ONVIF_TIMEOUT`, `CAMARAS`; `camaras_data` por defecto `data/`; helpers `_entero/_decimal/_booleano`. | Gemini 3.5 flash-lite, revisado por Claude |
+| Nota | Red (NetWatch) queda **en revisión a detalle** antes de migrar; se sigue con cámaras. Las IPs reales de las cámaras hoy son .74 y .76. | Claude |
+
+## 2026-11-13 — Fase 3 (cámaras, backend) — módulos sueltos, aún sin conectar
+
+| Paso | Qué | Quién |
+|---|---|---|
+| T62 | `panel/camaras/registro.py`: tabla `camaras` en panel.db, alta/baja con validación (IP local, ruta, puertos, límite todo-o-nada), `publica()` sin clave, `fuente_rtsp`, siembra con `CAMARAS`, `importar_json` (cameras.json conservando ids). 13 pruebas. | Gemini falló (código 3, sin archivos) → agente Claude Haiku |
+| T63 | `panel/camaras/go2rtc.py`: cliente urllib (streams, registrar+preload, quitar, foto, scripts en caché) y `Sincronizador`. Arreglo: distinguir "rechazada" (no se reintenta) de "sin conexión" (sí se reintenta); pruebas con go2rtc falso con estado. 5 pruebas. | Gemini 3.5 flash-lite, corregido por Claude |
+| T64 | `panel/camaras/vigilante.py`: salud con la forma de `/api/salud`; eventos `camara_caida`/`camara_volvio`/`go2rtc_sin_respuesta`/`go2rtc_volvio`/`servidor_suspendido` con los tiempos de antes (45 s). Arreglo: go2rtc y pruebas TCP fuera del candado. 9 pruebas. | Agente Claude Sonnet, corregido por Claude |
+| T67 | `panel/camaras/grabaciones.py`: días, fotos, clips, rutas seguras (no sale de data/), borrar, borrar día, `.zip` en streaming sobre un flujo sin seek. 15 pruebas. | Agente Claude Haiku |
+| Pruebas | Suite completa: 80/80 OK (antes 20 + luces/rutinas). Arreglo en `test_tareas` (la especificación contaba mal las vueltas). | Claude |
+
+## 2026-11-13 — Red sin NetWatch: opción B (sonda + panel-home)
+
+| Paso | Qué | Quién |
+|---|---|---|
+| R0 | Diseño y contrato `docs/RED.md`: la sonda mide fuera de Docker (ARP/MAC), panel-home aplica reglas y arma el mismo `/api/summary`. Código de NetWatch copiado a `docs/origen/netwatch/codigo/`. | Claude |
+| R1 | `sonda/`: mediciones macOS/Linux/Windows, lecturas, cola con tope, envío con token, `python3 -m sonda`. 19 pruebas; probada contra la red real en macOS (Windows solo con texto de ejemplo). | Agente Claude Sonnet |
+| R2 | `panel/red/almacen.py` (`RedDb`): tablas `red_*` con las mismas consultas que NetWatch. 4 pruebas. | Gemini 3.5 flash |
+| R3 | `panel/red/estado.py` (`EstadoRed`): caídas con 3 fallos, pausas, inventario, IP pública; estado de servicios persistente. 18 pruebas. | Agente Claude Sonnet |
+| R4 | `fabricantes.py`, `resumen.py`, `consultas.py` y la fachada `servicio.py`. 16 pruebas. | Gemini (503/timeout) → agente Claude Sonnet |
+| R5 | `panel/red/escaner.py`: puertos, ping, TTL, DNS desde panel-home. 17 pruebas. | Agente Claude Haiku |
+| R6 | Integración: `RED_INTERNA`, `RED_TOKEN`, `OUI_ARCHIVO`; avisos de red los manda panel-home; recolector con `red`; rutas web; `main.py` con `Planificador`; Dockerfile (`sonda/`, `iputils-ping`); README y ARQUITECTURA. | Claude |
+| R7 | `scripts/migrar_netwatch.py`: idempotente. Con la copia local de netwatch.db: 34 equipos, 519 eventos, 61 velocidades; 2ª corrida 0. 7 pruebas (arreglo: no cargar el .env real en la prueba). | Agente Haiku → Gemini 3.5 flash, revisado por Claude |
+| Prueba | Panel + sonda real 50 s: token malo 401, lan/wan/dns 100 %, 14 equipos con calidad, IP pública, eventos, CSV, escáner del router (53/80/443), "Sonda de red" en Acerca de. Suite 161/161. | Claude |
+
+## 2026-11-13 — Sonda nativa en Windows (la .94 solo corre Windows)
+
+| Paso | Qué | Quién |
+|---|---|---|
+| W1 | `sonda/medir.py` para Windows en español/inglés: ping solo con `TTL=` (TTL expirado = fallo), `tiempo<1m`, decodificación OEM/cp850, `arp -a` con varias interfaces (vEthernet), `route print` con la ruta de menor métrica, IP local evitando adaptadores virtuales. 18 pruebas con salidas de ejemplo; verificado que en macOS sigue midiendo bien. | Agente Claude Sonnet |
+| W2 | `sonda/__main__.py`: lee el `.env` del repo, panel por defecto `http://127.0.0.1:8770`, `--log` con rotación (con `pythonw` es la única salida). Arreglos: sin consola no truena, fecha en el log, `force=True`. Pruebas (8). | Gemini 3.5 flash-lite (código) + Claude (arreglos) + agente Haiku (pruebas, Gemini no las escribió) |
+| W3 | `scripts/windows/instalar-sonda.ps1` (tarea programada "PleyadesHome Sonda": SYSTEM, al iniciar +1 min, reinicio cada minuto), `desinstalar-sonda.ps1`, `sonda.bat`, guía `docs/SONDA_WINDOWS.md`. Sin probar en Windows real. | Agente Claude Haiku |

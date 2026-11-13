@@ -18,6 +18,12 @@ YA_AVISADOS: FrozenSet[str] = frozenset({
     "camara_sin_red", "camara_sin_video", "camara_ok", "go2rtc_caido", "go2rtc_ok",
 })
 
+# Lo que avisaba NetWatch; con RED_INTERNA=1 lo avisa panel-home
+AVISOS_RED: FrozenSet[str] = frozenset({
+    "internet_caido", "internet_ok", "red_local_caida", "red_local_ok", "dns_caido", "dns_ok",
+    "equipo_nuevo", "cambio_ip",
+})
+
 # Solo lo que nadie más avisa: cuando NetWatch o gestorCamaras dejan de responder.
 # El movimiento NO se avisa al instante (solo va a la línea de tiempo): el detector ya manda un resumen cada 2 h.
 # Contenedores caídos tampoco los avisa nadie más (p. ej. si se detiene el detector).
@@ -32,7 +38,7 @@ class Config:
     netwatch_url: str = "http://127.0.0.1:8765"
     camaras_url: str = "http://127.0.0.1:8080"
     go2rtc_url: str = ""
-    camaras_data: Path = ROOT.parent / "Camaras" / "gestorCamaras" / "data"
+    camaras_data: Path = ROOT / "data"
     fotos_remotas: bool = False   # True: las capturas se piden por HTTP a gestorCamaras
     consumo_cmd: str = ""
     recolectar_cada: int = 15
@@ -42,6 +48,19 @@ class Config:
     luces_archivo: Path = ROOT / "data" / "devices.json"  # focos Tuya (tinytuya wizard); ver docs/LUCES.md
     docker_sock: str = "/var/run/docker.sock"  # para ver los contenedores; vacío = no consultar
     avisar: FrozenSet[str] = TIPOS_AVISO
+    camaras_internas: bool = False
+    go2rtc_interno_url: str = "http://127.0.0.1:1984"
+    admin_pin: str = ""
+    max_camaras: int = 32
+    max_sesiones: int = 2
+    sesion_caduca: int = 60
+    vigilar_cada: int = 10
+    caida_tras: int = 45
+    onvif_timeout: float = 5.0
+    camaras_iniciales: str = ""
+    red_interna: bool = False     # True: la red la mide la sonda (sonda/) y la procesa panel-home; ver docs/RED.md
+    red_token: str = ""           # secreto compartido con la sonda (POST /api/interno/red)
+    oui_archivo: Path = ROOT / "data" / "oui.txt"   # fabricantes por MAC (se descarga solo)
 
     @property
     def telegram_activo(self) -> bool:
@@ -57,16 +76,43 @@ def cargar(env: Mapping[str, str] = os.environ) -> Config:
         valor = env.get(clave, "")
         return valor.strip() if valor else ""
 
+    def _entero(clave: str, minimo: int | None = None) -> int | None:
+        val = _obtener(clave)
+        if not val:
+            return None
+        try:
+            n = int(val)
+        except ValueError:
+            raise ValueError(f"{clave} debe ser un entero válido, valor recibido: {val!r}")
+        if minimo is not None:
+            return max(minimo, n)
+        return n
+
+    def _decimal(clave: str, minimo: float | None = None) -> float | None:
+        val = _obtener(clave)
+        if not val:
+            return None
+        try:
+            f = float(val)
+        except ValueError:
+            raise ValueError(f"{clave} debe ser un número válido, valor recibido: {val!r}")
+        if minimo is not None:
+            return max(minimo, f)
+        return f
+
+    def _booleano(clave: str) -> bool | None:
+        val = _obtener(clave)
+        if not val:
+            return None
+        return val.lower() in ("1", "si", "sí", "true", "yes")
+
     val = _obtener("PANEL_HOST")
     if val:
         kwargs["host"] = val
 
-    val = _obtener("PANEL_PORT")
-    if val:
-        try:
-            kwargs["port"] = int(val)
-        except ValueError:
-            raise ValueError(f"PANEL_PORT debe ser un entero válido, valor recibido: {val!r}")
+    n_port = _entero("PANEL_PORT")
+    if n_port is not None:
+        kwargs["port"] = n_port
 
     val = _obtener("PANEL_DB")
     if val:
@@ -95,21 +141,17 @@ def cargar(env: Mapping[str, str] = os.environ) -> Config:
     if "DOCKER_SOCK" in env:
         kwargs["docker_sock"] = _obtener("DOCKER_SOCK")
 
-    val = _obtener("FOTOS_REMOTAS")
-    if val:
-        kwargs["fotos_remotas"] = val.lower() in ("1", "si", "sí", "true", "yes")
+    b_fotos = _booleano("FOTOS_REMOTAS")
+    if b_fotos is not None:
+        kwargs["fotos_remotas"] = b_fotos
 
     val = _obtener("CONSUMO_CMD")
     if val:
         kwargs["consumo_cmd"] = val
 
-    val = _obtener("RECOLECTAR_CADA")
-    if val:
-        try:
-            segundos = int(val)
-        except ValueError:
-            raise ValueError(f"RECOLECTAR_CADA debe ser un entero válido, valor recibido: {val!r}")
-        kwargs["recolectar_cada"] = max(5, segundos)
+    n_recol = _entero("RECOLECTAR_CADA", minimo=5)
+    if n_recol is not None:
+        kwargs["recolectar_cada"] = n_recol
 
     val = _obtener("TELEGRAM_TOKEN")
     if val:
@@ -127,6 +169,62 @@ def cargar(env: Mapping[str, str] = os.environ) -> Config:
     if val:
         nombres = [item.strip() for item in val.split(",") if item.strip()]
         kwargs["avisar"] = frozenset(nombres)
+
+    b_cam_int = _booleano("CAMARAS_INTERNAS")
+    if b_cam_int is not None:
+        kwargs["camaras_internas"] = b_cam_int
+
+    val = _obtener("GO2RTC_INTERNO_URL")
+    if val:
+        kwargs["go2rtc_interno_url"] = val.rstrip("/")
+
+    val = _obtener("ADMIN_PIN")
+    if val:
+        kwargs["admin_pin"] = val
+
+    n_max_cam = _entero("MAX_CAMARAS", minimo=1)
+    if n_max_cam is not None:
+        kwargs["max_camaras"] = n_max_cam
+
+    n_max_ses = _entero("MAX_SESIONES", minimo=1)
+    if n_max_ses is not None:
+        kwargs["max_sesiones"] = n_max_ses
+
+    n_ses_cad = _entero("SESION_CADUCA", minimo=10)
+    if n_ses_cad is not None:
+        kwargs["sesion_caduca"] = n_ses_cad
+
+    n_vig = _entero("VIGILAR_CADA", minimo=2)
+    if n_vig is not None:
+        kwargs["vigilar_cada"] = n_vig
+
+    n_caida = _entero("CAIDA_TRAS", minimo=5)
+    if n_caida is not None:
+        kwargs["caida_tras"] = n_caida
+
+    f_onvif = _decimal("ONVIF_TIMEOUT", minimo=1.0)
+    if f_onvif is not None:
+        kwargs["onvif_timeout"] = f_onvif
+
+    val = _obtener("CAMARAS")
+    if val:
+        kwargs["camaras_iniciales"] = val
+
+    b_red = _booleano("RED_INTERNA")
+    if b_red is not None:
+        kwargs["red_interna"] = b_red
+
+    val = _obtener("RED_TOKEN")
+    if val:
+        kwargs["red_token"] = val
+
+    val = _obtener("OUI_ARCHIVO")
+    if val:
+        kwargs["oui_archivo"] = Path(val).expanduser()
+
+    # Sin NetWatch, los avisos de la red los manda panel-home (salvo que PANEL_AVISAR diga otra cosa)
+    if kwargs.get("red_interna") and "avisar" not in kwargs:
+        kwargs["avisar"] = TIPOS_AVISO | AVISOS_RED
 
     return Config(**kwargs)
 
