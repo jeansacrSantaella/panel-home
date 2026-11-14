@@ -248,4 +248,11 @@
   });
 
   comprobarSesion();
+
+  // App Android: botón para cambiar la dirección del panel (cuando la casa cambia de IP)
+  const btnServidor = document.getElementById("btn-servidor-app");
+  if (btnServidor && window.PleyadesApp) {
+    btnServidor.hidden = false;
+    btnServidor.addEventListener("click", () => window.PleyadesApp.servidores());
+  }
 })();

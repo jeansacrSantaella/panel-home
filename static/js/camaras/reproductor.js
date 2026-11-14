@@ -1,9 +1,10 @@
 /* Reproductor común de cámaras (window.Reproductor).
    Internas: <video-stream> de go2rtc por el WebSocket del panel, con una sesión de video compartida por toda la página.
-   Externas: iframe a stream.html de go2rtc. */
+   Transición con GO2RTC_URL (camaras_puente): <video-stream> por el puente del panel sin sesión, para controlar el audio.
+   Sin nada de eso: iframe a stream.html de go2rtc (el audio no se puede controlar desde el panel). */
 (function () {
   "use strict";
-  let cfg = { internas: false, go2rtc_url: "" };
+  let cfg = { internas: false, puente: false, go2rtc_url: "" };
   const vivos = new Set();           // reproductores montados
   let sid = null, pendiente = null, latido = null, cierre = null, modulo = null;
 
@@ -123,10 +124,10 @@
     v.montar = async function () {
       if (v.destruido) return;
       contenedor.classList.add("reproductor");
-      if (!cfg.internas) { contenedor.replaceChildren(crearIframe(camara)); return; }
+      if (!cfg.internas && !cfg.puente) { contenedor.replaceChildren(crearIframe(camara)); return; }
       aviso(contenedor, "Conectando…");
       try {
-        const id = await asegurarSesion();
+        const id = cfg.internas ? await asegurarSesion() : null;
         await cargarModulo();
         if (v.destruido) return;
         const p = document.createElement("video-stream");
@@ -135,7 +136,8 @@
         p.background = true;
         p.setAttribute("aria-label", `Video de ${camara.nombre || camara.id}`);
         const proto = location.protocol === "https:" ? "wss:" : "ws:";
-        p.src = `${proto}//${location.host}/api/camaras/video?src=${encodeURIComponent(camara.id)}&sesion=${encodeURIComponent(id)}`;
+        p.src = `${proto}//${location.host}/api/camaras/video?src=${encodeURIComponent(camara.id)}`
+          + (id ? `&sesion=${encodeURIComponent(id)}` : "");
         contenedor.replaceChildren(p);
         // Siempre arranca en silencio
         conAudio = false;
@@ -147,7 +149,11 @@
           contenedor.appendChild(botonAudio);
         }
         requestAnimationFrame(() => {
-          if (p.video) { p.video.muted = true; p.video.controls = false; p.video.playsInline = true; }
+          if (p.video) {
+            p.video.muted = true; p.video.controls = false; p.video.playsInline = true;
+            // go2rtc vuelve a llamar play() al reconectar: si el audio está apagado, sigue en silencio
+            p.video.addEventListener("play", () => { if (!conAudio) p.video.muted = true; });
+          }
           aplicarAudio();
         });
         if (opciones.alListo) opciones.alListo(id);
@@ -174,7 +180,7 @@
 
   // La configuración llega con /api/panel
   document.addEventListener("panel", e => {
-    if (e.detail) configurar({ internas: !!e.detail.camaras_internas, go2rtc_url: e.detail.go2rtc_url || "" });
+    if (e.detail) configurar({ internas: !!e.detail.camaras_internas, puente: !!e.detail.camaras_puente, go2rtc_url: e.detail.go2rtc_url || "" });
   });
   addEventListener("pagehide", cerrarSesion);
 

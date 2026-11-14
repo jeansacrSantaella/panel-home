@@ -16,7 +16,7 @@ import re
 import sqlite3
 
 from panel import VERSION, fuentes
-from panel.camaras.go2rtc import Go2rtcError
+from panel.camaras.go2rtc import Go2rtc, Go2rtcError
 from panel.camaras.grabaciones import Grabaciones, GrabacionError
 from panel.camaras.registro import CamaraError
 from panel.camaras.servicio import exigir_admin
@@ -65,6 +65,8 @@ def estado_panel(cfg, db, recolector, ahora=None, luces=None) -> dict:
     return {
         "ahora": ahora, "actualizado": u.get("ts", 0), "go2rtc_url": cfg.go2rtc_url,
         "camaras_internas": cfg.camaras_internas,
+        # Modo de transición con GO2RTC_URL: el video pasa por el puente del panel (mismo origen, audio controlable)
+        "camaras_puente": bool(not cfg.camaras_internas and cfg.go2rtc_url),
         "camaras_url": cfg.camaras_url, "netwatch_url": cfg.netwatch_url, "red_interna": cfg.red_interna,
         "red": {k: nw.get(k) for k in CLAVES_RED} if nw else None,
         "equipos": equipos, "consumo_activo": bool(cfg.consumo_cmd),
@@ -148,6 +150,20 @@ def crear_servidor(cfg, db, recolector, auth, luces=None, rutinas=None, red=None
     from panel.auth import COOKIE, DURACION_SESION, Bloqueado
 
     grabaciones = camaras.grabaciones if camaras is not None else Grabaciones(cfg.camaras_data)
+    # Sin cámaras internas pero con GO2RTC_URL: puente de video y scripts de go2rtc por el panel (ver docs/CAMARAS.md)
+    go2rtc_externo = Go2rtc(cfg.go2rtc_url) if camaras is None and cfg.go2rtc_url else None
+    fuentes_externas = {"ts": 0.0, "ids": set()}
+
+    def fuente_externa_valida(src: str) -> bool:
+        # Solo fuentes que go2rtc ya conoce (nada arbitrario); la lista se refresca cada 60 s
+        ahora = time.time()
+        if ahora - fuentes_externas["ts"] > 60 or src not in fuentes_externas["ids"]:
+            try:
+                fuentes_externas["ids"] = set(go2rtc_externo.streams() or {})
+                fuentes_externas["ts"] = ahora
+            except Go2rtcError:
+                return False
+        return src in fuentes_externas["ids"]
 
     class Manejador(BaseHTTPRequestHandler):
         server_version = "PleyadesHome"  # no anunciar versión de Python
@@ -425,27 +441,41 @@ def crear_servidor(cfg, db, recolector, auth, luces=None, rutinas=None, red=None
             return self._json([{k: v for k, v in c.items() if k != "clave"} for c in camaras.registro.lista()])
 
         def _camaras_video(self, q: dict):
-            if camaras is None:
+            if camaras is None and go2rtc_externo is None:
                 return self._sin_camaras()
             origen = self.headers.get("Origin")
             if origen and urlparse(origen).netloc != self.headers.get("Host", ""):
                 return self._json({"error": "origen no permitido"}, 403)
             if "websocket" not in (self.headers.get("Upgrade") or "").lower():
                 return self._json({"error": "se espera WebSocket"}, 400)
+            src = q.get("src", "")
+            from panel.camaras.video import puente_websocket
+            if camaras is None:  # modo de transición: go2rtc externo, sin sesiones de video
+                if not fuente_externa_valida(src):
+                    return self._json({"error": "cámara desconocida"}, 404)
+                self.close_connection = True
+                return puente_websocket(self, cfg.go2rtc_url, src)
             if not camaras.sesiones.valida(q.get("sesion", "")):
                 return self._json({"error": "sesión de video no válida"}, 403)
-            src = q.get("src", "")
             try:
                 camaras.registro.una(src)  # solo cámaras registradas (nada de fuentes arbitrarias)
             except CamaraError as e:
                 return self._error_cam(e)
-            from panel.camaras.video import puente_websocket
             self.close_connection = True
             puente_websocket(self, cfg.go2rtc_interno_url, src)
 
         def _camaras_get(self, resto: str):
             if camaras is None:
-                return self._sin_camaras()
+                m = re.fullmatch(r"/go2rtc/([\w.-]+)", resto)
+                if go2rtc_externo is None or not m:
+                    return self._sin_camaras()
+                try:
+                    cuerpo = go2rtc_externo.script(m.group(1))
+                except ValueError:
+                    return self._json({"error": "no existe"}, 404)
+                except Go2rtcError as e:
+                    return self._json({"error": str(e)}, 502)
+                return self._enviar(200, cuerpo, "text/javascript; charset=utf-8", "private, max-age=3600")
             if resto in ("", "/"):
                 return self._json(camaras.lista())
             if resto == "/salud":

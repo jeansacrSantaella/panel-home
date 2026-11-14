@@ -83,6 +83,18 @@ Con `CAMARAS_INTERNAS=1` el recolector usa `lista()`/`salud()`/`espacio()` y las
 los eventos del vigilante (`camara_caida`, `camara_volvio`, `go2rtc_sin_respuesta`, `go2rtc_volvio`, `servidor_suspendido`)
 entran a la línea de tiempo y se avisan (se agregan a `avisar` por defecto, como la red).
 
+## Modo de transición con `GO2RTC_URL` (sin cámaras internas)
+
+Con `CAMARAS_INTERNAS=0` y `GO2RTC_URL` definido, `/api/panel` trae `camaras_puente: true` y el video de Inicio y
+Resumen pasa por el panel, no por un iframe de go2rtc. Así el botón 🔇/🔊 del reproductor controla el audio, cosa que un
+iframe de otro origen no permite.
+- `GET /api/camaras/go2rtc/video-stream.js` y `video-rtc.js` se piden al go2rtc de `GO2RTC_URL`.
+- `GET /api/camaras/video?src=` (WebSocket) se conecta a ese go2rtc **sin sesión de video**. Solo acepta fuentes
+  que go2rtc ya conoce (`/api/streams`, la lista se refresca cada 60 s); otra fuente → 404.
+- Sin `GO2RTC_URL` se queda el iframe a `stream.html`, que no tiene control de audio.
+
+Todos los videos arrancan en silencio; el audio se activa con un toque en 🔇.
+
 ## Detector (`detector/`, contenedor aparte)
 
 Igual que el de gestorCamaras pero: lee las cámaras de `GET {PANEL_URL}/api/interno/camaras` con `INTERNO_TOKEN`,

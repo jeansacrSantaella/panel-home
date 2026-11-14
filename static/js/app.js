@@ -100,7 +100,7 @@
   function pintarCamaras(d) {
     const cont = document.getElementById("camaras");
     if (!cont) return;
-    Reproductor.configurar({ internas: !!d.camaras_internas, go2rtc_url: d.go2rtc_url || "" });
+    Reproductor.configurar({ internas: !!d.camaras_internas, puente: !!d.camaras_puente, go2rtc_url: d.go2rtc_url || "" });
 
     const cams = d.camaras || [];
     if (cams.length === 0) {

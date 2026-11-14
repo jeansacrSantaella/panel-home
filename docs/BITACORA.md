@@ -176,3 +176,26 @@ Una línea por paso: qué se hizo y quién lo hizo.
 | Esqueletos | Sistema común de esqueletos de carga (`esqueletos.js` + `esqueletos.css`, 10 formas, fundido a los 300 ms, se quitan solos) en 27 contenedores de Inicio, Resumen, Luces, Capturas y Red; reemplaza las "tres estrellas" del Resumen. Clima y Habitación ya no pisan el esqueleto con "Cargando…". Verificado con capturas simulando API lenta. Regla en memoria y en `docs/DISENO.md`. | Gemini (CSS; el JS se cortó 2 veces) + agente Haiku (JS) + Claude (marcado, arreglos, capturas) |
 | Inicio/Luces | Habitaciones pasa a la pestaña Luces (carga propia, toque → su grupo de focos, insignia enciende/apaga la habitación). En Inicio, "Última hora": carrusel de capturas de los últimos 60 min (auto cada 5 s, flechas, deslizar, teclado, miniaturas con la foto, visor). Verificado con fotos reales de la .94. | Gemini (carrusel, CSS, luces-habitaciones vía agente Haiku) + Claude (marcado, miniaturas) |
 | Móvil | Cámara de Inicio desbordaba a 390 px (`aspect-ratio` 16:9 + `min-height: 220px` forzaban ~391 px de ancho): ahora ancho 100 %. Margen de Cámaras en celular 12 px. "null ms" → vacío. Capturas a 390 px reales con un iframe de prueba (headless no baja de ~500 px). | Claude |
+| Despliegue | El dueño probó en la Lenovo: todo OK. |  Usuario |
+
+## 2026-11-14 — App Android (APK) con dirección configurable
+
+| Paso | Qué | Quién |
+|---|---|---|
+| Base | Proyecto `android/` (Kotlin, sin librerías, minSdk 26): Gradle 8.11 + AGP 8.7, manifiesto con texto plano para la LAN, tema obsidiana, ícono adaptativo vectorial de las Pléyades. SDK de Android instalado con Homebrew. | Claude |
+| Código | `Servidores.kt` + `Sondeo.kt` (direcciones, `/salud`, búsqueda en la red /24), `AjustesActivity.kt` (pantalla Servidores), `ConstelacionView.kt` (inicio trazo a trazo), `MainActivity.kt` (WebView, arranque con cambio de IP automático, error, descargas, puente JS). | Gemini 3.5 flash-lite (4 tareas en paralelo) |
+| Arreglos | 5 errores de compilación; `Servidores(this)` antes de tener contexto (cerraba la app al abrir) → `by lazy`; `/salud` exige `"ok"`; aviso "Conectado" solo si cambió; revisión al volver tras 1 min. | Claude |
+| Web | Botón "Cambiar servidor de la app" en el menú de la cuenta y en el inicio de sesión, visible solo dentro de la app. | Claude |
+| Emulador | Prueba real en un Android 15 (emulador) contra un panel aislado: primera vez → Servidores; IP equivocada → "No encuentro el panel"; editar → carga el login; botón del panel → Servidores; IP vieja → busca en la red, la reemplaza sola y avisa "La casa cambió de IP". Arreglados al probar: color del halo sin `#` (cerraba la app), `/salud` no se pedía (pedía `/`), Android 15 dibujaba bajo la barra de estado, botones en mayúsculas. | Claude |
+| Pruebas | 8 pruebas de `normalizar()` OK; suite Python 290/290. APK de 0.9 MB en `android/PleyadesHome.apk`. `docs/ANDROID.md` y sección en el README. | Claude |
+
+## 2026-11-14 — Audio de las cámaras en la app (v1.1)
+
+| Paso | Qué | Quién |
+|---|---|---|
+| Causa | La app permitía reproducir con sonido sin un toque (`mediaPlaybackRequiresUserGesture=false`). Chrome no lo permite, y por eso go2rtc caía a silencio en el navegador; en la app las cámaras arrancaban sonando. | Claude |
+| App | Ahora exige un toque, como Chrome. Depuración del WebView solo en el APK de depuración. "Reintentar" dejaba la pantalla de inicio encima del panel para siempre: arreglado. Versión 1.1 (código 2). | Claude |
+| Puente | En modo de transición (`CAMARAS_INTERNAS=0` + `GO2RTC_URL`), Inicio y Resumen ya no usan el iframe de go2rtc (de otro origen, sin control de audio): el video va por el puente WebSocket del panel, sin sesión y solo con fuentes que go2rtc conoce, y los scripts de go2rtc también pasan por el panel. Así aparece el botón 🔇/🔊. El reproductor sigue en silencio si go2rtc reintenta `play()`. | Claude |
+| Pruebas | `tests/test_web_camaras_puente.py` (8). | Gemini 3.6 flash |
+| Prueba real | Emulador Android 15 con las cámaras de la .94: Inicio, Resumen y Cámaras (gestorCamaras) arrancan con `muted=true` y reproduciendo; 🔇 → 🔊 activa el audio (`muted=false`, el video sigue corriendo) y otro toque lo quita. Suite 298/298. | Claude |
+

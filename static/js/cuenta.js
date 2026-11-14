@@ -57,6 +57,13 @@
       if (btnCuenta) btnCuenta.setAttribute("aria-expanded", "false");
     }
 
+    // Dentro de la app Android (puente PleyadesApp): elegir o editar la dirección del panel
+    const accionServidor = document.getElementById("accion-servidor");
+    if (accionServidor && window.PleyadesApp) {
+      accionServidor.hidden = false;
+      accionServidor.addEventListener("click", () => { cerrarMenu(); window.PleyadesApp.servidores(); });
+    }
+
     if (btnCuenta && menuCuenta) {
       btnCuenta.addEventListener("click", () => {
         const estaOculto = menuCuenta.hidden;

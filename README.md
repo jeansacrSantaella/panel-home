@@ -200,6 +200,12 @@ contadores. Sin `CONSUMO_CMD` la tarjeta muestra la calidad de conexión de cada
 Los gráficos usan `static/js/hchart.js` (y `hchart-calor.js` para el mapa de calor), una librería propia que dibuja solo con HTML y CSS (sin canvas ni SVG).
 Diseño de las tarjetas y componentes: [docs/DISENO.md](docs/DISENO.md).
 
+## App Android
+
+APK nativo en `android/` que abre el panel en pantalla completa. Guarda varias direcciones, prueba cuál responde
+y, si la casa cambió de IP, busca el panel en la red WiFi y se actualiza sola; también se puede agregar o editar la
+dirección a mano. Guía: [docs/ANDROID.md](docs/ANDROID.md).
+
 ## Variables de entorno
 
 Plantilla completa en `.env.example`. Valores por defecto según `panel/config.py`.
@@ -285,6 +291,7 @@ data/              panel.db, fotos, clips, oui.txt, devices.json (fuera de git)
 | [DISENO.md](docs/DISENO.md) | distribución, componentes y piel de vidrio |
 | [ARQUITECTURA.md](docs/ARQUITECTURA.md) | contrato entre módulos (`Config`, eventos, API) |
 | [PLAN_MIGRACION.md](docs/PLAN_MIGRACION.md) | plan por fases que dejó el proyecto autosuficiente |
+| [ANDROID.md](docs/ANDROID.md) | app Android: instalar, cambiar la dirección del panel y compilar el APK |
 | [BITACORA.md](docs/BITACORA.md) | registro de cada paso |
 | `origen/` | copias de referencia de NetWatch y gestorCamaras (no se usan en ejecución) |
 

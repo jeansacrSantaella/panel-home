@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Tema" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/obsidiana</item>
+        <item name="android:statusBarColor">@color/obsidiana</item>
+        <item name="android:navigationBarColor">@color/obsidiana</item>
+        <item name="android:colorAccent">@color/cian</item>
+        <item name="android:colorPrimary">@color/violeta</item>
+    </style>
+    <style name="Dialogo" parent="android:Theme.Material.Dialog.Alert">
+        <item name="android:colorAccent">@color/cian</item>
+    </style>
+</resources>

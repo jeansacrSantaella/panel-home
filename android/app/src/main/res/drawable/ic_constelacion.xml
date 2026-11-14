@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Las Pléyades (M45) de PleyadesHome; Alcyone, la estrella de cuatro puntas, es la casa. Familia Astreo · Santaella -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:translateX="7.235" android:translateY="9.000" android:scaleX="0.08824" android:scaleY="0.08824">
+        <path android:strokeWidth="26" android:strokeLineCap="round" android:pathData="M251,545 L246,586 M246,586 L438,607 M438,607 L542,737 M542,737 L724,565 M724,565 L656,451 M656,451 L438,607 M656,451 L724,373 M724,373 L698,285 M724,565 L802,503">
+            <aapt:attr name="android:strokeColor">
+                <gradient android:type="linear" android:startX="246" android:startY="737" android:endX="802" android:endY="285">
+                    <item android:offset="0" android:color="#FF8B5CF6"/>
+                    <item android:offset="0.55" android:color="#FF5AA8FF"/>
+                    <item android:offset="1" android:color="#FF00E5FF"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:fillColor="#FFF4FDFF" android:strokeColor="#FF00E5FF" android:strokeWidth="8" android:pathData="M213,586 a33,33 0 1,0 66,0 a33,33 0 1,0 -66,0 Z M231,545 a20,20 0 1,0 40,0 a20,20 0 1,0 -40,0 Z M516,737 a26,26 0 1,0 52,0 a26,26 0 1,0 -52,0 Z M693,565 a31,31 0 1,0 62,0 a31,31 0 1,0 -62,0 Z M627,451 a29,29 0 1,0 58,0 a29,29 0 1,0 -58,0 Z M700,373 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0 Z M784,503 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0 Z M680,285 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0 Z"/>
+        <path android:pathData="M313,607 a125,125 0 1,0 250,0 a125,125 0 1,0 -250,0 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="radial" android:centerX="438" android:centerY="607" android:gradientRadius="125">
+                    <item android:offset="0" android:color="#FFFFFFFF"/>
+                    <item android:offset="0.15" android:color="#F29FF6FF"/>
+                    <item android:offset="0.4" android:color="#6600E5FF"/>
+                    <item android:offset="1" android:color="#008B5CF6"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:fillColor="#FFEAFFFF" android:pathData="M438,495 C447,578 467,598 550,607 C467,616 447,636 438,719 C429,636 409,616 326,607 C409,598 429,578 438,495 Z"/>
+        <path android:fillColor="#FFFFFFFF" android:pathData="M423,607 a15,15 0 1,0 30,0 a15,15 0 1,0 -30,0 Z"/>
+    </group>
+</vector>

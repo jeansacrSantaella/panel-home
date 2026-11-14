@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="obsidiana">#0B0F17</color>
+    <color name="superficie">#121A2B</color>
+    <color name="violeta">#8B5CF6</color>
+    <color name="azul">#5AA8FF</color>
+    <color name="cian">#00E5FF</color>
+    <color name="texto">#E6ECF7</color>
+    <color name="tenue">#8A94A8</color>
+</resources>
